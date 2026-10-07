@@ -5,7 +5,7 @@ package ratelimit
 import (
 	"context"
 	"io"
-	"sync"
+	"sync/atomic"
 
 	"golang.org/x/time/rate"
 )
@@ -15,34 +15,35 @@ import (
 const chunk = 32 * 1024
 
 // Limiter is a byte-per-second limiter whose rate can be changed at runtime.
-// A zero or negative rate means unlimited.
+// A zero or negative rate means unlimited. The underlying token bucket is
+// stable for the limiter's lifetime, so it can be shared with libraries that
+// take a *rate.Limiter (e.g. the torrent engine).
 type Limiter struct {
-	mu  sync.RWMutex
 	lim *rate.Limiter
-	bps int64
+	bps atomic.Int64
 }
 
 // New returns a limiter capped at bps bytes per second (<=0 = unlimited).
 func New(bps int64) *Limiter {
-	l := &Limiter{}
+	l := &Limiter{lim: rate.NewLimiter(rate.Inf, chunk)}
 	l.SetRate(bps)
 	return l
 }
 
 // SetRate changes the cap. Safe to call while readers are active.
 func (l *Limiter) SetRate(bps int64) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.bps = bps
 	if bps <= 0 {
-		l.lim = rate.NewLimiter(rate.Inf, 0)
+		l.bps.Store(0)
+		l.lim.SetLimit(rate.Inf)
 		return
 	}
 	burst := int(bps)
 	if burst < chunk {
 		burst = chunk
 	}
-	l.lim = rate.NewLimiter(rate.Limit(bps), burst)
+	l.bps.Store(bps)
+	l.lim.SetBurst(burst)
+	l.lim.SetLimit(rate.Limit(bps))
 }
 
 // Rate returns the current cap in bytes per second (0 = unlimited).
@@ -50,31 +51,23 @@ func (l *Limiter) Rate() int64 {
 	if l == nil {
 		return 0
 	}
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-	if l.bps < 0 {
-		return 0
-	}
-	return l.bps
+	return l.bps.Load()
 }
+
+// Raw exposes the token bucket for libraries that accept *rate.Limiter.
+func (l *Limiter) Raw() *rate.Limiter { return l.lim }
 
 // WaitN blocks until n bytes may pass.
 func (l *Limiter) WaitN(ctx context.Context, n int) error {
-	if l == nil {
-		return nil
-	}
-	l.mu.RLock()
-	lim, unlimited := l.lim, l.bps <= 0
-	l.mu.RUnlock()
-	if unlimited {
+	if l == nil || l.bps.Load() <= 0 {
 		return nil
 	}
 	for n > 0 {
 		step := n
-		if step > lim.Burst() {
-			step = lim.Burst()
+		if b := l.lim.Burst(); step > b {
+			step = b
 		}
-		if err := lim.WaitN(ctx, step); err != nil {
+		if err := l.lim.WaitN(ctx, step); err != nil {
 			return err
 		}
 		n -= step
