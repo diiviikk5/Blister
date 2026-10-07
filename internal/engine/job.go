@@ -29,6 +29,7 @@ type Job struct {
 	// Set by the driver so live tuning and saving reach it.
 	onTune   func(connections int)
 	snapshot func() []httpdl.Segment
+	onFiles  func(selected []bool)
 
 	// Sampled under m.mu.
 	lastDone, lastUp int64
@@ -102,6 +103,13 @@ func (j *Job) OnTune(fn func(int)) {
 func (j *Job) OnSnapshot(fn func() []httpdl.Segment) {
 	j.m.mu.Lock()
 	j.snapshot = fn
+	j.m.mu.Unlock()
+}
+
+// OnFiles registers a callback for live torrent file selection changes.
+func (j *Job) OnFiles(fn func([]bool)) {
+	j.m.mu.Lock()
+	j.onFiles = fn
 	j.m.mu.Unlock()
 }
 

@@ -477,6 +477,57 @@ func (m *Manager) Tune(id string, connections int, speedLimit int64) error {
 	return nil
 }
 
+// SelectFiles chooses which files of a torrent to download.
+func (m *Manager) SelectFiles(id string, selected []bool) error {
+	m.mu.Lock()
+	t, ok := m.tasks[id]
+	if !ok {
+		m.mu.Unlock()
+		return errNotFound(id)
+	}
+	if t.Torrent == nil || len(t.Torrent.Files) != len(selected) {
+		m.mu.Unlock()
+		return errors.New("file list doesn't match this torrent")
+	}
+	any := false
+	for _, s := range selected {
+		any = any || s
+	}
+	if !any {
+		m.mu.Unlock()
+		return errors.New("select at least one file")
+	}
+	files := append([]TorrentFile(nil), t.Torrent.Files...)
+	var size int64
+	for i := range files {
+		files[i].Selected = selected[i]
+		if selected[i] {
+			size += files[i].Size
+		}
+	}
+	ti := *t.Torrent
+	ti.Files = files
+	t.Torrent = &ti
+	t.Size = size
+	var hook func([]bool)
+	if j := m.jobs[id]; j != nil {
+		hook = j.onFiles
+		j.size.Store(size)
+	}
+	if t.Status == StatusCompleted {
+		t.Status = StatusQueued // newly selected files need fetching
+	}
+	cp := *t
+	m.mu.Unlock()
+	if hook != nil {
+		hook(selected)
+	}
+	m.o.Emit(EvUpdated, cp)
+	m.save()
+	m.poke()
+	return nil
+}
+
 // Rename changes the target file name of a task that hasn't finished.
 func (m *Manager) Rename(id, name string) error {
 	name = httpdl.Sanitize(name)
