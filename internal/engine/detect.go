@@ -3,6 +3,7 @@ package engine
 import (
 	"net/url"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,14 +26,14 @@ func DetectKind(raw string) Kind {
 	if linkgrab.IsMagnet(raw) {
 		return KindTorrent
 	}
+	if IsLocalPath(raw) {
+		if strings.EqualFold(filepath.Ext(raw), ".torrent") {
+			return KindTorrent
+		}
+	}
 	u, err := url.Parse(raw)
 	if err != nil {
 		return KindHTTP
-	}
-	if u.Scheme == "" || u.Scheme == "file" {
-		if strings.EqualFold(path.Ext(u.Path), ".torrent") {
-			return KindTorrent
-		}
 	}
 	p := strings.ToLower(u.Path)
 	switch {
@@ -49,6 +50,16 @@ func DetectKind(raw string) Kind {
 		}
 	}
 	return KindHTTP
+}
+
+// IsLocalPath reports whether s is a filesystem path rather than a URL
+// ("C:\x.torrent" parses as a URL with scheme "c", so check explicitly).
+func IsLocalPath(s string) bool {
+	if strings.HasPrefix(s, "file://") || strings.HasPrefix(s, "/") || strings.HasPrefix(s, `\\`) {
+		return true
+	}
+	return len(s) > 2 && s[1] == ':' && (s[2] == '\\' || s[2] == '/') &&
+		((s[0] >= 'a' && s[0] <= 'z') || (s[0] >= 'A' && s[0] <= 'Z'))
 }
 
 // GuessName derives a provisional display name from a link.
