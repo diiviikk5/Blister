@@ -55,7 +55,6 @@
     store.toast("New pairing code. Paste it into the extension.", "info");
   }
 
-  const accents = ["#ffd60a", "#ff7a45", "#c6f432", "#2fd27a", "#35d0ff", "#b8a2ff", "#ff8fc4", "#ff2e88"];
 </script>
 
 <div class="settings">
@@ -225,28 +224,8 @@
         </div>
       {:else}
         <div class="row">
-          <div class="txt"><b>Theme</b><span>Blister runs hot either way.</span></div>
-          <div class="ib-tabs ctl-tabs" role="tablist">
-            {#each [["dark", "Dark"], ["light", "Light"], ["system", "System"]] as [v, l] (v)}
-              <button class="ib-tab" role="tab" aria-selected={s.theme === v} onclick={() => set("theme", v as Settings["theme"])}>{l}</button>
-            {/each}
-          </div>
-        </div>
-        <div class="row">
-          <div class="txt"><b>Accent</b><span>Buttons, bars and the active filter.</span></div>
-          <div class="swatches">
-            {#each accents as c (c)}
-              <button class="sw" class:on={s.accent === c} style:background={c} onclick={() => set("accent", c)} aria-label="Accent {c}"></button>
-            {/each}
-          </div>
-        </div>
-        <div class="row">
-          <div class="txt"><b>Density</b><span>Compact fits more downloads on screen.</span></div>
-          <div class="ib-tabs ctl-tabs" role="tablist">
-            {#each [["comfortable", "Comfortable"], ["compact", "Compact"]] as [v, l] (v)}
-              <button class="ib-tab" role="tab" aria-selected={s.density === v} onclick={() => set("density", v as Settings["density"])}>{l}</button>
-            {/each}
-          </div>
+          <div class="txt"><b>Rice Studio</b><span>Themes, colours, fonts, layouts, progress bar styles, wallpapers, window transparency and your own CSS. Everything about how Blister looks lives there.</span></div>
+          <button class="btn btn--accent" onclick={() => (store.view = "rice")}><Icon name="sliders" size={15} /> Open Rice Studio</button>
         </div>
       {/if}
     </div>
@@ -370,28 +349,6 @@
   }
   .token code:hover {
     filter: none;
-  }
-  .swatches {
-    display: flex;
-    gap: 8px;
-  }
-  .sw {
-    width: 30px;
-    height: 30px;
-    border: var(--bw) solid var(--ib-line);
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    box-shadow: var(--ib-ex2);
-    transition: transform 0.1s var(--ib-press);
-  }
-  .sw:hover {
-    transform: translate(-1px, -1px);
-  }
-  .sw.on {
-    transform: translate(2px, 2px);
-    box-shadow: none;
-    outline: var(--bw-lg) solid var(--ib-line);
-    outline-offset: 2px;
   }
   .foot {
     font-size: 12px;
