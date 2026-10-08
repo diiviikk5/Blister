@@ -7,6 +7,7 @@
   let { search = $bindable() }: { search?: HTMLInputElement } = $props();
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <header class="bar" style="--wails-draggable: drag" ondblclick={() => win.toggleMaximise()}>
   <div class="brand">
     <Logo size={24} />

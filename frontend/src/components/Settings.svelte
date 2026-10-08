@@ -226,9 +226,9 @@
       {:else}
         <div class="row">
           <div class="txt"><b>Theme</b><span>Blister runs hot either way.</span></div>
-          <div class="ib-tabs ctl-tabs">
+          <div class="ib-tabs ctl-tabs" role="tablist">
             {#each [["dark", "Dark"], ["light", "Light"], ["system", "System"]] as [v, l] (v)}
-              <button class="ib-tab" aria-selected={s.theme === v} onclick={() => set("theme", v as Settings["theme"])}>{l}</button>
+              <button class="ib-tab" role="tab" aria-selected={s.theme === v} onclick={() => set("theme", v as Settings["theme"])}>{l}</button>
             {/each}
           </div>
         </div>
@@ -242,9 +242,9 @@
         </div>
         <div class="row">
           <div class="txt"><b>Density</b><span>Compact fits more downloads on screen.</span></div>
-          <div class="ib-tabs ctl-tabs">
+          <div class="ib-tabs ctl-tabs" role="tablist">
             {#each [["comfortable", "Comfortable"], ["compact", "Compact"]] as [v, l] (v)}
-              <button class="ib-tab" aria-selected={s.density === v} onclick={() => set("density", v as Settings["density"])}>{l}</button>
+              <button class="ib-tab" role="tab" aria-selected={s.density === v} onclick={() => set("density", v as Settings["density"])}>{l}</button>
             {/each}
           </div>
         </div>
