@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -19,6 +22,7 @@ import (
 var assets embed.FS
 
 func main() {
+	waitForPrevious(os.Args[1:])
 	a, err := app.New()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Blister failed to start:", err)
@@ -69,6 +73,31 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Blister:", err)
 		os.Exit(1)
+	}
+}
+
+// waitForPrevious blocks (up to 10s) until a relaunching instance has exited.
+func waitForPrevious(args []string) {
+	for _, arg := range args {
+		v, ok := strings.CutPrefix(arg, "--wait-for=")
+		if !ok {
+			continue
+		}
+		pid, err := strconv.Atoi(v)
+		if err != nil {
+			return
+		}
+		p, err := os.FindProcess(pid)
+		if err != nil {
+			return
+		}
+		done := make(chan struct{})
+		go func() { _, _ = p.Wait(); close(done) }()
+		select {
+		case <-done:
+		case <-time.After(10 * time.Second):
+		}
+		time.Sleep(300 * time.Millisecond) // let the lock release
 	}
 }
 

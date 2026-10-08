@@ -629,7 +629,9 @@ func (a *App) Relaunch() error {
 	if err != nil {
 		return err
 	}
-	if err := exec.Command(exe).Start(); err != nil {
+	// The new copy waits for this one to exit; otherwise the single-instance
+	// lock would hand it straight back to us just before we quit.
+	if err := exec.Command(exe, fmt.Sprintf("--wait-for=%d", os.Getpid())).Start(); err != nil {
 		return err
 	}
 	runtime.Quit(a.ctx)
