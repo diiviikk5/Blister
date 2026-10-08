@@ -1,0 +1,307 @@
+/* Blister app layer on top of iso-brutal.css. "Medium" intensity: extrusions
+   stay at ex2-ex8, no tilts in working surfaces, accent only as block fill. */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+.ib {
+  --ib-font: "Geist Variable", "Geist", system-ui, sans-serif;
+  --ib-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  --ib-accent: #ff5c39;
+  --ib-accent-ink: #1a110d;
+  --ib-hot: #ffd23f;
+  --ib-hot-ink: #1a110d;
+  --ib-alt: #3d7bff;
+  --ok: #2fd27a;
+  --bad: #ff4d6d;
+
+  --row-h: 76px;
+  --side-w: 232px;
+  --detail-w: 380px;
+}
+
+/* warm dark: Blister runs hot */
+[data-theme="dark"] .ib,
+.ib[data-theme="dark"],
+[data-theme="dark"].ib {
+  --ib-paper: #14110f;
+  --ib-paper-2: #1c1815;
+  --ib-card: #221d19;
+  --ib-night: #0c0a09;
+  --ib-text: #f7f0e6;
+  --ib-muted: #c3b8aa;
+  --ib-faint: #8a7f73;
+  --ib-line: #f7f0e6;
+  --ib-ex: #f7f0e6;
+  --ib-grid: rgba(247, 240, 230, 0.05);
+}
+
+.ib[data-density="compact"] {
+  --row-h: 58px;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+body {
+  font-size: 14px;
+  font-weight: 550;
+}
+#app {
+  height: 100%;
+}
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--ib-hot);
+  outline-offset: 2px;
+}
+::selection {
+  background: var(--ib-accent);
+  color: var(--ib-accent-ink);
+}
+
+/* scrollbars: chunky and outlined like everything else */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ib-paper-2);
+  border: 3px solid var(--ib-paper);
+  outline: 2px solid var(--ib-faint);
+  outline-offset: -5px;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ib-accent);
+}
+
+/* --------------------------------------------------------------- buttons */
+.btn {
+  --face: var(--ib-card);
+  --fg: var(--ib-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 13px;
+  border: 2.5px solid var(--ib-line);
+  border-radius: 10px;
+  background: var(--face);
+  color: var(--fg);
+  font-weight: 800;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  box-shadow: var(--ib-ex4);
+  transition: transform 0.12s var(--ib-press), box-shadow 0.12s var(--ib-press), background 0.12s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--ib-ex4), 5px 5px 0 var(--ib-ex);
+}
+.btn:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ib-ex);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn--accent {
+  --face: var(--ib-accent);
+  --fg: var(--ib-accent-ink);
+}
+.btn--ink {
+  --face: var(--ib-text);
+  --fg: var(--ib-paper);
+}
+.btn--danger {
+  --face: var(--bad);
+  --fg: #1a0a0d;
+}
+.btn--ghost {
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--ib-paper-2);
+  box-shadow: none;
+  transform: none;
+}
+.btn--icon {
+  width: 36px;
+  padding: 0;
+}
+.btn--lg {
+  height: 46px;
+  padding: 0 20px;
+  font-size: 15px;
+  border-width: 3px;
+  border-radius: 12px;
+  box-shadow: var(--ib-ex6);
+}
+.btn--lg:active:not(:disabled) {
+  transform: translate(5px, 5px);
+}
+.btn--sm {
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+  border-width: 2px;
+  border-radius: 8px;
+  box-shadow: var(--ib-ex2);
+}
+.btn--sm.btn--icon {
+  width: 28px;
+}
+
+/* --------------------------------------------------------------- fields */
+.field {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 2.5px solid var(--ib-line);
+  border-radius: 10px;
+  background: var(--ib-paper-2);
+  color: var(--ib-text);
+  font: inherit;
+  font-weight: 600;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.18);
+  transition: transform 0.12s var(--ib-press), box-shadow 0.12s var(--ib-press);
+}
+.field:focus {
+  outline: none;
+  transform: translate(-1px, -1px);
+  box-shadow: var(--ib-ex4);
+  background: var(--ib-card);
+}
+.field::placeholder {
+  color: var(--ib-faint);
+}
+textarea.field {
+  height: auto;
+  padding: 10px 12px;
+  resize: none;
+  line-height: 1.5;
+}
+select.field {
+  appearance: none;
+  padding-right: 32px;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 17px) 15px, calc(100% - 12px) 15px;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ib-muted);
+}
+.mono {
+  font-family: var(--ib-mono);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--ib-muted);
+}
+.faint {
+  color: var(--ib-faint);
+}
+.ell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* small outlined pill used for kinds and states */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 7px;
+  border: 2px solid var(--ib-line);
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--ib-card);
+  white-space: nowrap;
+}
+.pill--accent {
+  background: var(--ib-accent);
+  color: var(--ib-accent-ink);
+}
+.pill--hot {
+  background: var(--ib-hot);
+  color: var(--ib-hot-ink);
+}
+.pill--alt {
+  background: var(--ib-alt);
+  color: #fff;
+}
+.pill--bad {
+  background: var(--bad);
+  color: #1a0a0d;
+}
+.pill--ok {
+  background: var(--ok);
+  color: #06210f;
+}
+
+/* the heat stripe used on live bars */
+.heat {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ib-accent) 0 7px,
+    color-mix(in srgb, var(--ib-accent) 72%, var(--ib-hot)) 7px 14px
+  );
+  background-size: 20px 20px;
+}
+.heat--live {
+  animation: heat-crawl 0.6s linear infinite;
+}
+@keyframes heat-crawl {
+  to {
+    background-position: 20px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
