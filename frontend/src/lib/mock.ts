@@ -281,6 +281,7 @@ export function createMock() {
     Move: () => {},
     Tune: (i: string, c: number, l: number) => { const t = find(i); if (t) { t.connections = c; t.speedLimit = l; sims.delete(t.id); upd(t); } },
     SelectFiles: (i: string, sel: boolean[]) => { const t = find(i); t?.torrent?.files?.forEach((f, k) => (f.selected = sel[k])); if (t) upd(t); },
+    SetURL: (i: string, url: string) => { const t = find(i); if (t) { t.url = url; t.status = "queued"; t.error = ""; upd(t); } },
     Rename: (i: string, name: string) => { const t = find(i); if (t) { t.name = name; upd(t); } },
     Open: () => {},
     Reveal: () => {},

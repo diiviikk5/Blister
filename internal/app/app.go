@@ -421,6 +421,9 @@ func (a *App) Tune(id string, connections int, speedLimit int64) error {
 // SelectFiles picks which files of a torrent to download.
 func (a *App) SelectFiles(id string, selected []bool) error { return a.m.SelectFiles(id, selected) }
 
+// SetURL replaces an expired or broken link and keeps progress.
+func (a *App) SetURL(id, url string) error { return a.m.SetURL(id, url) }
+
 // Rename changes a download's file name.
 func (a *App) Rename(id, name string) error { return a.m.Rename(id, name) }
 

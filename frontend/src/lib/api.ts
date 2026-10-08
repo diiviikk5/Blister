@@ -63,6 +63,7 @@ export const api = {
   tune: (id: string, connections: number, speedLimit: number) => call<void>("Tune", id, connections, speedLimit),
   selectFiles: (id: string, selected: boolean[]) => call<void>("SelectFiles", id, selected),
   rename: (id: string, name: string) => call<void>("Rename", id, name),
+  setURL: (id: string, url: string) => call<void>("SetURL", id, url),
   open: (id: string) => call<void>("Open", id),
   reveal: (id: string) => call<void>("Reveal", id),
   openDownloads: () => call<void>("OpenDownloads"),
