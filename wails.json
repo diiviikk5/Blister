@@ -1,0 +1,21 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Blister",
+  "outputfilename": "Blister",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "wailsjsdir": "./frontend/src/lib",
+  "author": {
+    "name": "diiviikk5",
+    "email": "divikarora465@gmail.com"
+  },
+  "info": {
+    "companyName": "Blister",
+    "productName": "Blister",
+    "productVersion": "0.1.0",
+    "copyright": "MIT",
+    "comments": "The download manager that doesn't wait."
+  }
+}
