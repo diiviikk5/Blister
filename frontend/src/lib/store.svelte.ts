@@ -50,6 +50,8 @@ class Store {
   addSeed = $state<External | null>(null);
   toasts = $state<Toast[]>([]);
   clipboard = $state<string[] | null>(null);
+  /** Download whose link is being replaced (expired/broken links). */
+  relink = $state<Task | null>(null);
 
   #toastId = 0;
 

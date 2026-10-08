@@ -21,6 +21,24 @@
   let renaming = $state<Task | null>(null);
   let newName = $state("");
   let dragging = $state(false);
+  let relinkURL = $state("");
+
+  // Prefill a replacement link from the clipboard when it looks like one.
+  $effect(() => {
+    const t = store.relink;
+    if (!t) return;
+    relinkURL = "";
+    readClipboard().then((c) => {
+      const v = c.trim();
+      if (/^(https?:\/\/|magnet:)/i.test(v) && v !== t.url) relinkURL = v;
+    });
+  });
+
+  function doRelink() {
+    const t = store.relink!;
+    store.relink = null;
+    store.run(api.setURL(t.id, relinkURL.trim()).then(() => store.toast("Link replaced. Resuming where it left off.", "ok")));
+  }
 
   store
     .init()
@@ -73,7 +91,7 @@
   }
 
   async function keys(e: KeyboardEvent) {
-    if (store.addOpen || removing || renaming) return;
+    if (store.addOpen || removing || renaming || store.relink) return;
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key.toLowerCase() === "f") {
       e.preventDefault();
@@ -217,6 +235,21 @@
     {#snippet actions()}
       <button class="btn" onclick={() => (renaming = null)}>Cancel</button>
       <button class="btn btn--accent" onclick={doRename}>Rename</button>
+    {/snippet}
+  </Modal>
+{/if}
+
+{#if store.relink}
+  <Modal title="Replace link" onclose={() => (store.relink = null)}>
+    <p>
+      Paste a fresh link for <strong>{store.relink.name}</strong>. Progress is kept if it's the same file. Links that expire
+      (signed or session URLs) are the usual reason to do this.
+    </p>
+    <!-- svelte-ignore a11y_autofocus -->
+    <input class="field mono" bind:value={relinkURL} placeholder="https://…" autofocus onkeydown={(e) => e.key === "Enter" && relinkURL.trim() && doRelink()} />
+    {#snippet actions()}
+      <button class="btn" onclick={() => (store.relink = null)}>Cancel</button>
+      <button class="btn btn--accent" disabled={!relinkURL.trim()} onclick={doRelink}>Replace and resume</button>
     {/snippet}
   </Modal>
 {/if}

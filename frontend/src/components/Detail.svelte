@@ -75,7 +75,10 @@
         <span class="ib-alert__icon">!</span>
         <div>
           <div>{task.error}</div>
-          <button class="btn btn--sm" onclick={() => store.run(api.resume([task.id]))}><Icon name="restart" size={13} /> Try again</button>
+          <div class="erracts">
+            <button class="btn btn--sm" onclick={() => store.run(api.resume([task.id]))}><Icon name="restart" size={13} /> Try again</button>
+            <button class="btn btn--sm" onclick={() => (store.relink = task)}><Icon name="link" size={13} /> Use a new link</button>
+          </div>
         </div>
       </div>
     {/if}
@@ -267,7 +270,9 @@
   .err {
     font-size: 13px;
   }
-  .err .btn {
+  .erracts {
+    display: flex;
+    gap: 8px;
     margin-top: 10px;
   }
   .stats {

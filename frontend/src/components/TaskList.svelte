@@ -26,6 +26,7 @@
           : { label: many ? `Resume ${ids.length}` : "Resume", icon: "play", hint: "Space", disabled: t.status === "completed" && !many, run: () => store.run(api.resume(ids)) },
         { label: "Restart from zero", icon: "restart", run: () => store.run(api.restart(ids)) },
         { label: "Rename…", icon: "doc", hint: "F2", disabled: many, run: () => onrename(t) },
+        { label: "Replace link…", icon: "link", disabled: many || t.status === "completed", run: () => (store.relink = t) },
         { sep: true },
         { label: many ? `Copy ${ids.length} links` : "Copy link", icon: "link", run: () => copyText(ids.map((i) => store.tasks[i]?.url).join("\n")) },
         { label: "Download again", icon: "down", disabled: many, run: () => store.openAdd({ urls: [t.url], request: t.request, source: "launch" }) },
