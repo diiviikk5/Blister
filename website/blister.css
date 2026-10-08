@@ -68,15 +68,111 @@ body.ib { margin: 0; overflow-x: clip; }
 #mode .i-moon { fill: currentColor; stroke: none; }
 
 /* ------------------------------------------------------------------ hero */
-.hero { position: relative; padding: 72px 0 110px; }
-.hero > .ib-gridpaper { mask-image: linear-gradient(#000 40%, transparent 85%); }
-.hero-title { margin: 26px 0 34px; }
-.hero-title .w { display: inline-block; }
-.hero-title .ib-block { margin: 0 .12em 0 -.04em; }
-.hero-row { display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: end; }
-.hero .ib-lead { max-width: 58ch; margin: 0; }
+/* Copy left, the file being split on the right. No kicker sticker and no
+   app window up here: the hero is about one idea, the split. */
+.hero { position: relative; padding: 64px 0 96px; overflow: hidden; }
+.hero__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; align-items: center; }
+.hero__status {
+    display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px;
+    padding: 6px 12px; border: 2.5px solid var(--ib-line); border-radius: 999px;
+    background: var(--ib-card); font-size: 12.5px; font-weight: 700; color: var(--ib-muted);
+    font-variant-numeric: tabular-nums;
+}
+.hero__status span { color: var(--ib-text); }
+.hero__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ib-hot); border: 2px solid var(--ib-line); animation: dot 1.4s steps(2) infinite; }
+@keyframes dot { 50% { background: transparent; } }
+.hero__title { font-size: clamp(50px, 7.4vw, 104px); }
+.hero__title .w { display: inline-block; }
+.hero__title .ib-mark {
+    display: inline-block; margin-top: .06em; padding: 0 .1em .04em; border: var(--ib-bw) solid var(--ib-line);
+    border-radius: .1em; box-shadow: var(--ib-ex8);
+}
+.hero__lead { max-width: 50ch; margin: 26px 0 30px; }
+
+.paste {
+    display: flex; align-items: center; gap: 10px; max-width: 600px;
+    padding: 8px 8px 8px 16px; border: var(--ib-bw) solid var(--ib-line); border-radius: 16px;
+    background: var(--ib-paper-2); box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--ib-ex) 14%, transparent);
+    transition: transform .12s var(--ib-press), box-shadow .12s var(--ib-press);
+}
+.paste:focus-within { transform: translate(-2px, -2px); background: var(--ib-card); box-shadow: var(--ib-ex6); }
+.paste__icon { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--ib-faint); stroke-width: 2.6; stroke-linecap: round; }
+.paste__in { flex: 1; min-width: 0; height: 44px; border: 0; background: none; outline: none; color: var(--ib-text); font-size: 14.5px; font-weight: 600; }
+.paste__in::placeholder { color: var(--ib-faint); }
+.paste__go { height: 46px; padding: 0 20px; font-size: 15px; box-shadow: var(--ib-ex4); }
+.paste__go:hover { box-shadow: var(--ib-ex6); }
+.paste__go:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ib-ex); }
+.hero__kinds { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.hero__kinds .ib-tag { font-size: 12px; }
+.hero__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 34px; }
+.hero__src { font-weight: 800; font-size: 15px; border-bottom: 3px solid var(--ib-accent); padding-bottom: 2px; }
+.hero__src:hover { background: var(--ib-accent); color: var(--ib-accent-ink); }
 .actions { display: flex; flex-wrap: wrap; gap: 18px; margin: 30px 0 20px; }
 .actions--center { justify-content: center; }
+
+/* the file, in isometric, split into 16 lanes */
+.hero__art { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.file-stage {
+    width: 100%; height: 420px; padding: 0; border: 0; background: none; cursor: pointer;
+    display: grid; place-items: center; perspective: 2400px;
+}
+.file-stage:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 6px; border-radius: 18px; }
+.file-iso {
+    --gap: 0px; --lift: 0px; --wave: 0px;
+    position: relative; display: block; width: 380px; height: 210px;
+    transform-style: preserve-3d; transform: rotateX(56deg) rotateZ(-40deg);
+}
+.file-iso__shadow {
+    position: absolute; inset: 6px -6px -6px 6px; border-radius: 16px;
+    background: repeating-linear-gradient(45deg, var(--ib-ex) 0 2px, transparent 2px 9px);
+    opacity: .35; transform: translateZ(-34px);
+}
+.file-iso__lanes { position: absolute; inset: 0; display: flex; gap: var(--gap); transform-style: preserve-3d; transition: gap .6s cubic-bezier(.2, .9, .25, 1.15); }
+.lane {
+    position: relative; flex: 1; display: block;
+    border: 2.5px solid var(--ib-line); background: var(--ib-paper-2);
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--lift) + (var(--i) - 7.5) * var(--wave)));
+    transition: transform .6s cubic-bezier(.2, .9, .25, 1.15) calc(var(--i) * 18ms), background .3s;
+}
+.lane:first-child { border-radius: 10px 0 0 10px; }
+.lane:last-child { border-radius: 0 10px 10px 0; }
+/* thickness: a front and a side face, so each lane reads as a block */
+.lane::after { content: ""; position: absolute; left: -2.5px; right: -2.5px; top: 100%; height: 22px; background: var(--ib-ex); transform-origin: top; transform: rotateX(-90deg); }
+.lane::before { content: ""; position: absolute; top: -2.5px; bottom: -2.5px; left: 100%; width: 22px; background: color-mix(in srgb, var(--ib-ex) 70%, var(--ib-paper)); transform-origin: left; transform: rotateY(90deg); }
+.lane b { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--ib-accent); transition: height .25s linear; }
+.lane.is-head b { border-top: 4px solid var(--ib-hot); }
+
+.file-iso[data-phase="split"], .file-iso[data-phase="pull"] { --gap: 8px; --lift: 26px; }
+.file-iso[data-phase="pull"] { --wave: 1.4px; }
+.file-iso[data-phase="done"] .lane { background: var(--ib-accent); }
+.file-iso[data-phase="done"] .lane:not(:first-child) { border-left-color: transparent; }
+
+.file-card {
+    width: min(360px, 100%); display: grid; gap: 8px; padding: 14px 16px;
+    border: var(--ib-bw) solid var(--ib-line); border-radius: var(--ib-r-lg); background: var(--ib-card); box-shadow: var(--ib-ex8);
+}
+.file-card__name { font-size: 13.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-card__bar { height: 12px; border: 2.5px solid var(--ib-line); border-radius: 6px; background: var(--ib-paper-2); overflow: hidden; }
+.file-card__bar i { display: block; height: 100%; width: 0; background: var(--ib-accent); transition: width .25s linear; }
+.file-card__row { display: flex; align-items: center; gap: 12px; font-size: 12.5px; font-weight: 700; color: var(--ib-muted); font-variant-numeric: tabular-nums; }
+.file-card__row b { color: var(--ib-text); font-size: 15px; min-width: 4ch; }
+.file-card__state { margin-left: auto; padding: 1px 8px; border: 2px solid var(--ib-line); border-radius: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: var(--ib-paper-2); color: var(--ib-text); }
+.file-card__state.is-done { background: var(--ib-accent); color: var(--ib-accent-ink); }
+
+/* the live window, now in its own section */
+.preview__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-bottom: 8px; }
+.preview__lead { max-width: 52ch; margin: 18px 0 0; }
+
+@media (max-width: 960px) {
+    .hero__grid { grid-template-columns: minmax(0, 1fr); }
+    .file-stage { height: 340px; }
+    .file-iso { width: 280px; height: 160px; }
+    .preview__head { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .hero__dot { animation: none; }
+}
 
 /* Ctrl + C: copy a link, Blister catches it */
 .catch {
@@ -87,7 +183,7 @@ body.ib { margin: 0; overflow-x: clip; }
 .catch__label { max-width: 26ch; text-align: center; font-size: 13px; font-weight: 700; color: var(--ib-faint); }
 
 /* ------------------------------------------------------------------ the app, inside a slab */
-.app { margin: 76px 0 0; }
+.app { margin: 48px 0 0; }
 .app-rate { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--ib-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .app-rate b { color: var(--ib-text); }
 .app-rate b.up { margin-left: 10px; }
@@ -473,14 +569,14 @@ body.ib { margin: 0; overflow-x: clip; }
 .footer__links { display: flex; gap: 4px; }
 
 /* ------------------------------------------------------------------ motion */
-.rise, .hero-title .w { animation: rise .65s var(--ib-press) both; animation-delay: calc(var(--d) * 70ms); }
+.rise, .hero__title .w { animation: rise .65s var(--ib-press) both; animation-delay: calc(var(--d) * 70ms); }
 .drop { animation: drop .8s cubic-bezier(.2, .9, .25, 1.5) both; animation-delay: calc(var(--d) * 70ms); }
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } }
 @keyframes drop { from { opacity: 0; transform: translateY(-70px) rotate(-14deg); } to { transform: rotate(-2deg); } }
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .rise, .drop, .hero-title .w, .dl--caught, .seg__fill, .final__strip i::before { animation: none; }
+    .rise, .drop, .hero__title .w, .dl--caught, .seg__fill, .final__strip i::before { animation: none; }
     .chunk, .chunk__heat i, .step, .accent, .efile i::before, .tmap i, .dens__list li { transition: none; }
     .pieces i, .playpause { transition: none; }
     /* a still frame of the lanes instead of a moving one */
@@ -492,7 +588,6 @@ body.ib { margin: 0; overflow-x: clip; }
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 960px) {
     .nav-links { display: none; }
-    .hero-row { grid-template-columns: 1fr; }
     .catch { justify-self: start; align-items: flex-start; }
     .catch__label { text-align: left; }
     .app__body { grid-template-columns: 1fr; }
