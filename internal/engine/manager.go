@@ -753,6 +753,54 @@ type TickItem struct {
 	ETA     int64  `json:"eta"`
 	Conns   int    `json:"conns"`
 	Seeds   int    `json:"seeds"`
+	// Map is file coverage in MapCells digits (0 empty .. 9 full) and Heads
+	// are the live connections' positions in [0,1], for the segmented bar.
+	Map   string    `json:"map,omitempty"`
+	Heads []float64 `json:"heads,omitempty"`
+}
+
+// MapCells is the resolution of TickItem.Map.
+const MapCells = 120
+
+// coverage renders segments as a MapCells-wide fill map plus the positions
+// of the segments still being written.
+func coverage(size int64, segs []httpdl.Segment) (string, []float64) {
+	if size <= 0 || len(segs) == 0 {
+		return "", nil
+	}
+	cell := float64(size) / MapCells
+	fill := make([]float64, MapCells)
+	var heads []float64
+	for _, s := range segs {
+		end := s.End
+		if end < 0 || end > size {
+			end = size
+		}
+		done := min(s.Pos, end)
+		if s.Pos < end {
+			heads = append(heads, float64(int(float64(done)/float64(size)*1000))/1000)
+		}
+		// Spread [s.Start, done) over the cells it touches.
+		for a := s.Start; a < done; {
+			c := int(float64(a) / cell)
+			if c >= MapCells {
+				break
+			}
+			cEnd := int64(float64(c+1) * cell)
+			b := min(done, cEnd)
+			if b <= a {
+				b = a + 1
+			}
+			fill[c] += float64(b - a)
+			a = b
+		}
+	}
+	out := make([]byte, MapCells)
+	for i, f := range fill {
+		v := int(f / cell * 9)
+		out[i] = byte('0' + max(0, min(9, v)))
+	}
+	return string(out), heads
 }
 
 // Tick is the payload of EvTick.
@@ -785,10 +833,14 @@ func (m *Manager) telemetry(now time.Time) {
 		if t.Speed > 0 && t.Size > 0 {
 			t.ETA = (t.Size - t.Done) / t.Speed
 		}
-		tick.Items = append(tick.Items, TickItem{
+		item := TickItem{
 			ID: id, Status: t.Status, Done: t.Done, Size: t.Size, Speed: t.Speed,
 			UpSpeed: t.UpSpeed, ETA: t.ETA, Conns: t.Conns, Seeds: t.Seeds,
-		})
+		}
+		if j.snapshot != nil {
+			item.Map, item.Heads = coverage(t.Size, j.snapshot())
+		}
+		tick.Items = append(tick.Items, item)
 		tick.Speed += t.Speed
 		tick.UpSpeed += t.UpSpeed
 		if t.Status != StatusSeeding {

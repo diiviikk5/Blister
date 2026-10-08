@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/diiviikk5/Blister/internal/httpdl"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -253,5 +254,24 @@ func TestParseChecksum(t *testing.T) {
 	}
 	if _, _, err := ParseChecksum("sha3:abcd"); err == nil {
 		t.Fatal("expected unsupported algo error")
+	}
+}
+
+func TestCoverage(t *testing.T) {
+	m, heads := coverage(1200, []httpdl.Segment{
+		{Start: 0, End: 600, Pos: 600},    // finished half
+		{Start: 600, End: 1200, Pos: 900}, // half of the rest, still running
+	})
+	if len(m) != MapCells {
+		t.Fatalf("map len %d", len(m))
+	}
+	if m[0] != '9' || m[MapCells/2-1] != '9' || m[MapCells-1] != '0' {
+		t.Fatalf("bad map %s", m)
+	}
+	if len(heads) != 1 || heads[0] != 0.75 {
+		t.Fatalf("heads %v", heads)
+	}
+	if m, _ := coverage(-1, nil); m != "" {
+		t.Fatal("unknown size should give no map")
 	}
 }
