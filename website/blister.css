@@ -173,6 +173,8 @@ body.ib { margin: 0; overflow-x: clip; }
 .ib-marquee { position: relative; z-index: 2; }
 
 /* headline highlights wrap as clean slabs, one per line */
+/* wrapped highlights need room or the next line covers descenders */
+.ib-h2:has(.ib-mark) { line-height: 1.1; }
 .ib-h2 .ib-mark { padding: 0 .12em .04em; border-radius: .08em; -webkit-box-decoration-break: clone; box-decoration-break: clone; box-shadow: 4px 4px 0 var(--ib-ex); }
 
 /* ------------------------------------------------------------------ section heads */
