@@ -85,7 +85,7 @@
     padding: 6px;
     border: var(--bw) solid var(--ib-line);
     border-radius: var(--r);
-    background: var(--ib-card);
+    background: var(--paper-solid, var(--ib-card));
     box-shadow: var(--ib-ex6);
     animation: pop 0.1s var(--ib-press);
   }

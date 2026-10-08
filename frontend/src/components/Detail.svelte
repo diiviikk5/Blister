@@ -196,7 +196,7 @@
     display: flex;
     flex-direction: column;
     border-left: var(--bw-lg) solid var(--ib-line);
-    background: var(--ib-paper);
+    background: transparent; /* the app shell paints the one translucent layer */
     min-height: 0;
   }
   /* docked under the list: wide and short, sections side by side */

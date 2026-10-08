@@ -49,7 +49,7 @@
     height: 52px;
     padding: 0 0 0 16px;
     border-bottom: var(--bw-lg) solid var(--ib-line);
-    background: var(--ib-paper);
+    background: transparent; /* the app shell paints the one translucent layer */
   }
   .brand {
     display: flex;

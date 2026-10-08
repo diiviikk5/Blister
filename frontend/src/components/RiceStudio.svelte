@@ -120,7 +120,7 @@
   async function pickWall() {
     try {
       const url = await api.pickImage();
-      if (url) edit((x) => ((x.fx.wallpaper = url), (x.fx.opacity = Math.min(x.fx.opacity, 0.82))));
+      if (url) edit((x) => ((x.fx.wallpaper = url), (x.fx.opacity = Math.min(x.fx.opacity, 0.68))));
     } catch (e) {
       store.toast(errText(e), "error");
     }
@@ -401,7 +401,7 @@
             <span>Wallpaper</span>
             <div class="wallrow">
               <button class="btn btn--sm" onclick={pickWall}><Icon name="image" size={13} /> Choose image</button>
-              <input class="field" placeholder="…or an https:// image URL" value={r.fx.wallpaper.startsWith("data:") ? "" : r.fx.wallpaper} onchange={(e) => edit((x) => ((x.fx.wallpaper = str(e).trim()), str(e).trim() && (x.fx.opacity = Math.min(x.fx.opacity, 0.82))))} />
+              <input class="field" placeholder="…or an https:// image URL" value={r.fx.wallpaper.startsWith("data:") ? "" : r.fx.wallpaper} onchange={(e) => edit((x) => ((x.fx.wallpaper = str(e).trim()), str(e).trim() && (x.fx.opacity = Math.min(x.fx.opacity, 0.68))))} />
               {#if r.fx.wallpaper}<button class="btn btn--sm btn--icon" onclick={() => edit((x) => ((x.fx.wallpaper = ""), (x.fx.opacity = 1)))} aria-label="Remove wallpaper"><Icon name="x" size={13} /></button>{/if}
             </div>
           </div>

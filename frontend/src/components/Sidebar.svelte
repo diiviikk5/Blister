@@ -88,7 +88,7 @@
     width: var(--side-w);
     padding: 18px 14px 14px;
     border-right: var(--bw-lg) solid var(--ib-line);
-    background: var(--ib-paper);
+    background: transparent; /* the app shell paints the one translucent layer */
     overflow-y: auto;
   }
   .add {
