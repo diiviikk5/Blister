@@ -212,7 +212,7 @@
         <div class="opt grow">
           <span class="label">Save to</span>
           <div class="folder">
-            <input class="field" bind:value={dir} placeholder="Automatic: Downloads\Blister, sorted by type" />
+            <input class="field" bind:value={dir} placeholder={`${store.settings?.downloadDir ?? "Downloads"}${store.settings?.categorizeFolders ? ", sorted by type" : ""}`} />
             <button class="btn btn--icon" onclick={browse} aria-label="Choose folder"><Icon name="folder" size={16} /></button>
           </div>
         </div>
