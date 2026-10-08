@@ -83,7 +83,7 @@
     gap: 18px;
     width: var(--side-w);
     padding: 18px 14px 14px;
-    border-right: 3px solid var(--ib-line);
+    border-right: var(--bw-lg) solid var(--ib-line);
     background: var(--ib-paper);
     overflow-y: auto;
   }
@@ -105,8 +105,8 @@
     gap: 10px;
     height: 36px;
     padding: 0 10px;
-    border: 2.5px solid transparent;
-    border-radius: 10px;
+    border: var(--bw) solid transparent;
+    border-radius: var(--r);
     background: none;
     font-weight: 750;
     font-size: 14px;
@@ -122,7 +122,7 @@
     background: var(--ib-accent);
     color: var(--ib-accent-ink);
     border-color: var(--ib-line);
-    box-shadow: 3px 3px 0 var(--ib-ex);
+    box-shadow: var(--ib-ex3);
   }
   .link.bad:not(.on) {
     color: var(--bad);

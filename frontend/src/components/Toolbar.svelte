@@ -70,7 +70,7 @@
     align-items: center;
     gap: 14px;
     padding: 16px 18px 14px;
-    border-bottom: 3px solid var(--ib-line);
+    border-bottom: var(--bw-lg) solid var(--ib-line);
   }
   h1 {
     margin: 0 8px 0 0;
@@ -78,8 +78,8 @@
     align-items: baseline;
     gap: 9px;
     font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.05em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
     white-space: nowrap;
   }
   .n {

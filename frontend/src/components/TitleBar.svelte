@@ -48,7 +48,7 @@
     gap: 14px;
     height: 52px;
     padding: 0 0 0 16px;
-    border-bottom: 3px solid var(--ib-line);
+    border-bottom: var(--bw-lg) solid var(--ib-line);
     background: var(--ib-paper);
   }
   .brand {
@@ -67,8 +67,8 @@
     width: min(440px, 40vw);
     height: 34px;
     padding: 0 10px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 10px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-paper-2);
     color: var(--ib-faint);
     box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.18);
@@ -97,7 +97,7 @@
     font-weight: 700;
     padding: 1px 6px;
     border: 1.5px solid var(--ib-faint);
-    border-radius: 5px;
+    border-radius: var(--r-xs);
   }
   .clear {
     display: grid;

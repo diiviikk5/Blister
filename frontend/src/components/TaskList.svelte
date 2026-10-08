@@ -90,8 +90,8 @@
   .big {
     margin: 0;
     font-size: 30px;
-    font-weight: 900;
-    letter-spacing: -0.05em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
   }
   .muted {
     margin: 0 0 8px;

@@ -195,7 +195,7 @@
     width: var(--detail-w);
     display: flex;
     flex-direction: column;
-    border-left: 3px solid var(--ib-line);
+    border-left: var(--bw-lg) solid var(--ib-line);
     background: var(--ib-paper);
     min-height: 0;
   }
@@ -212,8 +212,8 @@
     flex: none;
     display: grid;
     place-items: center;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--c);
     color: #140d1f;
     box-shadow: var(--ib-ex4);
@@ -225,8 +225,8 @@
   h2 {
     margin: 2px 0 8px;
     font-size: 17px;
-    font-weight: 900;
-    letter-spacing: -0.03em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
     line-height: 1.2;
     word-break: break-word;
     display: -webkit-box;
@@ -264,7 +264,7 @@
     height: 10px;
     margin-right: 6px;
     background: var(--ib-hot);
-    border: 1.5px solid var(--ib-line);
+    border: calc(var(--bw) * 0.6) solid var(--ib-line);
     vertical-align: -1px;
   }
   .err {
@@ -282,10 +282,10 @@
   }
   .stat {
     padding: 11px 12px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
-    box-shadow: 3px 3px 0 var(--ib-ex);
+    box-shadow: var(--ib-ex3);
   }
   .stat .label {
     margin: 0 0 4px;
@@ -294,8 +294,8 @@
   }
   .v {
     font-size: 21px;
-    font-weight: 900;
-    letter-spacing: -0.04em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
   }
   .s {
     font-size: 11.5px;
@@ -348,8 +348,8 @@
     text-decoration: underline;
   }
   .files {
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
     max-height: 260px;
     overflow-y: auto;
@@ -370,8 +370,8 @@
   .file :global(.ib-check input) {
     width: 20px;
     height: 20px;
-    border-width: 2.5px;
-    border-radius: 6px;
+    border-width: var(--bw);
+    border-radius: var(--r-sm);
   }
   .fp {
     flex: 1;
@@ -423,7 +423,7 @@
     display: flex;
     gap: 10px;
     padding: 14px 16px;
-    border-top: 3px solid var(--ib-line);
+    border-top: var(--bw-lg) solid var(--ib-line);
   }
   .foot .btn {
     flex: 1;

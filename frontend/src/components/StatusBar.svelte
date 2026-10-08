@@ -65,7 +65,7 @@
     gap: 4px;
     height: 34px;
     padding: 0 8px;
-    border-top: 3px solid var(--ib-line);
+    border-top: var(--bw-lg) solid var(--ib-line);
     background: var(--ib-paper-2);
     font-size: 12.5px;
     font-weight: 700;
@@ -86,7 +86,7 @@
   }
   .btnish {
     border: 2px solid transparent;
-    border-radius: 7px;
+    border-radius: var(--r-sm);
     background: none;
     font-weight: 750;
     cursor: pointer;

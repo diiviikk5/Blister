@@ -48,8 +48,8 @@
     align-items: center;
     gap: 10px;
     padding: 10px 10px 10px 12px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
     box-shadow: var(--ib-ex6);
     font-size: 13px;
@@ -68,8 +68,8 @@
     flex: none;
     display: grid;
     place-items: center;
-    border: 2px solid var(--ib-line);
-    border-radius: 8px;
+    border: calc(var(--bw) * 0.8) solid var(--ib-line);
+    border-radius: var(--r-sm);
     background: var(--ib-paper-2);
   }
   [data-tone="ok"] .ic {

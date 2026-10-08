@@ -284,8 +284,8 @@
     max-height: calc(100vh - 48px);
     display: flex;
     flex-direction: column;
-    border: 3px solid var(--ib-line);
-    border-radius: 18px;
+    border: var(--bw-lg) solid var(--ib-line);
+    border-radius: var(--r-lg);
     background: var(--ib-paper);
     box-shadow: var(--ib-ex14);
     animation: drop 0.22s cubic-bezier(0.3, 1.4, 0.5, 1);
@@ -305,8 +305,8 @@
   h2 {
     margin: 0;
     font-size: 34px;
-    font-weight: 900;
-    letter-spacing: -0.06em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
     line-height: 1;
   }
   h2 :global(.ib-block) {
@@ -336,8 +336,8 @@
   .items {
     max-height: 230px;
     overflow-y: auto;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
   }
   .item {
@@ -423,7 +423,7 @@
     align-items: center;
     gap: 8px;
     padding: 16px 22px 20px;
-    border-top: 3px solid var(--ib-line);
+    border-top: var(--bw-lg) solid var(--ib-line);
     margin-top: 10px;
   }
   .start {
@@ -433,8 +433,8 @@
   .start input {
     width: 20px;
     height: 20px;
-    border-width: 2.5px;
-    border-radius: 6px;
+    border-width: var(--bw);
+    border-radius: var(--r-sm);
   }
   .spacer {
     flex: 1;

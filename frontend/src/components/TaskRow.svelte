@@ -136,18 +136,18 @@
     bottom: 0;
     width: 5px;
     background: var(--ib-accent);
-    border-right: 2px solid var(--ib-line);
+    border-right: calc(var(--bw) * 0.8) solid var(--ib-line);
   }
   .tile {
     width: 44px;
     height: 44px;
     display: grid;
     place-items: center;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 11px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--c);
     color: #140d1f;
-    box-shadow: 3px 3px 0 var(--ib-ex);
+    box-shadow: var(--ib-ex3);
     overflow: hidden;
   }
   .tile img {
@@ -158,7 +158,7 @@
   :global([data-density="compact"]) .tile {
     width: 36px;
     height: 36px;
-    border-radius: 9px;
+    border-radius: var(--r);
   }
   .main {
     display: flex;
@@ -205,7 +205,7 @@
   .dot {
     width: 4px;
     height: 4px;
-    border-radius: 1px;
+    border-radius: var(--r-xs);
     background: var(--ib-faint);
     flex: none;
   }

@@ -83,8 +83,8 @@
     z-index: 100;
     width: 236px;
     padding: 6px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
     box-shadow: var(--ib-ex6);
     animation: pop 0.1s var(--ib-press);
@@ -103,7 +103,7 @@
     height: 32px;
     padding: 0 9px;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     background: none;
     font-weight: 700;
     font-size: 13.5px;

@@ -33,8 +33,8 @@
   .box {
     width: min(460px, calc(100vw - 40px));
     padding: 20px 22px;
-    border: 3px solid var(--ib-line);
-    border-radius: 16px;
+    border: var(--bw-lg) solid var(--ib-line);
+    border-radius: var(--r-lg);
     background: var(--ib-paper);
     box-shadow: var(--ib-ex10);
     animation: drop 0.18s cubic-bezier(0.3, 1.4, 0.5, 1);
@@ -48,8 +48,8 @@
   h3 {
     margin: 0 0 10px;
     font-size: 22px;
-    font-weight: 900;
-    letter-spacing: -0.04em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
   }
   .content {
     font-size: 14px;

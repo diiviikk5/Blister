@@ -267,13 +267,13 @@
     align-items: center;
     gap: 20px;
     padding: 16px 18px 14px;
-    border-bottom: 3px solid var(--ib-line);
+    border-bottom: var(--bw-lg) solid var(--ib-line);
   }
   h1 {
     margin: 0;
     font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.05em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
   }
   .scroll {
     flex: 1;
@@ -282,8 +282,8 @@
   }
   .card {
     max-width: 860px;
-    border: 3px solid var(--ib-line);
-    border-radius: 16px;
+    border: var(--bw-lg) solid var(--ib-line);
+    border-radius: var(--r-lg);
     background: var(--ib-card);
     box-shadow: var(--ib-ex6);
   }
@@ -358,8 +358,8 @@
   .token code {
     flex: 1;
     padding: 6px 10px;
-    border: 2px solid var(--ib-line);
-    border-radius: 8px;
+    border: calc(var(--bw) * 0.8) solid var(--ib-line);
+    border-radius: var(--r-sm);
     background: var(--ib-paper-2);
     font-size: 12px;
     overflow: hidden;
@@ -378,10 +378,10 @@
   .sw {
     width: 30px;
     height: 30px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 8px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r-sm);
     cursor: pointer;
-    box-shadow: 2px 2px 0 var(--ib-ex);
+    box-shadow: var(--ib-ex2);
     transition: transform 0.1s var(--ib-press);
   }
   .sw:hover {
@@ -390,7 +390,7 @@
   .sw.on {
     transform: translate(2px, 2px);
     box-shadow: none;
-    outline: 3px solid var(--ib-line);
+    outline: var(--bw-lg) solid var(--ib-line);
     outline-offset: 2px;
   }
   .foot {

@@ -71,8 +71,8 @@
     --fill: var(--ib-accent);
     position: relative;
     width: 100%;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 6px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r-sm);
     background: var(--ib-paper-2);
     overflow: hidden;
     box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.2);
@@ -97,7 +97,7 @@
   .fill {
     height: 100%;
     background-color: var(--fill);
-    border-right: 2.5px solid var(--ib-line);
+    border-right: var(--bw) solid var(--ib-line);
     transition: width 0.45s cubic-bezier(0.3, 0.7, 0.4, 1);
   }
   .fill[style*="width: 0%"] {
@@ -113,14 +113,14 @@
     width: 4px;
     margin-left: -2px;
     background: var(--ib-hot);
-    border-left: 1.5px solid var(--ib-line);
-    border-right: 1.5px solid var(--ib-line);
+    border-left: calc(var(--bw) * 0.6) solid var(--ib-line);
+    border-right: calc(var(--bw) * 0.6) solid var(--ib-line);
     transition: left 0.5s linear;
   }
   .sweep {
     width: 35%;
     animation: sweep 1.3s ease-in-out infinite alternate;
-    border-left: 2.5px solid var(--ib-line);
+    border-left: var(--bw) solid var(--ib-line);
   }
   @keyframes sweep {
     from {

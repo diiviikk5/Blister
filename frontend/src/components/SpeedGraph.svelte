@@ -33,8 +33,8 @@
 <style>
   .graph {
     padding: 10px 12px 8px;
-    border: 2.5px solid var(--ib-line);
-    border-radius: 12px;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
     background: var(--ib-card);
     box-shadow: var(--ib-ex4);
   }
@@ -56,7 +56,7 @@
     width: 100%;
     height: 54px;
     margin-top: 6px;
-    border-bottom: 2px solid var(--ib-line);
+    border-bottom: calc(var(--bw) * 0.8) solid var(--ib-line);
   }
   .area {
     fill: color-mix(in srgb, var(--ib-accent) 85%, transparent);

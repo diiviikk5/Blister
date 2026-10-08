@@ -292,13 +292,13 @@
   }
   .dz {
     padding: 28px 40px;
-    border: 3px dashed var(--ib-line);
-    border-radius: 18px;
+    border: var(--bw-lg) dashed var(--ib-line);
+    border-radius: var(--r-lg);
     background: var(--ib-card);
     box-shadow: var(--ib-ex10);
     font-size: 30px;
-    font-weight: 900;
-    letter-spacing: -0.05em;
+    font-weight: var(--h-weight);
+    letter-spacing: var(--h-track);
   }
   .del {
     margin-top: 14px;
@@ -308,7 +308,7 @@
   .del input {
     width: 20px;
     height: 20px;
-    border-width: 2.5px;
-    border-radius: 6px;
+    border-width: var(--bw);
+    border-radius: var(--r-sm);
   }
 </style>
