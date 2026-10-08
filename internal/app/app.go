@@ -50,8 +50,8 @@ type App struct {
 	tools   *media.Tools
 	bridge  *bridge.Server
 
-	mu      sync.Mutex
-	ready   bool
+	mu    sync.Mutex
+	ready bool
 	// Window geometry to restore after mini bar mode.
 	restore *[4]int
 	pending []External
