@@ -454,3 +454,119 @@ const pickAccent = radioGroup($$(".accent"), "accent", (a) => {
 pickAccent(root.dataset.accent || "blister");
 const pickDensity = radioGroup($$(".dens .ib-tab"), "density", (d) => ($("#dens").dataset.density = d));
 pickDensity("comfortable");
+
+// ---------------------------------------------------------------- hero: one file, sixteen lanes
+// split -> pull (each lane at its own pace) -> stitch -> verified, then again.
+{
+  const iso = $("#file-iso");
+  const lanes = $$(".lane", iso).map((el) => ({ el, fill: $("b", el), p: 0, v: 0 }));
+  const ui = {
+    phase: $("#hs-phase"), rate: $("#hs-rate"), lanes: $("#hs-lanes"),
+    name: $("#fc-name"), bar: $("#fc-bar"), pct: $("#fc-pct"), size: $("#fc-size"), state: $("#fc-state"),
+  };
+  const form = $("#paste");
+  const input = $("#paste-in");
+
+  let file = { name: "blender-4.2-windows-x64.zip", mb: 342 };
+  let run = 0; // bumps on every restart so stale timers die quietly
+  let raf = 0;
+
+  const wait = (ms, id) => new Promise((ok) => setTimeout(() => id === run && ok(), ms));
+
+  function setPhase(p, label = p) {
+    iso.dataset.phase = p;
+    ui.phase.textContent = label;
+    ui.state.textContent = label;
+    ui.state.classList.toggle("is-done", p === "done");
+  }
+
+  function paint(total, rate) {
+    for (const l of lanes) {
+      l.fill.style.height = `${(l.p * 100).toFixed(1)}%`;
+      l.el.classList.toggle("is-head", l.p > 0 && l.p < 1);
+    }
+    const pct = Math.round(total * 100);
+    ui.pct.textContent = `${pct}%`;
+    ui.bar.style.width = `${pct}%`;
+    ui.rate.textContent = `${rate.toFixed(1)} MB/s`;
+    ui.lanes.textContent = `${lanes.filter((l) => l.p > 0 && l.p < 1).length || 16} lanes`;
+  }
+
+  function reset() {
+    for (const l of lanes) l.p = 0;
+    paint(0, 0);
+  }
+
+  function nameFrom(url) {
+    const u = url.trim();
+    if (/^magnet:/i.test(u)) return decodeURIComponent((/dn=([^&]+)/.exec(u) || [, "torrent"])[1].replace(/\+/g, " "));
+    if (/youtu|vimeo|tiktok|instagram|twitch|x\.com/i.test(u)) return "video.mp4";
+    const last = u.split(/[?#]/)[0].split("/").filter(Boolean).pop();
+    return last && last.includes(".") ? decodeURIComponent(last) : "download.bin";
+  }
+
+  async function play() {
+    const id = ++run;
+    cancelAnimationFrame(raf);
+    const r = rng(file.name.length * 977 + 13);
+    ui.name.textContent = file.name;
+    ui.size.textContent = `${file.mb} MB`;
+    reset();
+    setPhase("idle", "probing");
+    await wait(700, id);
+
+    setPhase("split", "splitting");
+    await wait(650, id);
+
+    // Every lane gets its own speed; when one finishes it helps the slowest.
+    for (const l of lanes) l.v = 0.16 + r() * 0.3;
+    setPhase("pull", "pulling");
+    let last = performance.now();
+    await new Promise((done) => {
+      const tick = (now) => {
+        if (id !== run) return;
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        let rate = 0;
+        for (const l of lanes) {
+          if (l.p >= 1) continue;
+          l.p = Math.min(1, l.p + l.v * dt * (0.8 + r() * 0.4));
+          rate += l.v;
+        }
+        const finished = lanes.filter((l) => l.p >= 1);
+        const slow = lanes.filter((l) => l.p < 1).sort((a, b) => a.p - b.p)[0];
+        if (slow && finished.length) slow.v = Math.min(0.9, slow.v + 0.004 * finished.length);
+        const total = lanes.reduce((a, l) => a + l.p, 0) / lanes.length;
+        paint(total, (rate * file.mb) / 16);
+        if (total >= 1) return done();
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    });
+
+    setPhase("stitch", "stitching");
+    paint(1, 0);
+    await wait(650, id);
+    setPhase("done", "verified");
+    await wait(2600, id);
+    play();
+  }
+
+  function still() {
+    // Reduced motion: a single frame, mid-pull.
+    const r = rng(42);
+    setPhase("pull", "pulling");
+    for (const l of lanes) l.p = 0.35 + r() * 0.5;
+    paint(lanes.reduce((a, l) => a + l.p, 0) / 16, 58.4);
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!input.value.trim()) return input.focus();
+    file = { name: nameFrom(input.value), mb: 40 + Math.round(rng(input.value.length)() * 900) };
+    reduced ? (ui.name.textContent = file.name, still()) : play();
+  });
+  $("#file-stage").addEventListener("click", () => (reduced ? still() : play()));
+
+  reduced ? still() : play();
+}
