@@ -57,7 +57,7 @@
   <div class="main">
     <div class="name ell" title={task.name}>{task.name}</div>
     <div class="bar">
-      <SegBar {progress} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} height={14} />
+      <SegBar {progress} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} />
     </div>
     <div class="meta">
       <span class="state" data-s={task.status}>{task.media?.stage && running ? task.media.stage : statusLabel[task.status]}</span>
