@@ -526,5 +526,23 @@ func (a *App) PickTorrents() ([]string, error) {
 	})
 }
 
+// ShowWindow brings the window back (second launch, tray-style hide).
+func (a *App) ShowWindow() {
+	if a.ctx == nil {
+		return
+	}
+	runtime.WindowShow(a.ctx)
+	runtime.WindowUnminimise(a.ctx)
+}
+
+// Close hides the window when "close to tray" is on, otherwise quits.
+func (a *App) Close() {
+	if a.store.Get().CloseToTray {
+		runtime.WindowHide(a.ctx)
+		return
+	}
+	runtime.Quit(a.ctx)
+}
+
 // Quit closes Blister.
 func (a *App) Quit() { runtime.Quit(a.ctx) }

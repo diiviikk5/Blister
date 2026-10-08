@@ -36,7 +36,7 @@
     <div class="win" style="--wails-draggable: no-drag">
       <button onclick={() => win.minimise()} aria-label="Minimise"><Icon name="min" size={16} /></button>
       <button onclick={() => win.toggleMaximise()} aria-label="Maximise"><Icon name="max" size={14} /></button>
-      <button class="close" onclick={() => win.quit()} aria-label="Close"><Icon name="x" size={16} /></button>
+      <button class="close" onclick={() => win.close()} aria-label="Close"><Icon name="x" size={16} /></button>
     </div>
   {/if}
 </header>

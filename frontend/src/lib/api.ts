@@ -79,7 +79,7 @@ export const win = {
   minimise: () => window.runtime?.WindowMinimise(),
   toggleMaximise: () => window.runtime?.WindowToggleMaximise(),
   isMaximised: () => window.runtime?.WindowIsMaximised() ?? Promise.resolve(false),
-  quit: () => (window.runtime ? window.runtime.Quit() : undefined),
+  close: () => (native ? call<void>("Close") : Promise.resolve()),
 };
 
 export async function readClipboard(): Promise<string> {

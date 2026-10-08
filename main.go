@@ -46,7 +46,10 @@ func main() {
 		OnShutdown: a.Shutdown,
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId:               "dev.blister.app",
-			OnSecondInstanceLaunch: func(d options.SecondInstanceData) { a.HandleArgs(d.Args) },
+			OnSecondInstanceLaunch: func(d options.SecondInstanceData) {
+				a.ShowWindow()
+				a.HandleArgs(d.Args)
+			},
 		},
 		DragAndDrop: &options.DragAndDrop{EnableFileDrop: true},
 		Bind:        []any{a},
