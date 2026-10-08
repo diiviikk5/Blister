@@ -146,6 +146,9 @@ export interface Settings {
   closeToTray: boolean;
   scheduleStart: string;
   scheduleEnd: string;
+  rice: string;
+  riceLibrary: string;
+  windowEffect: "none" | "mica" | "acrylic" | "tabbed";
 }
 
 export interface ToolStatus {

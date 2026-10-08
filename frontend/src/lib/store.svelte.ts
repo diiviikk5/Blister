@@ -2,6 +2,7 @@
 // the list view derives filtered/sorted arrays from it.
 import { api, on, errText } from "./api";
 import type { External, Settings, Task, Tick, TickItem, ToolStatus } from "./types";
+import { applyRice, defaultRice, normalize, type Rice } from "./rice";
 
 export type Filter =
   | "all"
@@ -45,7 +46,11 @@ class Store {
   selected = $state<string[]>([]);
   focus = $state<string | null>(null);
 
-  view = $state<"list" | "settings">("list");
+  view = $state<"list" | "settings" | "rice">("list");
+  /** The live look. Edits apply instantly and save shortly after. */
+  rice = $state<Rice>(structuredClone(defaultRice));
+  library = $state<Rice[]>([]);
+  paletteOpen = $state(false);
   addOpen = $state(false);
   addSeed = $state<External | null>(null);
   toasts = $state<Toast[]>([]);
@@ -107,6 +112,7 @@ class Store {
     this.version = b.version;
     this.settings = b.settings;
     this.tools = b.tools;
+    this.loadRice(b.settings);
     const tasks: Record<string, Task> = {};
     for (const t of b.tasks ?? []) tasks[t.id] = t;
     this.tasks = tasks;
@@ -161,6 +167,37 @@ class Store {
     this.speed = tick.speed;
     this.upSpeed = tick.upSpeed;
     this.history = [...this.history.slice(1), tick.speed];
+  }
+
+  loadRice(s: Settings) {
+    let r: Rice;
+    try {
+      r = s.rice ? normalize(JSON.parse(s.rice)) : structuredClone(defaultRice);
+    } catch {
+      r = structuredClone(defaultRice);
+    }
+    try {
+      this.library = s.riceLibrary ? (JSON.parse(s.riceLibrary) as Rice[]).map(normalize) : [];
+    } catch {
+      this.library = [];
+    }
+    this.rice = r;
+    applyRice(r);
+  }
+
+  #riceTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Applies a look now and persists it (debounced, so sliders stay smooth). */
+  setRice(r: Rice) {
+    this.rice = r;
+    applyRice($state.snapshot(r) as Rice);
+    clearTimeout(this.#riceTimer);
+    this.#riceTimer = setTimeout(() => this.persistRice(), 400);
+  }
+
+  persistRice() {
+    if (!this.settings) return;
+    const s = { ...this.settings, rice: JSON.stringify($state.snapshot(this.rice)), riceLibrary: JSON.stringify($state.snapshot(this.library)) };
+    this.saveSettings(s);
   }
 
   toast(text: string, tone: Toast["tone"] = "info", action?: Toast["action"]) {

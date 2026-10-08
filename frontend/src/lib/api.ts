@@ -74,6 +74,8 @@ export const api = {
   setSpeedLimit: (bps: number) => call<Settings>("SetSpeedLimit", bps),
   pickFolder: (current: string) => call<string>("PickFolder", current),
   pickTorrents: () => call<string[] | null>("PickTorrents"),
+  pickImage: () => call<string>("PickImage"),
+  relaunch: () => call<void>("Relaunch"),
 };
 
 export const win = {

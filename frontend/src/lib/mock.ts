@@ -36,6 +36,9 @@ const defaults: Settings = {
   closeToTray: false,
   scheduleStart: "",
   scheduleEnd: "",
+  rice: "",
+  riceLibrary: "",
+  windowEffect: "none",
 };
 
 const cats: Record<string, string> = {
@@ -293,6 +296,8 @@ export function createMock() {
     SetSpeedLimit: (bps: number) => { settings = { ...settings, speedLimit: bps }; emit("settings:changed", settings); return settings; },
     PickFolder: (cur: string) => cur,
     PickTorrents: () => [],
+    PickImage: () => "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=70",
+    Relaunch: () => location.reload(),
   };
 
   return {

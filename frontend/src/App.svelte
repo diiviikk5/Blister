@@ -45,18 +45,6 @@
     .then(() => (ready = true))
     .catch((e) => (failed = String(e)));
 
-  // Theme, accent and density follow settings live.
-  const dark = typeof matchMedia !== "undefined" ? matchMedia("(prefers-color-scheme: dark)") : null;
-  let systemDark = $state(dark?.matches ?? true);
-  dark?.addEventListener("change", (e) => (systemDark = e.matches));
-  $effect(() => {
-    const s = store.settings;
-    if (!s) return;
-    const theme = s.theme === "system" ? (systemDark ? "dark" : "light") : s.theme;
-    document.documentElement.dataset.theme = theme;
-    document.body.dataset.density = s.density;
-    document.body.style.setProperty("--ib-accent", s.accent || "#ffd60a");
-  });
 
   function askRemove(ids: string[]) {
     if (!ids.length) return;
