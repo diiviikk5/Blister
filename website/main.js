@@ -43,7 +43,7 @@ const pad2 = (n) => String(n).padStart(2, "0");
 // connection, every connection pulls its own range, and when one finishes early
 // it takes over the back half of whichever range has the most left.
 class SegBar {
-  constructor(el, { lanes = 16, duration = 8, seed = 7, minSplit = 0.012, onSplit, onDone } = {}) {
+  constructor(el, { lanes = 16, duration = 8, seed = 7, minSplit = 0.006, onSplit, onDone } = {}) {
     Object.assign(this, { el, lanes, duration, minSplit, onSplit, onDone });
     this.reset(seed);
   }
@@ -65,7 +65,7 @@ class SegBar {
     fill.className = "seg__fill";
     lane.append(fill);
     this.el.append(lane);
-    const seg = { start, end, pos: start, id, lane, fill, speed: 0.45 + this.r() * 1.1, phase: this.r() * 6.28, v: 0 };
+    const seg = { start, end, pos: start, id, lane, fill, speed: 0.3 + this.r() * 1.7, phase: this.r() * 6.28, v: 0 };
     this.place(seg);
     this.segs.push(seg);
     if (isNew) setTimeout(() => lane.classList.remove("is-new"), 900);
@@ -82,7 +82,7 @@ class SegBar {
     if (this.done) return;
     this.t += dt;
     for (const s of this.active) {
-      s.v = this.base * s.speed * (0.7 + 0.3 * Math.sin(this.t * 1.4 + s.phase));
+      s.v = this.base * s.speed * (1 + 0.3 * Math.sin(this.t * 1.4 + s.phase));
       s.pos = Math.min(s.end, s.pos + s.v * dt);
       if (s.pos >= s.end) this.finish(s);
     }
