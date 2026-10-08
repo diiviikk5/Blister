@@ -58,7 +58,7 @@ const base: Omit<Rice, "name" | "colors"> = {
   type: { ui: "Geist Variable", mono: "Geist Mono Variable", scale: 1, weight: 900, tracking: -0.05, monoUI: false },
   layout: { view: "list", density: "comfortable", sidebar: "left", detail: "right", rows: "lines" },
   bar: { style: "lanes", height: 14, heads: true, stripes: true },
-  fx: { motion: 1, grain: 0, scanlines: 0, vignette: 0, wallpaper: "", dim: 0.55, blur: 0, opacity: 1 },
+  fx: { motion: 1, grain: 0, scanlines: 0, vignette: 0, wallpaper: "", dim: 0.35, blur: 0, opacity: 1 },
   css: "",
 };
 
@@ -264,6 +264,7 @@ export function applyRice(r: Rice, el: HTMLElement = document.body) {
   set("--ib-paper-2", see(c.paper2, op + 0.1));
   set("--ib-card", see(c.card, op + 0.2));
   set("--paper-solid", c.paper);
+  document.documentElement.style.setProperty("--paper-solid", c.paper);
   set("--ib-night", c.paper2);
   set("--ib-text", c.text);
   set("--ib-muted", c.muted);
