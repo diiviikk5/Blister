@@ -275,3 +275,40 @@ func TestCoverage(t *testing.T) {
 		t.Fatal("unknown size should give no map")
 	}
 }
+
+func TestSetURLKeepsProgress(t *testing.T) {
+	data := blob(3 << 20)
+	srv := slowServer(data, 0)
+	defer srv.Close()
+	m, _ := newManager(t, t.TempDir(), t.TempDir())
+	defer m.Close()
+	tk, err := m.Add(AddRequest{URL: srv.URL + "/old.bin", SpeedLimit: 1 << 20})
+	if err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(10 * time.Second)
+	for c, _ := m.Get(tk.ID); c.Done < 256<<10; c, _ = m.Get(tk.ID) {
+		if time.Now().After(deadline) {
+			t.Fatal("never made progress")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if err := m.SetURL(tk.ID, "magnet:?xt=urn:btih:abc"); err == nil {
+		t.Fatal("switching an HTTP download to a magnet should fail")
+	}
+	if err := m.SetURL(tk.ID, srv.URL+"/new.bin"); err != nil {
+		t.Fatal(err)
+	}
+	c, _ := m.Get(tk.ID)
+	if c.URL != srv.URL+"/new.bin" || c.Done == 0 {
+		t.Fatalf("url %q done %d", c.URL, c.Done)
+	}
+	if err := m.Tune(tk.ID, 8, 0); err != nil {
+		t.Fatal(err)
+	}
+	done := waitStatus(t, m, tk.ID, StatusCompleted, 20*time.Second)
+	got, _ := os.ReadFile(done.Path())
+	if !bytes.Equal(got, data) {
+		t.Fatal("file corrupt after switching links")
+	}
+}
