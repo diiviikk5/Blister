@@ -550,9 +550,14 @@
     overflow: hidden;
   }
   .pv :global(.row) {
-    grid-template-columns: 40px minmax(0, 1fr) 84px;
+    grid-template-columns: 40px minmax(0, 1fr) 78px;
     gap: 10px;
-    padding: 0 12px;
+    height: auto;
+    min-height: var(--row-h);
+    padding: 12px;
+  }
+  .pv :global(.row .nums .small:last-child) {
+    display: none;
   }
   .pv :global(.row .acts) {
     display: none;

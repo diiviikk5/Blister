@@ -71,7 +71,6 @@
     <button class="link" class:on={store.view === "rice"} onclick={() => (store.view = "rice")}>
       <Icon name="sliders" size={17} />
       <span>Rice Studio</span>
-      <kbd class="count">Ctrl ⇧ R</kbd>
     </button>
     <button class="link" class:on={store.view === "settings"} onclick={() => (store.view = "settings")}>
       <Icon name="gear" size={17} />
