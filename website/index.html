@@ -54,6 +54,130 @@
   </header>
 
   <main id="main">
+    <!-- ============================================================ hero -->
+    <section class="hero" id="top">
+      <div class="ib-gridpaper" aria-hidden="true"></div>
+      <div class="ib-container">
+        <span class="ib-kicker rise" style="--d:0">Download manager · Windows</span>
+        <h1 class="ib-h1 hero-title" aria-label="Downloads at a blistering pace.">
+          <span class="w" style="--d:1">Downloads</span>
+          <span class="w" style="--d:2">at</span>
+          <span class="w" style="--d:3">a</span><br>
+          <span class="ib-block drop" style="--d:5">blistering</span>
+          <span class="w" style="--d:6">pace.</span>
+        </h1>
+
+        <div class="hero-row">
+          <div>
+            <p class="ib-lead rise" style="--d:7">
+              Blister cuts every file into pieces and pulls them over sixteen connections at once,
+              then stitches them back together on your disk. Plain links, torrents and video sites
+              all land in the same quick, quiet queue. It's free, open source and asks for nothing.
+            </p>
+            <div class="actions rise" style="--d:8">
+              <a class="ib-btn ib-btn--lg" href="https://github.com/diiviikk5/Blister/releases/latest">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+                Download for Windows
+              </a>
+              <a class="ib-btn ib-btn--paper ib-btn--lg" href="https://github.com/diiviikk5/Blister">Read the source</a>
+            </div>
+            <p class="ib-note rise" style="--d:9">Free · Open source · No accounts, no ads, no telemetry</p>
+          </div>
+
+          <button class="catch rise" style="--d:9" id="catch" type="button" aria-describedby="catch-label">
+            <span class="ib-keys" id="keys" aria-hidden="true">
+              <span class="ib-keycap">Ctrl</span><span class="ib-plus">+</span><span class="ib-keycap ib-keycap--accent">C</span>
+            </span>
+            <span class="catch__label ib-mono" id="catch-label">copy a link anywhere, Blister catches it</span>
+          </button>
+        </div>
+
+        <!-- the app, as a window slab -->
+        <figure class="ib-slab app rise" style="--d:10" aria-label="A simulated preview of the Blister window">
+          <div class="ib-slab__bar">
+            <span class="ib-slab__dot" style="background:var(--ib-hot)"></span>
+            <span class="ib-slab__dot" style="background:var(--ib-accent)"></span>
+            <span class="ib-slab__dot" style="background:var(--ib-card)"></span>
+            <span class="ib-slab__title">Blister</span>
+            <span class="app-rate ib-mono" aria-hidden="true"><b>↓</b> <span id="rate-down">0.0 MB/s</span><b class="up">↑</b> <span id="rate-up">0.0 MB/s</span></span>
+            <button class="ib-slab__badge playpause" id="playpause" type="button" aria-pressed="false">
+              <span class="pp-on">Pause preview</span><span class="pp-off">Play preview</span>
+            </button>
+          </div>
+          <div class="app__body">
+            <aside class="app__side" aria-hidden="true">
+              <span class="app__item is-on">All <b>7</b></span>
+              <span class="app__item">Active <b>3</b></span>
+              <span class="app__item">Queued <b>2</b></span>
+              <span class="app__item">Finished <b>14</b></span>
+              <span class="app__label">Folders</span>
+              <span class="app__item"><i style="--c:#ff5c39"></i>Archives</span>
+              <span class="app__item"><i style="--c:#3d7bff"></i>Videos</span>
+              <span class="app__item"><i style="--c:#ffd23f"></i>Music</span>
+              <span class="app__item"><i style="--c:#7bd88f"></i>Programs</span>
+              <span class="app__label">Schedule</span>
+              <span class="app__sched ib-mono">01:00 – 07:00</span>
+            </aside>
+            <div class="app__main" id="app-list">
+              <div class="dl dl--caught" id="caught" hidden>
+                <span class="dl__icon" data-kind="clip" aria-hidden="true"></span>
+                <div class="dl__info">
+                  <strong class="dl__name" id="caught-name">podcast-episode-112.mp3</strong>
+                  <span class="dl__meta ib-mono" id="caught-meta">Caught from clipboard · queued · Music/</span>
+                </div>
+                <span class="dl__tag">New</span>
+              </div>
+
+              <div class="dl dl--http">
+                <span class="dl__icon" data-kind="zip" aria-hidden="true"></span>
+                <div class="dl__info">
+                  <strong class="dl__name" id="http-name">blender-4.2-windows-x64.zip</strong>
+                  <span class="dl__meta ib-mono"><span id="http-conns">16 connections</span> · <span id="http-size">342 MB</span> · <span id="http-state">downloading</span></span>
+                </div>
+                <div class="dl__nums ib-mono">
+                  <b id="http-pct">0%</b>
+                  <span id="http-eta">--</span>
+                </div>
+                <div class="seg" id="seg" role="progressbar" aria-label="Simulated multi-connection download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                <span class="seg__note ib-mono" id="seg-note" aria-live="off">Each stripe is one connection.</span>
+              </div>
+
+              <div class="dl dl--bt">
+                <span class="dl__icon" data-kind="magnet" aria-hidden="true"></span>
+                <div class="dl__info">
+                  <strong class="dl__name">debian-12-amd64-DVD-1.iso</strong>
+                  <span class="dl__meta ib-mono"><span id="bt-peers">38 peers</span> · DHT · encrypted · <span id="bt-state">downloading</span></span>
+                </div>
+                <div class="dl__nums ib-mono">
+                  <b id="bt-pct">0%</b>
+                  <span id="bt-ratio">ratio 0.00</span>
+                </div>
+                <div class="pieces" id="pieces" role="img" aria-label="Simulated torrent piece map"></div>
+              </div>
+
+              <div class="dl dl--video">
+                <span class="dl__icon" data-kind="video" aria-hidden="true"></span>
+                <div class="dl__info">
+                  <strong class="dl__name">Lecture 07, signals and systems.mp4</strong>
+                  <span class="dl__meta ib-mono">YouTube · 1080p · video + audio, merging with ffmpeg</span>
+                </div>
+                <div class="dl__nums ib-mono"><b>100%</b><span>done</span></div>
+                <span class="dl__done ib-mono">Saved to Videos/</span>
+              </div>
+
+              <div class="dl dl--queued">
+                <span class="dl__icon" data-kind="app" aria-hidden="true"></span>
+                <div class="dl__info">
+                  <strong class="dl__name">vs_community_2026.exe</strong>
+                  <span class="dl__meta ib-mono">Queued · starts at 01:00 · limit 4 MB/s</span>
+                </div>
+                <span class="dl__tag dl__tag--quiet">Queued</span>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
 <!--SECTIONS-->
   </main>
 
