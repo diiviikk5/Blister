@@ -1,5 +1,6 @@
 <script lang="ts">
   import TaskRow from "./TaskRow.svelte";
+  import TaskTable from "./TaskTable.svelte";
   import Menu, { type MenuItem } from "./Menu.svelte";
   import Icon from "./Icon.svelte";
   import { api, copyText } from "../lib/api";
@@ -37,7 +38,10 @@
   }
 </script>
 
-<div class="list" role="listbox" aria-multiselectable="true" aria-label="Downloads">
+{#if store.rice.layout.view === "table" && store.visible.length}
+  <TaskTable oncontext={context} />
+{:else}
+<div class="list" class:grid={store.rice.layout.view === "grid" && store.visible.length} role="listbox" aria-multiselectable="true" aria-label="Downloads">
   {#each store.visible as task (task.id)}
     <TaskRow {task} oncontext={context} />
   {:else}
@@ -61,6 +65,7 @@
     </div>
   {/each}
 </div>
+{/if}
 
 {#if menu}
   <Menu {...menu} onclose={() => (menu = null)} />
@@ -71,6 +76,19 @@
     flex: 1;
     overflow-y: auto;
     outline: none;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    align-content: start;
+    gap: 16px;
+    padding: 18px;
+  }
+  :global([data-rows="cards"]) .list:not(.grid) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
   }
   .empty {
     height: 100%;

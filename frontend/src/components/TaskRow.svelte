@@ -125,6 +125,58 @@
   .row:hover {
     background: color-mix(in srgb, var(--ib-paper-2) 60%, transparent);
   }
+  /* card rows: each download is its own raised block */
+  :global([data-rows="cards"]) .row,
+  :global(.grid) .row {
+    flex: none;
+    border: var(--bw) solid var(--ib-line);
+    border-radius: var(--r);
+    background: var(--ib-card);
+    box-shadow: var(--ib-ex3);
+    transition: transform calc(0.12s * var(--motion, 1)) var(--ib-press), box-shadow calc(0.12s * var(--motion, 1)) var(--ib-press);
+  }
+  :global([data-rows="cards"]) .row:hover,
+  :global(.grid) .row:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--ib-ex4);
+    background: var(--ib-card);
+  }
+  :global([data-rows="cards"]) .row.sel::before,
+  :global(.grid) .row.sel::before {
+    display: none;
+  }
+  :global([data-rows="cards"]) .row.sel,
+  :global(.grid) .row.sel {
+    outline: var(--bw) solid var(--ib-accent);
+    outline-offset: 2px;
+  }
+  /* grid: tall cards */
+  :global(.grid) .row {
+    height: auto;
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: start;
+    row-gap: 12px;
+    padding: 16px;
+  }
+  :global(.grid) .tile {
+    width: 52px;
+    height: 52px;
+  }
+  :global(.grid) .main {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  :global(.grid) .nums {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+  }
+  :global(.grid) .acts {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    opacity: 1;
+  }
   .row.sel {
     background: color-mix(in srgb, var(--ib-accent) 13%, var(--ib-paper));
   }
