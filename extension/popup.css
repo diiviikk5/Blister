@@ -1,12 +1,12 @@
 :root {
-  --paper: #14110f;
-  --card: #221d19;
-  --sunk: #1c1815;
-  --ink: #f7f0e6;
-  --muted: #c3b8aa;
-  --accent: #ff5c39;
-  --accent-ink: #1a110d;
-  --hot: #ffd23f;
+  --paper: #0d0913;
+  --card: #1c1527;
+  --sunk: #150f1e;
+  --ink: #f3eefb;
+  --muted: #b9afc8;
+  --accent: #ffd60a;
+  --accent-ink: #140d1f;
+  --hot: #ff2e88;
   --ok: #2fd27a;
   --bad: #ff4d6d;
   color-scheme: dark;
