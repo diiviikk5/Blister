@@ -4,6 +4,7 @@
   // ascii, braille, dots) render the same coverage as glyphs.
   import type { Status } from "../lib/types";
   import { store } from "../lib/store.svelte";
+  import type { BarStyle } from "../lib/rice";
 
   let {
     progress = 0,
@@ -11,9 +12,10 @@
     heads = [],
     status = "downloading",
     height,
-  }: { progress?: number; map?: string; heads?: number[]; status?: Status; height?: number } = $props();
+    force,
+  }: { progress?: number; map?: string; heads?: number[]; status?: Status; height?: number; force?: BarStyle } = $props();
 
-  const style = $derived(store.rice.bar.style);
+  const style = $derived(force ?? store.rice.bar.style);
   const showHeads = $derived(store.rice.bar.heads);
   const live = $derived(status === "downloading" || status === "starting");
   const h = $derived(height ?? store.rice.bar.height);
