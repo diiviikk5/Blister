@@ -32,6 +32,9 @@
 
   <div class="spacer"></div>
 
+  <button class="minibtn" style="--wails-draggable: no-drag" onclick={() => store.setMini(true)} title="Mini bar (Ctrl M)" aria-label="Mini bar mode">
+    <Icon name="min" size={14} stroke={3} /><span>Mini</span>
+  </button>
   {#if native}
     <div class="win" style="--wails-draggable: no-drag">
       <button onclick={() => win.minimise()} aria-label="Minimise"><Icon name="min" size={16} /></button>
@@ -110,6 +113,25 @@
   .spacer {
     flex: 1;
     align-self: stretch;
+  }
+  .minibtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    margin-right: 6px;
+    border: calc(var(--bw) * 0.8) solid var(--ib-line);
+    border-radius: var(--r-sm);
+    background: none;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ib-muted);
+  }
+  .minibtn:hover {
+    background: var(--ib-accent);
+    color: var(--ib-accent-ink);
   }
   .win {
     display: flex;

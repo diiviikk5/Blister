@@ -42,6 +42,7 @@
       { id: "folder", label: "Open download folder", group: "Actions", icon: "folder", run: () => store.run(api.openDownloads()) },
       { id: "rice", label: "Open Rice Studio", hint: "Ctrl Shift R", group: "Look", icon: "sliders", run: () => (store.view = "rice") },
       { id: "settings", label: "Open settings", hint: "Ctrl ,", group: "Actions", icon: "gear", run: () => (store.view = "settings") },
+      { id: "mini", label: "Mini bar mode", hint: "Ctrl M", group: "Look", icon: "min", run: () => store.setMini(true) },
       { id: "shuffle", label: "Shuffle a new look", group: "Look", icon: "bolt", run: () => store.setRice(shuffle($state.snapshot(store.rice) as Rice)) },
     ];
     if (t.length) {
