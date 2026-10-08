@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
   import SegBar from "./SegBar.svelte";
+  import IsoLanes from "./IsoLanes.svelte";
   import { api, copyText } from "../lib/api";
   import { store, prog } from "../lib/store.svelte";
   import { bytes, speed, eta, percent, ago, parseRate } from "../lib/format";
@@ -14,6 +15,10 @@
   const running = $derived(task.status === "downloading" || task.status === "starting");
   const map = $derived(live?.map || task.torrent?.pieceMap || "");
   const sep = $derived(task.dir.includes("\\") ? "\\" : "/");
+
+  // 3D lanes or just the flat bar; remembered for the session.
+  let viz = $state<"iso" | "flat">((sessionStorage.getItem("blister-viz") as "iso" | "flat") || "iso");
+  $effect(() => sessionStorage.setItem("blister-viz", viz));
 
   // Local edits for tuning; resynced when another task is focused.
   let conns = $state(0);
@@ -59,8 +64,14 @@
 
   <div class="body">
     <div class="barwrap">
+      {#if viz === "iso" && dock === "right"}
+        <IsoLanes {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} progress={prog(task)} status={task.status} />
+      {/if}
       <SegBar progress={task.size > 0 || task.status === "completed" ? prog(task) : running ? -1 : 0} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} height={30} />
       <div class="legend num">
+        {#if dock === "right"}
+          <button class="viz" onclick={() => (viz = viz === "iso" ? "flat" : "iso")}>{viz === "iso" ? "Flat" : "3D"}</button>
+        {/if}
         <span>{percent(task.done, task.size) || (task.status === "completed" ? "100%" : "–")}</span>
         {#if task.kind === "http" && running && live?.heads?.length}
           <span class="faint"><i class="sw"></i>{live.heads.length} connections writing</span>
@@ -280,6 +291,22 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
+  }
+  .viz {
+    padding: 1px 7px;
+    border: calc(var(--bw) * 0.7) solid var(--ib-line);
+    border-radius: var(--r-xs);
+    background: none;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ib-muted);
+  }
+  .viz:hover {
+    background: var(--ib-accent);
+    color: var(--ib-accent-ink);
   }
   .legend {
     display: flex;
