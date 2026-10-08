@@ -45,7 +45,7 @@ func main() {
 		OnDomReady: a.DomReady,
 		OnShutdown: a.Shutdown,
 		SingleInstanceLock: &options.SingleInstanceLock{
-			UniqueId:               "dev.blister.app",
+			UniqueId: "dev.blister.app",
 			OnSecondInstanceLaunch: func(d options.SecondInstanceData) {
 				a.ShowWindow()
 				a.HandleArgs(d.Args)
