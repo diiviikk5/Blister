@@ -1,0 +1,81 @@
+/*
+ * Blister's take on Isometric Brutalism (iso-brutal.css).
+ *
+ * Brand: warm paper and ember-black ink; the accent is the app's own default,
+ * hot orange #ff5c39, and the signal is a heat yellow. Blister-only pieces:
+ * the segmented download bar (parallel connections filling at their own
+ * pace and splitting the slowest lane), the torrent piece map, the race,
+ * the engine diagram and the accent keys.
+ */
+
+/* ------------------------------------------------------------------ brand tokens */
+.ib {
+    --ib-paper: #f5eee3;
+    --ib-paper-2: #ebe1d1;
+    --ib-card: #fffaf2;
+    --ib-night: #150f0c;
+    --ib-text: #1a110d;
+    --ib-muted: #50443d;
+    --ib-faint: #85776d;
+    --ib-line: #1a110d;
+    --ib-ex: #1a110d;
+    --ib-grid: rgba(26, 17, 13, 0.07);
+    --ib-accent: #ff5c39;
+    --ib-accent-ink: #1a110d;
+    --ib-hot: #ffd23f;
+    --ib-hot-ink: #1a110d;
+    --ib-alt: #3d7bff;
+    --app-ink: #f7eee4;
+    --app-dim: #a3958b;
+    --app-line: rgba(255, 255, 255, .09);
+}
+
+[data-theme="dark"] .ib {
+    --ib-paper: #0f0b09;
+    --ib-paper-2: #18120f;
+    --ib-card: #1f1814;
+    --ib-text: #f7eee4;
+    --ib-muted: #bdb0a6;
+    --ib-faint: #8d8077;
+    --ib-line: #f7eee4;
+    --ib-ex: #f7eee4;
+    --ib-grid: rgba(247, 238, 228, 0.06);
+}
+
+/* ------------------------------------------------------------------ base */
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body.ib { margin: 0; overflow-x: clip; }
+.ib ::selection { background: var(--ib-accent); color: var(--ib-accent-ink); }
+.skip { position: absolute; left: -999px; top: 10px; z-index: 99; }
+.skip:focus { left: 10px; }
+.ib a.ib-btn { color: var(--fg); } /* the kit's `.ib a { color: inherit }` outranks .ib-btn */
+.ib-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ib-btn svg.gh { fill: currentColor; stroke: none; }
+.ib-brand__mark svg { width: 24px; height: 24px; }
+.ib-navlink:focus-visible, .ib-brand:focus-visible, .ib-faq summary:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 3px; border-radius: 8px; }
+[data-theme="dark"] .ib .ib-navlink:focus-visible { outline-color: var(--ib-accent); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ------------------------------------------------------------------ nav */
+.nav-links { display: flex; gap: 4px; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+#mode svg { width: 18px; height: 18px; }
+#mode .i-sun, [data-theme="dark"] #mode .i-moon { display: none; }
+[data-theme="dark"] #mode .i-sun { display: block; }
+#mode .i-moon { fill: currentColor; stroke: none; }
+
+/* ------------------------------------------------------------------ footer */
+.footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.footer__links { display: flex; gap: 4px; }
+
+/* ------------------------------------------------------------------ responsive */
+@media (max-width: 960px) {
+    .nav-links { display: none; }
+}
+@media (max-width: 560px) {
+    .ib-section { padding: 84px 0; }
+    .hide-sm { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}

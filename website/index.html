@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blister: downloads at a blistering pace</title>
+  <meta name="description" content="Blister is a free, open-source download manager. Sixteen connections per file, torrents, video sites, a smart queue and resume that survives a reboot. No accounts, no ads, no telemetry.">
+  <meta name="theme-color" content="#f5eee3">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700;800;900&family=Geist+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="iso-brutal.css">
+  <link rel="stylesheet" href="blister.css">
+  <script>
+    // Apply saved accent and mode before first paint so the page doesn't flash.
+    try {
+      const d = document.documentElement;
+      d.dataset.accent = localStorage.getItem("blister-accent") || "blister";
+      const mode = localStorage.getItem("blister-mode");
+      if (mode === "dark" || (!mode && matchMedia("(prefers-color-scheme: dark)").matches)) d.dataset.theme = "dark";
+    } catch {}
+  </script>
+</head>
+<body class="ib">
+  <a class="skip ib-btn ib-btn--sm" href="#main">Skip to content</a>
+
+  <header class="ib-nav">
+    <div class="ib-container ib-nav__inner">
+      <a class="ib-brand" href="#top" aria-label="Blister home">
+        <span class="ib-brand__mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v9m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18.5h3.4M10.3 18.5h3.4M15.6 18.5H19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>
+        </span>
+        Blister
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a class="ib-navlink" href="#features">Features</a>
+        <a class="ib-navlink" href="#race">Why it's fast</a>
+        <a class="ib-navlink" href="#engine">How it works</a>
+        <a class="ib-navlink" href="#torrents">Torrents</a>
+        <a class="ib-navlink" href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="ib-btn ib-btn--paper ib-btn--sm ib-btn--icon" id="mode" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>
+        </button>
+        <a class="ib-btn ib-btn--ink ib-btn--sm" href="https://github.com/diiviikk5/Blister">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="gh"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>
+          <span class="hide-sm">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+<!--SECTIONS-->
+  </main>
+
+  <footer class="ib-footer">
+    <div class="ib-container footer__inner">
+      <a class="ib-brand" href="#top">
+        <span class="ib-brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v9m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18.5h3.4M10.3 18.5h3.4M15.6 18.5H19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg></span>
+        Blister
+      </a>
+      <span class="ib-note">© 2026 Blister · Open source · Made with Go &amp; Wails</span>
+      <nav class="footer__links" aria-label="Project">
+        <a class="ib-navlink" href="https://github.com/diiviikk5/Blister">Source</a>
+        <a class="ib-navlink" href="https://github.com/diiviikk5/Blister/issues">Issues</a>
+        <a class="ib-navlink" href="https://github.com/diiviikk5/Blister/releases">Releases</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
