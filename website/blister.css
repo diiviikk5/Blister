@@ -384,6 +384,52 @@ body.ib { margin: 0; overflow-x: clip; }
 .tlegend span { display: inline-flex; align-items: center; gap: 6px; }
 .tlegend i { display: inline-block; width: 12px; border: 1.5px solid var(--ib-line); }
 
+/* ------------------------------------------------------------------ make it yours */
+/* accents mirror the app's picker; the signal colour is re-paired so it never clashes */
+[data-accent="lime"] .ib { --ib-accent: #c6f432; --ib-hot: #ff6fae; }
+[data-accent="cyan"] .ib { --ib-accent: #35d0ff; --ib-hot: #ffd23f; }
+[data-accent="violet"] .ib { --ib-accent: #b18cff; --ib-hot: #ffd23f; }
+[data-accent="rose"] .ib { --ib-accent: #ff6fae; --ib-hot: #35d0ff; }
+[data-accent="amber"] .ib { --ib-accent: #ffc23d; --ib-hot: #ff5c39; }
+
+.yours__grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
+.yours .ib-h2 { margin-top: 20px; }
+.yours__lead { margin: 24px 0 0; max-width: 46ch; }
+.accentpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 36px; max-width: 520px; }
+.accent {
+    flex-direction: column; gap: 10px; height: 88px; color: inherit; font-family: inherit; cursor: pointer;
+    transition: transform .1s ease, box-shadow .1s ease, background-color .2s ease;
+}
+.accent i { width: 36px; height: 14px; border: 2.5px solid var(--ib-line); border-radius: 4px; background: var(--m); }
+.accent:hover { transform: translate(-2px, -2px); box-shadow: var(--ib-ex10); }
+.accent:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 4px; }
+.accent[aria-checked="true"] { background: var(--m); color: #1a110d; transform: translate(6px, 6px); box-shadow: 2px 2px 0 var(--ib-ex); }
+.accent[aria-checked="true"] i { background: #fffaf2; border-color: #1a110d; }
+
+.dens {
+    padding: 22px; border: var(--ib-bw) solid var(--ib-line); border-radius: var(--ib-r-lg);
+    background: var(--ib-card); box-shadow: var(--ib-ex10);
+}
+.dens__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.dens__title { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ib-faint); }
+.ib-tab { color: var(--ib-muted); }
+.ib-tab:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 2px; }
+.ib-tab[aria-checked="true"] { background: var(--ib-card); color: var(--ib-text); outline: 2.5px solid var(--ib-line); box-shadow: 3px 3px 0 var(--ib-ex); }
+.dens__list { list-style: none; margin: 0; padding: 0; display: grid; }
+.dens__list li {
+    display: grid; grid-template-columns: minmax(0, 1fr) 120px 52px; align-items: center; gap: 14px;
+    padding: 14px 6px; border-bottom: 2px solid var(--ib-paper-2); transition: padding .2s var(--ib-press);
+}
+.dens__list li:last-child { border-bottom: 0; }
+.dens__list b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 800; }
+.dens__list em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--ib-faint); text-align: right; }
+.dens__list .ib-bar { height: 12px; }
+.dens__list .ib-bar i[style="width:0%"] { border-right: 0; }
+.dens[data-density="compact"] .dens__list li { padding: 6px; }
+.dens[data-density="compact"] .dens__list b { font-size: 13px; }
+.dens[data-density="compact"] .dens__list .ib-bar { height: 9px; border-width: 2px; }
+.dens__note { margin: 16px 0 0; }
+
 /* ------------------------------------------------------------------ footer */
 .footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .footer__links { display: flex; gap: 4px; }

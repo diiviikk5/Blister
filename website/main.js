@@ -423,3 +423,34 @@ if (!reduced) {
     if (e[0].isIntersecting && !tRunning && tGo.textContent === "Start") { tGo.click(); obs.disconnect(); }
   }, { threshold: 0.5 }).observe(tmap);
 }
+
+// ---------------------------------------------------------------- make it yours: accent keys latch, density tabs
+function radioGroup(buttons, attr, onPick) {
+  const pick = (value) => {
+    buttons.forEach((b) => {
+      const on = b.dataset[attr] === value;
+      b.setAttribute("aria-checked", String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    onPick(value);
+  };
+  buttons.forEach((b, i) => {
+    b.addEventListener("click", () => pick(b.dataset[attr]));
+    b.addEventListener("keydown", (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const next = buttons[(i + step + buttons.length) % buttons.length];
+      next.click();
+      next.focus();
+    });
+  });
+  return pick;
+}
+const pickAccent = radioGroup($$(".accent"), "accent", (a) => {
+  root.dataset.accent = a;
+  store("blister-accent", a);
+});
+pickAccent(root.dataset.accent || "blister");
+const pickDensity = radioGroup($$(".dens .ib-tab"), "density", (d) => ($("#dens").dataset.density = d));
+pickDensity("comfortable");
