@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon48.png" alt="" width="28" height="28" />
+      <strong>Blister</strong>
+      <span id="status" class="pill">Checking…</span>
+    </header>
+
+    <section id="pair" hidden>
+      <label for="token">Pairing code</label>
+      <p class="help">In Blister, open Settings → Browser and copy the code.</p>
+      <div class="row">
+        <input id="token" placeholder="Paste code" spellcheck="false" autocomplete="off" />
+        <button id="save" class="btn accent">Pair</button>
+      </div>
+    </section>
+
+    <section id="main" hidden>
+      <button id="grab" class="btn accent big">Download video on this tab</button>
+      <label class="switch">
+        <span>
+          <b>Catch downloads</b>
+          <small>Send browser downloads to Blister</small>
+        </span>
+        <input id="intercept" type="checkbox" />
+      </label>
+      <label class="field">
+        <span><b>Skip files under</b><small>Smaller files stay in the browser</small></span>
+        <select id="minSize">
+          <option value="0">Catch everything</option>
+          <option value="1048576">1 MB</option>
+          <option value="5242880">5 MB</option>
+          <option value="20971520">20 MB</option>
+          <option value="104857600">100 MB</option>
+        </select>
+      </label>
+      <button id="unpair" class="link">Use a different pairing code</button>
+    </section>
+
+    <p id="down" class="help" hidden>Blister isn't running. Start it, then reopen this popup. Downloads go to the browser in the meantime.</p>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
