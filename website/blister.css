@@ -136,6 +136,7 @@ body.ib { margin: 0; overflow-x: clip; }
 }
 .dl__tag--quiet { background: transparent; color: var(--app-dim); box-shadow: inset 0 0 0 1.5px var(--app-line); }
 .dl--queued { opacity: .72; }
+.dl[hidden] { display: none; }
 .dl--caught { animation: caught .5s var(--ib-press) both; border-color: color-mix(in srgb, var(--ib-hot) 60%, transparent); }
 @keyframes caught { from { opacity: 0; transform: translateY(-10px) scale(.98); } }
 
@@ -148,7 +149,7 @@ body.ib { margin: 0; overflow-x: clip; }
 .seg__lane { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--ib-night); }
 .seg__lane:first-child { border-left: 0; }
 .seg__fill {
-    height: 100%; width: 0;
+    display: block; height: 100%; width: 0;
     background: repeating-linear-gradient(-45deg, var(--ib-accent) 0 7px, color-mix(in srgb, var(--ib-accent) 72%, #000) 7px 14px);
     background-size: 19.8px 19.8px;
     box-shadow: inset -3px 0 0 var(--ib-hot);
