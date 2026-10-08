@@ -347,6 +347,43 @@ body.ib { margin: 0; overflow-x: clip; }
     background: var(--ib-accent); color: var(--ib-accent-ink); border-color: var(--ib-line); box-shadow: 2px 2px 0 var(--ib-ex);
 }
 
+/* ------------------------------------------------------------------ torrents */
+.torrents__grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; }
+.torrents .ib-h2 { margin-top: 20px; }
+.torrents__lead { margin: 22px 0 0; max-width: 46ch; }
+.ticks { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 10px; font-weight: 700; }
+.ticks li { display: flex; align-items: center; gap: 12px; }
+.ticks li::before { content: ""; flex: none; width: 14px; height: 14px; border: 2.5px solid var(--ib-line); border-radius: 4px; background: var(--ib-accent); box-shadow: 2px 2px 0 var(--ib-ex); }
+
+.tcard {
+    display: grid; gap: 18px; padding: 22px;
+    border: var(--ib-bw) solid var(--ib-line); border-radius: var(--ib-r-lg);
+    background: var(--ib-card); box-shadow: var(--ib-ex10);
+}
+.tcard__head { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px; }
+.tcard__head .dl__icon { border: 2.5px solid var(--ib-line); }
+.tcard__head strong { display: block; font-size: 17px; font-weight: 900; letter-spacing: -.02em; }
+.tcard__meta { font-size: 12.5px; font-weight: 700; color: var(--ib-faint); }
+#t-go { min-width: 112px; }
+.tfiles { margin: 0; padding: 0; border: 0; display: grid; gap: 4px; }
+.tfiles .ib-check { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; padding: 8px 10px; border-radius: 10px; font-size: 14.5px; }
+.tfiles .ib-check:hover { background: var(--ib-paper-2); }
+.tfiles .ib-check input:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 2px; }
+.tfiles .ib-check:has(input:not(:checked)) span { color: var(--ib-faint); text-decoration: line-through; text-decoration-thickness: 2px; }
+.tfiles em { font-style: normal; font-size: 12.5px; color: var(--ib-faint); }
+
+.tmap {
+    display: grid; grid-template-columns: repeat(30, 1fr); gap: 3px; padding: 10px;
+    border: 2.5px solid var(--ib-line); border-radius: 10px; background: var(--ib-night);
+}
+.tmap i, .tlegend i { aspect-ratio: 1; border-radius: 2px; background: #3a2e28; transition: background-color .2s ease; }
+.tmap i.f, .tlegend i.f { background: var(--ib-hot); }
+.tmap i.h, .tlegend i.h { background: var(--ib-accent); }
+.tmap i.s, .tlegend i.s { background: repeating-linear-gradient(-45deg, #3a2e28 0 2px, transparent 2px 4px); }
+.tlegend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; font-weight: 700; color: var(--ib-faint); }
+.tlegend span { display: inline-flex; align-items: center; gap: 6px; }
+.tlegend i { display: inline-block; width: 12px; border: 1.5px solid var(--ib-line); }
+
 /* ------------------------------------------------------------------ footer */
 .footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .footer__links { display: flex; gap: 4px; }

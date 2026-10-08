@@ -402,6 +402,46 @@
         </figure>
       </div>
     </section>
+
+    <!-- ============================================================ torrents -->
+    <section class="ib-section torrents" id="torrents">
+      <div class="ib-container torrents__grid">
+        <div>
+          <span class="ib-kicker">Torrents</span>
+          <h2 class="ib-h2">Take only the files <span class="ib-mark">you want.</span></h2>
+          <p class="ib-lead torrents__lead">Untick a file and its pieces drop out of the plan, even mid-download. Every square below is one piece of the torrent, coloured the moment it arrives.</p>
+          <ul class="ticks">
+            <li>Magnet links and .torrent files</li>
+            <li>DHT, so trackers are optional</li>
+            <li>UPnP opens a port for you</li>
+            <li>Peer encryption on by default</li>
+            <li>Stops seeding at the ratio you set</li>
+          </ul>
+        </div>
+
+        <div class="tcard">
+          <div class="tcard__head">
+            <span class="dl__icon" data-kind="magnet" data-label="BT" aria-hidden="true"></span>
+            <div>
+              <strong>blender-open-movies</strong>
+              <span class="ib-mono tcard__meta"><span id="t-sel">2.82 GB</span> selected · <span id="t-pct">0%</span></span>
+            </div>
+            <button class="ib-btn ib-btn--sm" id="t-go" type="button">Start</button>
+          </div>
+
+          <fieldset class="tfiles">
+            <legend class="visually-hidden">Files in this torrent</legend>
+            <label class="ib-check"><input type="checkbox" checked data-file="0"><span>Big Buck Bunny, 1080p.mp4</span><em class="ib-mono">691 MB</em></label>
+            <label class="ib-check"><input type="checkbox" checked data-file="1"><span>Sintel, 1080p.mkv</span><em class="ib-mono">1.21 GB</em></label>
+            <label class="ib-check"><input type="checkbox" checked data-file="2"><span>Tears of Steel, 1080p.mov</span><em class="ib-mono">905 MB</em></label>
+            <label class="ib-check"><input type="checkbox" checked data-file="3"><span>Posters and stills</span><em class="ib-mono">14 MB</em></label>
+          </fieldset>
+
+          <div class="tmap" id="tmap" role="img" aria-label="Piece map: one square per piece, filled as pieces arrive and hatched for skipped files"></div>
+          <div class="tlegend ib-mono" aria-hidden="true"><span><i class="h"></i>have</span><span><i class="f"></i>arriving</span><span><i></i>wanted</span><span><i class="s"></i>skipped</span></div>
+        </div>
+      </div>
+    </section>
 <!--SECTIONS-->
   </main>
 

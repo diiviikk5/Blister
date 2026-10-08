@@ -344,3 +344,82 @@ stepBtns.forEach((b) => {
   b.addEventListener("click", () => setStep(b.dataset.step));
   b.addEventListener("mouseenter", () => matchMedia("(hover: hover)").matches && setStep(b.dataset.step));
 });
+
+// ---------------------------------------------------------------- torrents: per-file selection on a live piece map
+const tfiles = [691, 1210, 905, 14]; // MB
+const T_PIECES = 240;
+const tTotal = tfiles.reduce((a, b) => a + b, 0);
+const tOwner = []; // piece -> file index
+{
+  let acc = 0;
+  tfiles.forEach((mb, f) => {
+    const n = f === tfiles.length - 1 ? T_PIECES - acc : Math.round((mb / tTotal) * T_PIECES);
+    for (let i = 0; i < n; i++) tOwner.push(f);
+    acc += n;
+  });
+}
+const tmap = $("#tmap");
+const tcells = tOwner.map(() => tmap.appendChild(document.createElement("i")));
+const tState = new Array(T_PIECES).fill(0); // 0 wanted, 1 arriving, 2 have
+const tWant = tfiles.map(() => true);
+const tGo = $("#t-go");
+let tRunning = false;
+let tRand = rng(99);
+let tTimer = 0;
+
+function tPaint() {
+  let want = 0, have = 0, mb = 0;
+  tcells.forEach((c, i) => {
+    const wanted = tWant[tOwner[i]];
+    c.className = tState[i] === 2 ? "h" : tState[i] === 1 ? "f" : wanted ? "" : "s";
+    if (wanted) { want++; if (tState[i] === 2) have++; }
+  });
+  tfiles.forEach((size, f) => tWant[f] && (mb += size));
+  $("#t-sel").textContent = mb >= 1000 ? (mb / 1000).toFixed(2) + " GB" : mb + " MB";
+  $("#t-pct").textContent = (want ? Math.floor((have / want) * 100) : 100) + "%";
+  return want === have;
+}
+function tTick() {
+  // finish what's in flight, then request a few more wanted pieces, out of order
+  for (let i = 0; i < T_PIECES; i++) if (tState[i] === 1 && tRand() < 0.35) tState[i] = 2;
+  const open = [];
+  for (let i = 0; i < T_PIECES; i++) if (tState[i] === 0 && tWant[tOwner[i]]) open.push(i);
+  const flying = tState.filter((s) => s === 1).length;
+  for (let k = flying; k < 10 && open.length; k++) tState[open.splice(Math.floor(tRand() * open.length), 1)[0]] = 1;
+  const done = tPaint();
+  if (done && !tState.includes(1)) return tStop("Done, seeding");
+  tTimer = setTimeout(tTick, 90);
+}
+function tStop(label) {
+  clearTimeout(tTimer);
+  tRunning = false;
+  tGo.textContent = label === "Paused" ? "Resume" : "Start over";
+  if (label !== "Paused") $("#t-pct").textContent = "100% · seeding";
+}
+tGo.addEventListener("click", () => {
+  if (tRunning) {
+    // pieces in flight go back to the wanted pool
+    tState.forEach((s, i) => s === 1 && (tState[i] = 0));
+    tPaint();
+    return tStop("Paused");
+  }
+  if (tGo.textContent === "Start over") { tState.fill(0); tRand = rng(99); }
+  tRunning = true;
+  tGo.textContent = "Pause";
+  tTick();
+});
+$$(".tfiles input").forEach((box) =>
+  box.addEventListener("change", () => {
+    tWant[box.dataset.file] = box.checked;
+    // dropping a file cancels its pieces still in flight
+    tState.forEach((s, i) => s === 1 && !tWant[tOwner[i]] && (tState[i] = 0));
+    const done = tPaint();
+    if (!tRunning && tGo.textContent === "Start over" && !done) tGo.textContent = "Resume";
+  })
+);
+tPaint();
+if (!reduced) {
+  new IntersectionObserver((e, obs) => {
+    if (e[0].isIntersecting && !tRunning && tGo.textContent === "Start") { tGo.click(); obs.disconnect(); }
+  }, { threshold: 0.5 }).observe(tmap);
+}
