@@ -167,6 +167,93 @@ body.ib { margin: 0; overflow-x: clip; }
 .pieces i.f { background: var(--ib-hot); }
 .pieces i.h { background: var(--ib-accent); }
 
+/* ------------------------------------------------------------------ marquee */
+.marquee-wrap { overflow-x: clip; padding: 24px 0; }
+.ib-marquee { position: relative; z-index: 2; }
+
+/* headline highlights wrap as clean slabs, one per line */
+.ib-h2 .ib-mark { padding: 0 .12em .04em; border-radius: .08em; -webkit-box-decoration-break: clone; box-decoration-break: clone; box-shadow: 4px 4px 0 var(--ib-ex); }
+
+/* ------------------------------------------------------------------ section heads */
+.section-head { display: grid; justify-items: start; gap: 20px; max-width: 780px; margin-bottom: 60px; }
+.section-head .ib-lead { margin: 0; }
+
+/* ------------------------------------------------------------------ feature chunks */
+/* each card is one chunk of a file: a labelled strip on top, a heat bar underneath that fills on hover */
+.chunks { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 36px 34px; }
+.chunk {
+    position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden;
+    border: var(--ib-bw) solid var(--ib-line); border-radius: var(--ib-r-lg);
+    background: var(--ib-card); box-shadow: var(--ib-ex8);
+    transition: transform .18s var(--ib-press), box-shadow .18s var(--ib-press);
+}
+.chunk:hover { transform: translate(-3px, -6px) rotate(-.6deg); box-shadow: var(--ib-ex10), 11px 11px 0 var(--ib-ex), 12px 12px 0 var(--ib-ex); }
+.chunk__label {
+    display: flex; justify-content: space-between; margin: 16px 16px 0; padding: 8px 12px;
+    border: 2.5px solid var(--ib-line); border-radius: 10px;
+    background: var(--label); color: var(--label-ink); font-size: 12px; font-weight: 700; letter-spacing: .08em;
+}
+.chunk__art { margin: 0 16px; height: 140px; }
+.chunk .ib-h3, .chunk .ib-body { margin: 0 18px; }
+.chunk .ib-body { flex: 1; }
+.chunk__heat { height: 16px; margin-top: 6px; border-top: var(--ib-bw) solid var(--ib-line); background: var(--ib-paper-2); }
+.chunk__heat i {
+    display: block; height: 100%; width: 14%;
+    background: repeating-linear-gradient(-45deg, var(--ib-accent) 0 7px, color-mix(in srgb, var(--ib-accent) 72%, #000) 7px 14px);
+    border-right: var(--ib-bw) solid var(--ib-line);
+    transition: width .9s cubic-bezier(.2, .8, .2, 1);
+}
+.chunk:nth-child(3n + 2) .chunk__heat i { width: 38%; }
+.chunk:nth-child(3n) .chunk__heat i { width: 63%; }
+.chunk:hover .chunk__heat i { width: 100%; border-right-color: transparent; }
+
+/* art inside the wells (always on night, so fixed light ink) */
+.mini-seg { display: flex; width: 84%; height: 30px; border: 2.5px solid #f7eee4; border-radius: 7px; overflow: hidden; background: #2a201b; }
+.mini-seg i { flex: 1; position: relative; border-left: 2px solid var(--ib-night); }
+.mini-seg i:first-child { border-left: 0; }
+.mini-seg i::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); background: var(--ib-accent); box-shadow: inset -3px 0 0 var(--ib-hot); }
+.mini-seg i[style*="100%"]::before { box-shadow: none; }
+
+.mini-pieces { display: grid; grid-template-columns: repeat(8, 18px); gap: 4px; }
+.mini-pieces i { height: 18px; border-radius: 3px; background: #2f2520; }
+.mini-pieces i.h { background: var(--ib-accent); }
+.mini-pieces i.f { background: var(--ib-hot); }
+
+.sites { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 0 12px; }
+.sites span { padding: 4px 9px; border: 2px solid #f7eee4; border-radius: 7px; color: #f7eee4; font-size: 13px; font-weight: 800; }
+.sites span:nth-child(odd) { transform: rotate(-2deg); }
+.sites .is-hot { background: var(--ib-hot); color: #1a110d; border-color: #1a110d; font-family: var(--ib-mono); }
+
+.resume { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; color: #a3958b; }
+.resume b { display: inline-block; width: 46px; color: #f7eee4; }
+.resume .is-on { color: #f7eee4; }
+.resume .is-on b { color: var(--ib-accent); }
+
+.sched { display: grid; justify-items: center; gap: 14px; color: #f7eee4; }
+.sched__clock { font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
+.sched__clock i { font-style: normal; margin: 0 8px; color: var(--ib-hot); }
+.sched__slots { display: flex; align-items: center; gap: 5px; }
+.sched__slots i { width: 22px; height: 12px; border: 2px solid #f7eee4; border-radius: 3px; }
+.sched__slots i.on { background: var(--ib-accent); border-color: var(--ib-accent); }
+.sched__slots em { margin-left: 8px; font-style: normal; font-size: 12px; color: #a3958b; }
+
+.limits { width: 84%; display: grid; gap: 14px; }
+.limits > span { display: grid; grid-template-columns: 46px 1fr 62px; align-items: center; gap: 10px; }
+.limits label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #a3958b; }
+.limits .ib-bar { --ib-line: #f7eee4; background: #2a201b; }
+.limits b { font-size: 12.5px; color: #f7eee4; text-align: right; }
+
+.hash { display: grid; justify-items: center; gap: 8px; color: #a3958b; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.hash code { font-family: inherit; font-size: 16px; letter-spacing: 0; text-transform: none; color: #f7eee4; }
+.hash b { padding: 3px 9px; border-radius: 6px; background: var(--ib-accent); color: #1a110d; letter-spacing: .04em; }
+
+.folders { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 0 14px; }
+.folders span { padding: 4px 9px; border: 2px solid #5a4b43; border-radius: 4px 9px 7px 7px; color: #c6b9ae; font-size: 12.5px; }
+.folders .is-on { border-color: #1a110d; background: var(--ib-accent); color: #1a110d; font-weight: 700; transform: translateY(-4px) rotate(-2deg); box-shadow: 3px 3px 0 #f7eee4; }
+
+.catchart { display: grid; gap: 8px; font-size: 13px; color: #f7eee4; }
+.catchart i { font-style: normal; color: var(--ib-hot); margin: 0 4px; }
+
 /* ------------------------------------------------------------------ footer */
 .footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .footer__links { display: flex; gap: 4px; }
