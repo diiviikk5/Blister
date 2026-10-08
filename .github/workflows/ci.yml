@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Many small commits land in a row; only the newest needs checking.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: windows-latest
