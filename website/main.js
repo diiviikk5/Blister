@@ -284,3 +284,50 @@ $("#catch").addEventListener("click", () => {
   void caught.offsetWidth;
   caught.style.animation = "";
 });
+
+// ---------------------------------------------------------------- the race: one connection vs sixteen
+// Illustrative only. The durations are picked to show the shape of the difference, not to measure it.
+const race = {
+  one: new SegBar($("#seg-one"), { lanes: 1, duration: 13, seed: 5 }),
+  many: new SegBar($("#seg-many"), { lanes: 16, duration: 4.2, seed: 41 }),
+  running: false,
+  last: 0,
+};
+const raceBtn = $("#race-go");
+function raceFrame(now) {
+  const dt = Math.min(0.1, (now - (race.last || now)) / 1000);
+  race.last = now;
+  for (const [key, flag] of [["one", "#flag-one"], ["many", "#flag-many"]]) {
+    const bar = race[key];
+    if (bar.done) continue;
+    bar.step(dt);
+    bar.render();
+    if (bar.done) $(flag).textContent = key === "many" ? "Done first" : "Done";
+  }
+  if (race.one.done && race.many.done) {
+    race.running = false;
+    raceBtn.setAttribute("aria-disabled", "false");
+    $("#race-go-label").textContent = "Run it again";
+    return;
+  }
+  requestAnimationFrame(raceFrame);
+}
+function runRace() {
+  if (race.running) return;
+  race.one.reset(5);
+  race.many.reset(41);
+  race.one.segs[0].speed = 1; // one steady connection
+  $("#flag-one").textContent = "";
+  $("#flag-many").textContent = "";
+  race.running = true;
+  race.last = 0;
+  raceBtn.setAttribute("aria-disabled", "true");
+  $("#race-go-label").textContent = "Racing…";
+  requestAnimationFrame(raceFrame);
+}
+raceBtn.addEventListener("click", runRace);
+if (!reduced) {
+  new IntersectionObserver((e, obs) => {
+    if (e[0].isIntersecting) { runRace(); obs.disconnect(); }
+  }, { threshold: 0.6 }).observe($("#track"));
+}

@@ -315,6 +315,55 @@
         </div>
       </div>
     </section>
+
+    <!-- ============================================================ the race -->
+    <section class="ib-section race" id="race">
+      <div class="ib-container">
+        <div class="section-head">
+          <span class="ib-kicker">Why it's fast</span>
+          <h2 class="ib-h2">One pipe is slow. <span class="ib-block">Sixteen</span> aren't.</h2>
+          <p class="ib-lead">Many servers hand out speed per connection, not per person. A browser opens one. Blister opens sixteen, and keeps every one of them busy until the last byte.</p>
+        </div>
+
+        <div class="race__grid">
+          <div class="track" id="track">
+            <div class="track__head">
+              <span class="ib-mono track__title">Same file, same line</span>
+              <button class="ib-btn ib-btn--sm" id="race-go" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+                <span id="race-go-label">Run the race</span>
+              </button>
+            </div>
+
+            <div class="lane">
+              <div class="lane__meta">
+                <strong>A browser download</strong>
+                <span class="ib-mono">1 connection</span>
+                <span class="lane__flag ib-mono" id="flag-one" aria-live="polite"></span>
+              </div>
+              <div class="seg seg--light" id="seg-one" role="progressbar" aria-label="Single connection download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+            </div>
+
+            <div class="lane">
+              <div class="lane__meta">
+                <strong>Blister</strong>
+                <span class="ib-mono">16 connections</span>
+                <span class="lane__flag ib-mono" id="flag-many" aria-live="polite"></span>
+              </div>
+              <div class="seg seg--light" id="seg-many" role="progressbar" aria-label="Sixteen connection download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+            </div>
+
+            <p class="track__note">An illustration, not a benchmark. If a server is already fast on one connection, or your line is already full, the gap shrinks. Nothing beats the speed of your own connection, Blister included.</p>
+          </div>
+
+          <ol class="whys">
+            <li class="ib-row"><span class="ib-row__num">01</span><div><h3 class="ib-h3">Per-connection limits stop mattering</h3><p class="ib-body">A server that caps each connection still lets each of the sixteen run at that cap.</p></div></li>
+            <li class="ib-row"><span class="ib-row__num">02</span><div><h3 class="ib-h3">Slow lanes get help</h3><p class="ib-body">When a lane finishes, it takes half of whatever's left on the slowest one. You can watch it happen in the bar.</p></div></li>
+            <li class="ib-row"><span class="ib-row__num">03</span><div><h3 class="ib-h3">No crawl at the end</h3><p class="ib-body">Because work keeps moving to free lanes, the last few percent don't hang on one tired connection.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
 <!--SECTIONS-->
   </main>
 
