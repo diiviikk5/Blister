@@ -322,6 +322,47 @@ func (m *Manager) Resume(id string) error {
 	return nil
 }
 
+// SetURL points a download at a fresh link (e.g. an expired signed URL) and
+// keeps its progress. The driver checks the size on resume and starts over
+// only if the new link serves a different file.
+func (m *Manager) SetURL(id, raw string) error {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return errors.New("empty link")
+	}
+	m.mu.Lock()
+	t, ok := m.tasks[id]
+	if !ok {
+		m.mu.Unlock()
+		return errNotFound(id)
+	}
+	if k := DetectKind(raw); k != t.Kind {
+		m.mu.Unlock()
+		return fmt.Errorf("that's a %s link, but this download is %s", k, t.Kind)
+	}
+	_, running := m.jobs[id]
+	m.mu.Unlock()
+	if running {
+		if err := m.stopAndWait(id); err != nil {
+			return err
+		}
+	}
+	m.mu.Lock()
+	t.URL = raw
+	t.Request.URL = raw
+	t.ETag = "" // another mirror has its own ETag; size still guards us
+	if t.Status != StatusCompleted {
+		t.Status = StatusQueued
+		t.Error = ""
+	}
+	cp := *t
+	m.mu.Unlock()
+	m.o.Emit(EvUpdated, cp)
+	m.save()
+	m.poke()
+	return nil
+}
+
 // Restart throws away progress and downloads again from scratch.
 func (m *Manager) Restart(id string) error {
 	if err := m.stopAndWait(id); err != nil {
