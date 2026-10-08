@@ -53,7 +53,7 @@
     {/each}
   </select>
 
-  <div class="group">
+  <div class="group bulk">
     <button class="btn btn--ghost" onclick={() => store.run(api.resumeAll())} title="Resume everything">Resume all</button>
     <button class="btn btn--ghost" onclick={() => store.run(api.pauseAll())} title="Pause everything">Pause all</button>
     {#if hasDone}
@@ -99,8 +99,18 @@
     width: 118px;
     height: 36px;
   }
-  @media (max-width: 1180px) {
-    .group:last-child {
+  .tools {
+    container-type: inline-size;
+    overflow: hidden;
+  }
+  @container (max-width: 860px) {
+    .bulk {
+      display: none;
+    }
+  }
+  @container (max-width: 560px) {
+    .sort,
+    .label-txt {
       display: none;
     }
   }
