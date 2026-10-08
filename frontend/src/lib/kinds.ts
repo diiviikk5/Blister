@@ -14,9 +14,9 @@ export const catIcon: Record<string, string> = {
 
 /** Tile colours per type; ink text sits on all of them. */
 export const catColor: Record<string, string> = {
-  video: "#ff5c39",
-  audio: "#ffd23f",
-  torrent: "#3d7bff",
+  video: "#ff7a45",
+  audio: "#ffd60a",
+  torrent: "#9d8cff",
   archive: "#c9a27a",
   program: "#2fd27a",
   document: "#f2ecdf",

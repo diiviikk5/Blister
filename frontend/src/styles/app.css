@@ -6,11 +6,11 @@
 .ib {
   --ib-font: "Geist Variable", "Geist", system-ui, sans-serif;
   --ib-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
-  --ib-accent: #ff5c39;
-  --ib-accent-ink: #1a110d;
-  --ib-hot: #ffd23f;
-  --ib-hot-ink: #1a110d;
-  --ib-alt: #3d7bff;
+  --ib-accent: #ffd60a;
+  --ib-accent-ink: #140d1f;
+  --ib-hot: #ff2e88;
+  --ib-hot-ink: #ffffff;
+  --ib-alt: #6c4dff;
   --ok: #2fd27a;
   --bad: #ff4d6d;
 
@@ -19,20 +19,20 @@
   --detail-w: 380px;
 }
 
-/* warm dark: Blister runs hot */
+/* plum dark, matching the website's thermal palette */
 [data-theme="dark"] .ib,
 .ib[data-theme="dark"],
 [data-theme="dark"].ib {
-  --ib-paper: #14110f;
-  --ib-paper-2: #1c1815;
-  --ib-card: #221d19;
-  --ib-night: #0c0a09;
-  --ib-text: #f7f0e6;
-  --ib-muted: #c3b8aa;
-  --ib-faint: #8a7f73;
-  --ib-line: #f7f0e6;
-  --ib-ex: #f7f0e6;
-  --ib-grid: rgba(247, 240, 230, 0.05);
+  --ib-paper: #0d0913;
+  --ib-paper-2: #150f1e;
+  --ib-card: #1c1527;
+  --ib-night: #08050c;
+  --ib-text: #f3eefb;
+  --ib-muted: #b9afc8;
+  --ib-faint: #8b819b;
+  --ib-line: #f3eefb;
+  --ib-ex: #f3eefb;
+  --ib-grid: rgba(243, 238, 251, 0.05);
 }
 
 .ib[data-density="compact"] {

@@ -215,7 +215,7 @@
     border: 2.5px solid var(--ib-line);
     border-radius: 12px;
     background: var(--c);
-    color: #1a110d;
+    color: #140d1f;
     box-shadow: var(--ib-ex4);
   }
   .title {

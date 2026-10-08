@@ -146,7 +146,7 @@
     border: 2.5px solid var(--ib-line);
     border-radius: 11px;
     background: var(--c);
-    color: #1a110d;
+    color: #140d1f;
     box-shadow: 3px 3px 0 var(--ib-ex);
     overflow: hidden;
   }
