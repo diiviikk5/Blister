@@ -80,7 +80,7 @@ func Defaults() Settings {
 		ClipboardWatch:    true,
 		BrowserPort:       7323,
 		Theme:             "dark",
-		Accent:            "#ff5c39",
+		Accent:            "#ffd60a",
 		Density:           "comfortable",
 		Notifications:     true,
 		Sounds:            true,

@@ -27,7 +27,7 @@ const defaults: Settings = {
   browserPort: 7323,
   browserToken: "3f9c2a71b0d84e6a9c11f2e7d5a0b8c4",
   theme: "dark",
-  accent: "#ff5c39",
+  accent: "#ffd60a",
   density: "comfortable",
   notifications: true,
   sounds: true,

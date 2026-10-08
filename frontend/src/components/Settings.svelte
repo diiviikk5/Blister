@@ -55,7 +55,7 @@
     store.toast("New pairing code. Paste it into the extension.", "info");
   }
 
-  const accents = ["#ff5c39", "#ffd23f", "#d2ff2e", "#2fd27a", "#3dd6ff", "#3d7bff", "#b18cff", "#ff8fb1"];
+  const accents = ["#ffd60a", "#ff7a45", "#c6f432", "#2fd27a", "#35d0ff", "#b8a2ff", "#ff8fc4", "#ff2e88"];
 </script>
 
 <div class="settings">

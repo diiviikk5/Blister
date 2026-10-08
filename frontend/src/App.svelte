@@ -55,7 +55,7 @@
     const theme = s.theme === "system" ? (systemDark ? "dark" : "light") : s.theme;
     document.documentElement.dataset.theme = theme;
     document.body.dataset.density = s.density;
-    document.body.style.setProperty("--ib-accent", s.accent || "#ff5c39");
+    document.body.style.setProperty("--ib-accent", s.accent || "#ffd60a");
   });
 
   function askRemove(ids: string[]) {

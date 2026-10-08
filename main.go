@@ -36,7 +36,7 @@ func main() {
 		Frameless:         true,
 		StartHidden:       minimized,
 		HideWindowOnClose: a.Settings().CloseToTray,
-		BackgroundColour:  &options.RGBA{R: 21, G: 18, B: 16, A: 255},
+		BackgroundColour:  &options.RGBA{R: 13, G: 9, B: 19, A: 255},
 		AssetServer:       &assetserver.Options{Assets: assets},
 		OnStartup: func(ctx context.Context) {
 			a.Startup(ctx)
