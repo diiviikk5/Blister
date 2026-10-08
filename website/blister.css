@@ -283,6 +283,70 @@ body.ib { margin: 0; overflow-x: clip; }
 .whys .ib-h3 { margin: 2px 0 4px; font-size: 19px; }
 .whys .ib-body { margin: 0; }
 
+/* ------------------------------------------------------------------ how it works */
+.engine__grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 64px; align-items: center; }
+.engine .ib-h2 { margin-top: 20px; }
+.engine__lead { margin: 22px 0 0; max-width: 46ch; }
+.steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 14px; }
+.step {
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    transition: transform .15s var(--ib-press), box-shadow .15s var(--ib-press), background-color .15s ease;
+}
+.step .ib-h3 { display: block; margin: 2px 0 4px; }
+.step .ib-body { display: block; margin: 0; }
+.step:hover { transform: translateX(6px); }
+.step:focus-visible { outline: 3px solid var(--ib-hot); outline-offset: 4px; }
+.step[aria-pressed="true"] { transform: translate(5px, 5px); box-shadow: 1px 1px 0 var(--ib-ex); background: var(--ib-paper-2); }
+.step[aria-pressed="false"] .ib-row__num { background: var(--ib-card); color: var(--ib-text); }
+
+.efig {
+    margin: 0; overflow: hidden;
+    border: var(--ib-bw) solid var(--ib-line); border-radius: var(--ib-r-lg);
+    background: var(--ib-card); box-shadow: var(--ib-ex10);
+}
+.efig__screen {
+    display: grid; align-content: center; gap: 26px; min-height: 330px; padding: 30px 28px;
+    border-bottom: var(--ib-bw) solid var(--ib-line); color: #f7eee4;
+    background-color: var(--ib-night);
+    background-image: linear-gradient(30deg, rgba(255, 255, 255, .05) 1px, transparent 1px), linear-gradient(150deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 28px 16.17px;
+}
+.efig__line { display: none; min-height: 3.2em; font-size: 14px; line-height: 1.6; }
+.efig__line b { margin-right: 8px; padding: 1px 7px; border-radius: 5px; background: var(--ib-accent); color: #1a110d; }
+.efig__line i { font-style: normal; color: #a3958b; }
+.efig[data-step="1"] [data-for="1"], .efig[data-step="2"] [data-for="2"],
+.efig[data-step="3"] [data-for="3"], .efig[data-step="4"] [data-for="4"] { display: block; }
+
+.efile { display: flex; height: 64px; overflow: hidden; border: var(--ib-bw) solid #f7eee4; border-radius: 10px; background: #2a201b; }
+.efile i { position: relative; flex: 1; border-left: 2px solid transparent; transition: border-color .3s ease; }
+.efile i:first-child { border-left: 0; }
+.efile i::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 0;
+    background: repeating-linear-gradient(-45deg, var(--ib-accent) 0 7px, color-mix(in srgb, var(--ib-accent) 72%, #000) 7px 14px);
+    box-shadow: inset -3px 0 0 var(--ib-hot);
+    transition: width .7s cubic-bezier(.2, .8, .2, 1);
+}
+.efig[data-step="1"] .efile { border-style: dashed; }
+.efig:not([data-step="1"]) .efile i { border-left-color: var(--ib-night); }
+.efig[data-step="3"] .efile i::before { width: var(--w); }
+.efig[data-step="3"] .efile i:nth-child(odd)::before { transition-delay: .08s; }
+.efig[data-step="4"] .efile i::before { width: 100%; background: var(--ib-accent); box-shadow: none; }
+.efig[data-step="4"] .efile i { border-left-color: transparent; }
+.efile__scale { display: flex; justify-content: space-between; font-size: 12px; color: #a3958b; }
+.efile__size { color: #f7eee4; }
+.efig[data-step="1"] .efile__size::after { content: "size: 342 MB"; }
+.efig[data-step="2"] .efile__size::after { content: "16 × 21.4 MB"; }
+.efig[data-step="3"] .efile__size::after { content: "pulling, 16 at once"; }
+.efig[data-step="4"] .efile__size::after { content: "one whole file"; }
+
+.efig__cap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 18px; }
+.efig__cap .ib-note { margin-left: auto; }
+.efig__badge { padding: 3px 9px; border: 2px solid var(--ib-line); border-radius: 7px; font-size: 12px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; color: var(--ib-faint); border-color: var(--ib-paper-2); }
+.efig[data-step="1"] .efig__badge[data-for="1"], .efig[data-step="2"] .efig__badge[data-for="2"],
+.efig[data-step="3"] .efig__badge[data-for="3"], .efig[data-step="4"] .efig__badge[data-for="4"] {
+    background: var(--ib-accent); color: var(--ib-accent-ink); border-color: var(--ib-line); box-shadow: 2px 2px 0 var(--ib-ex);
+}
+
 /* ------------------------------------------------------------------ footer */
 .footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .footer__links { display: flex; gap: 4px; }

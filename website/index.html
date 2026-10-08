@@ -364,6 +364,44 @@
         </div>
       </div>
     </section>
+
+    <!-- ============================================================ how it works -->
+    <section class="ib-section engine" id="engine">
+      <div class="ib-container engine__grid">
+        <div>
+          <span class="ib-kicker">Under the hood</span>
+          <h2 class="ib-h2">What happens after you <span class="ib-mark">paste a link.</span></h2>
+          <p class="ib-lead engine__lead">Four steps, the same for a 3 MB PDF or a 60 GB game. Pick one to see it.</p>
+          <ol class="steps" role="list">
+            <li><button class="ib-row step" type="button" data-step="1" aria-pressed="true"><span class="ib-row__num">01</span><span><span class="ib-h3">Probe</span><span class="ib-body">One small request learns the size, the real filename and whether the server lets it fetch parts of the file.</span></span></button></li>
+            <li><button class="ib-row step" type="button" data-step="2" aria-pressed="false"><span class="ib-row__num">02</span><span><span class="ib-h3">Split</span><span class="ib-body">The space is reserved on disk in one go, and the file is cut into one range per connection.</span></span></button></li>
+            <li><button class="ib-row step" type="button" data-step="3" aria-pressed="false"><span class="ib-row__num">03</span><span><span class="ib-h3">Pull</span><span class="ib-body">Every connection fetches its own range straight into place. Fast ones take work off slow ones. Progress is saved as it goes.</span></span></button></li>
+            <li><button class="ib-row step" type="button" data-step="4" aria-pressed="false"><span class="ib-row__num">04</span><span><span class="ib-h3">Finish</span><span class="ib-body">The checksum is verified if you gave one, the file moves to its folder and you get a quiet notification.</span></span></button></li>
+          </ol>
+        </div>
+
+        <figure class="efig" id="efig" data-step="1" aria-live="polite">
+          <div class="efig__screen">
+            <span class="efig__line ib-mono" data-for="1"><b>HEAD</b> blender-4.2-windows-x64.zip<br><i>200 OK · 342 MB · Accept-Ranges: bytes</i></span>
+            <span class="efig__line ib-mono" data-for="2"><b>RESERVE</b> 342 MB on disk<br><i>16 ranges of 21.4 MB</i></span>
+            <span class="efig__line ib-mono" data-for="3"><b>GET</b> × 16, Range: bytes=…<br><i>connection 09 took half of 03's range</i></span>
+            <span class="efig__line ib-mono" data-for="4"><b>DONE</b> sha256 matches<br><i>moved to Downloads/Archives/</i></span>
+
+            <div class="efile" aria-hidden="true">
+              <i style="--w:100%"></i><i style="--w:71%"></i><i style="--w:88%"></i><i style="--w:34%"></i><i style="--w:100%"></i><i style="--w:62%"></i><i style="--w:93%"></i><i style="--w:47%"></i><i style="--w:80%"></i><i style="--w:100%"></i><i style="--w:55%"></i><i style="--w:28%"></i><i style="--w:76%"></i><i style="--w:91%"></i><i style="--w:66%"></i><i style="--w:39%"></i>
+            </div>
+            <div class="efile__scale ib-mono" aria-hidden="true"><span>0</span><span class="efile__size"></span><span>342 MB</span></div>
+          </div>
+          <figcaption class="efig__cap">
+            <span class="efig__badge" data-for="1">Probe</span>
+            <span class="efig__badge" data-for="2">Split</span>
+            <span class="efig__badge" data-for="3">Pull</span>
+            <span class="efig__badge" data-for="4">Finish</span>
+            <span class="ib-note">Step <b id="efig-n">1</b> of 4</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
 <!--SECTIONS-->
   </main>
 

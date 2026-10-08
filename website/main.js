@@ -331,3 +331,16 @@ if (!reduced) {
     if (e[0].isIntersecting) { runRace(); obs.disconnect(); }
   }, { threshold: 0.6 }).observe($("#track"));
 }
+
+// ---------------------------------------------------------------- how it works: pick a step
+const efig = $("#efig");
+const stepBtns = $$(".step");
+function setStep(n) {
+  efig.dataset.step = n;
+  $("#efig-n").textContent = n;
+  stepBtns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.step === String(n))));
+}
+stepBtns.forEach((b) => {
+  b.addEventListener("click", () => setStep(b.dataset.step));
+  b.addEventListener("mouseenter", () => matchMedia("(hover: hover)").matches && setStep(b.dataset.step));
+});
