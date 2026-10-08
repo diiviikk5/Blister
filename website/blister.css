@@ -118,16 +118,11 @@ body.ib { margin: 0; overflow-x: clip; }
     width: 40px; height: 40px; border-radius: 9px; display: grid; place-content: center;
     background: #2c221d; color: #f7eee4; font-family: var(--ib-mono); font-size: 10px; font-weight: 700; letter-spacing: .04em;
 }
-.dl__icon::after { content: "URL"; }
+.dl__icon::after { content: attr(data-label); }
 .dl__icon[data-kind="zip"] { background: var(--ib-accent); color: #1a110d; }
-.dl__icon[data-kind="zip"]::after { content: "ZIP"; }
 .dl__icon[data-kind="magnet"] { background: var(--ib-hot); color: #1a110d; }
-.dl__icon[data-kind="magnet"]::after { content: "BT"; }
 .dl__icon[data-kind="video"] { background: #3d7bff; }
-.dl__icon[data-kind="video"]::after { content: "MP4"; }
-.dl__icon[data-kind="app"]::after { content: "EXE"; }
 .dl__icon[data-kind="clip"] { background: #f7eee4; color: #1a110d; }
-.dl__icon[data-kind="clip"]::after { content: "MP3"; }
 .dl__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .dl__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 800; letter-spacing: -.01em; }
 .dl__meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--app-dim); }

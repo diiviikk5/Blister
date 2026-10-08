@@ -163,3 +163,124 @@ function paintHttp() {
   if (!http.done) $("#http-eta").textContent = mbps > 0 ? fmtEta(((1 - http.progress) * f.mb) / mbps) + " left" : "--";
   return mbps;
 }
+
+// ---------------------------------------------------------------- hero: the torrent piece map
+const piecesEl = $("#pieces");
+const PIECES = 200;
+const bt = { r: null, state: [], flight: new Map(), have: 0, ratio: 0, seedFor: 0, peers: 38 };
+const cells = [];
+for (let i = 0; i < PIECES; i++) cells.push(piecesEl.appendChild(document.createElement("i")));
+function resetBt(seed) {
+  bt.r = rng(seed);
+  bt.state = new Array(PIECES).fill(0);
+  bt.flight.clear();
+  bt.have = 0;
+  bt.ratio = 0;
+  bt.seedFor = 0;
+  cells.forEach((c) => (c.className = ""));
+  $("#bt-state").textContent = "downloading";
+}
+let btAcc = 0;
+function stepBt(dt) {
+  btAcc += dt;
+  while (btAcc >= 0.07) {
+    btAcc -= 0.07;
+    if (bt.have < PIECES) {
+      // pieces arrive out of order, a handful in flight at once
+      while (bt.flight.size < 12 && bt.flight.size + bt.have < PIECES) {
+        let i = Math.floor(bt.r() * PIECES);
+        while (bt.state[i] !== 0) i = (i + 1) % PIECES;
+        bt.state[i] = 1;
+        bt.flight.set(i, 3 + Math.floor(bt.r() * 9));
+        cells[i].className = "f";
+      }
+      for (const [i, left] of bt.flight) {
+        if (left > 1) { bt.flight.set(i, left - 1); continue; }
+        bt.flight.delete(i);
+        bt.state[i] = 2;
+        bt.have++;
+        cells[i].className = "h";
+      }
+      if (bt.have === PIECES) $("#bt-state").textContent = "seeding to 2.0";
+    } else if (bt.ratio < 2) {
+      bt.ratio = Math.min(2, bt.ratio + 0.03);
+    } else if ((bt.seedFor += 0.07) > 2.5) {
+      resetBt(Math.floor(bt.r() * 1e6));
+    }
+    if (bt.r() < 0.08) bt.peers = Math.max(24, Math.min(52, bt.peers + (bt.r() < 0.5 ? -1 : 1)));
+  }
+}
+function paintBt() {
+  $("#bt-pct").textContent = Math.floor((bt.have / PIECES) * 100) + "%";
+  $("#bt-ratio").textContent = "ratio " + bt.ratio.toFixed(2);
+  $("#bt-peers").textContent = bt.peers + " peers";
+  if (bt.ratio >= 2) $("#bt-state").textContent = "ratio reached, stopped";
+}
+resetBt(23);
+
+// ---------------------------------------------------------------- hero: one clock, pausable
+const playBtn = $("#playpause");
+let paused = reduced;
+let onScreen = true;
+let clock = 0;
+let last = 0;
+let upWobble = 0;
+function frame(now) {
+  const dt = Math.min(0.1, (now - (last || now)) / 1000);
+  last = now;
+  if (!paused && onScreen && !document.hidden) {
+    clock += dt;
+    if (http.done && clock > holdUntil) loadHttp(fileIdx + 1);
+    http.step(dt);
+    stepBt(dt);
+    upWobble += dt;
+    paintAll();
+  }
+  requestAnimationFrame(frame);
+}
+function paintAll() {
+  const down = paintHttp() + (bt.have < PIECES ? 6 + 2 * Math.sin(clock * 0.9) : 0);
+  paintBt();
+  $("#rate-down").textContent = down.toFixed(1) + " MB/s";
+  $("#rate-up").textContent = (1.4 + 0.5 * Math.sin(upWobble * 0.7)).toFixed(1) + " MB/s";
+}
+function setPaused(p) {
+  paused = p;
+  playBtn.setAttribute("aria-pressed", String(p));
+  segEl.classList.toggle("is-paused", p);
+}
+playBtn.addEventListener("click", () => setPaused(!paused));
+new IntersectionObserver((e) => (onScreen = e[0].isIntersecting)).observe($(".app"));
+
+loadHttp(0);
+if (reduced) {
+  // a still frame: run the simulation forward to an interesting moment, then hold
+  for (let i = 0; i < 200 && http.progress < 0.62; i++) http.step(0.05);
+  for (let i = 0; i < 120; i++) stepBt(0.05);
+  paintAll();
+}
+setPaused(paused);
+requestAnimationFrame(frame);
+
+// ---------------------------------------------------------------- Ctrl + C: a link gets caught
+const caughtSamples = [
+  { name: "podcast-episode-112.mp3", meta: "Caught from clipboard · queued · Music/", label: "MP3" },
+  { name: "design-systems-handbook.pdf", meta: "Caught from clipboard · queued · Documents/", label: "PDF" },
+  { name: "youtube.com/watch?v=… (1080p)", meta: "Video page · yt-dlp picks the best format · Videos/", label: "MP4" },
+  { name: "magnet:?xt=urn:btih:… (3 files)", meta: "Magnet link · choose files before it starts", label: "BT" },
+];
+let caughtIdx = 0;
+const keys = $("#keys");
+const caught = $("#caught");
+$("#catch").addEventListener("click", () => {
+  keys.classList.add("is-down");
+  setTimeout(() => keys.classList.remove("is-down"), 160);
+  const s = caughtSamples[caughtIdx++ % caughtSamples.length];
+  $("#caught-name").textContent = s.name;
+  $("#caught-meta").textContent = s.meta;
+  $(".dl__icon", caught).dataset.label = s.label;
+  caught.hidden = false;
+  caught.style.animation = "none";
+  void caught.offsetWidth;
+  caught.style.animation = "";
+});
