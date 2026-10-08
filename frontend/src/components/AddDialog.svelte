@@ -17,7 +17,7 @@
   let dir = $state("");
   let connections = $state(store.settings?.connections ?? 16);
   let paused = $state(false);
-  let quality = $state(seed?.media ? "best" : "best");
+  let quality = $state("best");
   let checksum = $state("");
   let more = $state(false);
   let busy = $state(false);
@@ -50,6 +50,8 @@
     timer = setTimeout(async () => {
       try {
         links = (await api.parse(t)) ?? [];
+        // The extension marks video pages explicitly; trust it over URL rules.
+        if (seed?.media) links = links.map((l) => (l.kind === "http" ? { ...l, kind: "media" } : l));
         parseErr = "";
       } catch (e) {
         parseErr = errText(e);
