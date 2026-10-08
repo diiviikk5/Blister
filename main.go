@@ -25,6 +25,11 @@ func main() {
 		os.Exit(1)
 	}
 	args := os.Args[1:]
+	effect := a.Settings().WindowEffect
+	backdrop := map[string]windows.BackdropType{
+		"mica": windows.Mica, "acrylic": windows.Acrylic, "tabbed": windows.Tabbed,
+	}[effect]
+	translucent := backdrop != 0
 	minimized := slices.Contains(args, "--minimized")
 
 	err = wails.Run(&options.App{
@@ -36,7 +41,7 @@ func main() {
 		Frameless:         true,
 		StartHidden:       minimized,
 		HideWindowOnClose: a.Settings().CloseToTray,
-		BackgroundColour:  &options.RGBA{R: 13, G: 9, B: 19, A: 255},
+		BackgroundColour:  bg(translucent),
 		AssetServer:       &assetserver.Options{Assets: assets},
 		OnStartup: func(ctx context.Context) {
 			a.Startup(ctx)
@@ -54,8 +59,9 @@ func main() {
 		DragAndDrop: &options.DragAndDrop{EnableFileDrop: true},
 		Bind:        []any{a},
 		Windows: &windows.Options{
-			WebviewIsTransparent: false,
-			WindowIsTranslucent:  false,
+			WebviewIsTransparent: translucent,
+			WindowIsTranslucent:  translucent,
+			BackdropType:         backdrop,
 			DisableWindowIcon:    false,
 			Theme:                windows.SystemDefault,
 		},
@@ -64,4 +70,12 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Blister:", err)
 		os.Exit(1)
 	}
+}
+
+// bg is the window colour behind the page; clear when a backdrop shows through.
+func bg(translucent bool) *options.RGBA {
+	if translucent {
+		return &options.RGBA{R: 0, G: 0, B: 0, A: 0}
+	}
+	return &options.RGBA{R: 13, G: 9, B: 19, A: 255}
 }
