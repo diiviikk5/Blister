@@ -60,44 +60,83 @@
   <main id="main">
     <!-- ============================================================ hero -->
     <section class="hero" id="top">
-      <div class="ib-gridpaper" aria-hidden="true"></div>
-      <div class="ib-container">
-        <span class="ib-kicker rise" style="--d:0">Download manager · Windows</span>
-        <h1 class="ib-h1 hero-title" aria-label="Downloads at a blistering pace.">
-          <span class="w" style="--d:1">Downloads</span>
-          <span class="w" style="--d:2">at</span>
-          <span class="w" style="--d:3">a</span><br>
-          <span class="ib-block drop" style="--d:5">blistering</span>
-          <span class="w" style="--d:6">pace.</span>
-        </h1>
+      <div class="ib-container hero__grid">
+        <div class="hero__copy">
+          <p class="hero__status ib-mono rise" style="--d:0"><i class="hero__dot" aria-hidden="true"></i><span id="hs-phase">idle</span> · <span id="hs-lanes">16 lanes</span> · <span id="hs-rate">0.0 MB/s</span></p>
+          <h1 class="ib-h1 hero__title" aria-label="Every file, sixteen ways at once.">
+            <span class="w" style="--d:1">Every</span>
+            <span class="w" style="--d:2">file,</span><br>
+            <span class="w" style="--d:3">sixteen</span>
+            <span class="w" style="--d:4">ways</span><br>
+            <span class="w hero__at" style="--d:5"><span class="ib-mark">at once.</span></span>
+          </h1>
+          <p class="ib-lead hero__lead rise" style="--d:6">
+            Blister slices a download into lanes, pulls them in parallel and stitches the file back together on your disk.
+            Links, magnets and video pages go in the same box.
+          </p>
 
-        <div class="hero-row">
-          <div>
-            <p class="ib-lead rise" style="--d:7">
-              Blister cuts every file into pieces and pulls them over sixteen connections at once,
-              then stitches them back together on your disk. Plain links, torrents and video sites
-              all land in the same quick, quiet queue. It's free, open source and asks for nothing.
-            </p>
-            <div class="actions rise" style="--d:8">
-              <a class="ib-btn ib-btn--lg" href="https://github.com/diiviikk5/Blister/releases/latest">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
-                Download for Windows
-              </a>
-              <a class="ib-btn ib-btn--paper ib-btn--lg" href="https://github.com/diiviikk5/Blister">Read the source</a>
-            </div>
-            <p class="ib-note rise" style="--d:9">Free · Open source · No accounts, no ads, no telemetry</p>
+          <form class="paste rise" style="--d:7" id="paste" autocomplete="off">
+            <label class="visually-hidden" for="paste-in">Paste a link to watch it split</label>
+            <svg class="paste__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>
+            <input class="paste__in ib-mono" id="paste-in" spellcheck="false" placeholder="Paste a link to watch it split" value="https://mirror.example.org/blender-4.2-windows-x64.zip">
+            <button class="ib-btn paste__go" type="submit">Split it</button>
+          </form>
+          <p class="hero__kinds ib-mono rise" style="--d:8">
+            <span class="ib-tag">https://</span><span class="ib-tag">magnet:?</span><span class="ib-tag">.torrent</span><span class="ib-tag ib-tag--alt">youtube.com</span><span class="ib-tag">.m3u8</span>
+          </p>
+
+          <div class="hero__cta rise" style="--d:9">
+            <a class="ib-btn ib-btn--ink ib-btn--lg" href="https://github.com/diiviikk5/Blister/releases/latest">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+              Get Blister for Windows
+            </a>
+            <a class="hero__src" href="https://github.com/diiviikk5/Blister">Free and open source <span aria-hidden="true">→</span></a>
           </div>
+        </div>
 
-          <button class="catch rise" style="--d:9" id="catch" type="button" aria-label="Copy a link: see Blister catch it in the preview below">
+        <div class="hero__art rise" style="--d:5">
+          <button class="file-stage" id="file-stage" type="button" aria-label="Replay the split animation">
+            <span class="file-iso" id="file-iso" aria-hidden="true">
+              <span class="file-iso__shadow"></span>
+              <span class="file-iso__lanes"><i class="lane" style="--i:0"><b></b></i><i class="lane" style="--i:1"><b></b></i><i class="lane" style="--i:2"><b></b></i><i class="lane" style="--i:3"><b></b></i><i class="lane" style="--i:4"><b></b></i><i class="lane" style="--i:5"><b></b></i><i class="lane" style="--i:6"><b></b></i><i class="lane" style="--i:7"><b></b></i><i class="lane" style="--i:8"><b></b></i><i class="lane" style="--i:9"><b></b></i><i class="lane" style="--i:10"><b></b></i><i class="lane" style="--i:11"><b></b></i><i class="lane" style="--i:12"><b></b></i><i class="lane" style="--i:13"><b></b></i><i class="lane" style="--i:14"><b></b></i><i class="lane" style="--i:15"><b></b></i></span>
+            </span>
+          </button>
+          <div class="file-card" aria-live="polite">
+            <span class="file-card__name ib-mono" id="fc-name">blender-4.2-windows-x64.zip</span>
+            <span class="file-card__bar"><i id="fc-bar"></i></span>
+            <span class="file-card__row ib-mono"><b id="fc-pct">0%</b><span id="fc-size">342 MB</span><span id="fc-state" class="file-card__state">ready</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ marquee -->
+    <div class="marquee-wrap" aria-hidden="true">
+      <div class="ib-marquee">
+        <div class="ib-marquee__track">
+          <span class="ib-marquee__item">16 connections a file <i class="ib-marquee__star"></i> Magnets <i class="ib-marquee__star"></i> Video sites <i class="ib-marquee__star"></i> Resume anything <i class="ib-marquee__star"></i> No accounts <i class="ib-marquee__star"></i> No ads <i class="ib-marquee__star"></i> No telemetry <i class="ib-marquee__star"></i></span>
+          <span class="ib-marquee__item">16 connections a file <i class="ib-marquee__star"></i> Magnets <i class="ib-marquee__star"></i> Video sites <i class="ib-marquee__star"></i> Resume anything <i class="ib-marquee__star"></i> No accounts <i class="ib-marquee__star"></i> No ads <i class="ib-marquee__star"></i> No telemetry <i class="ib-marquee__star"></i></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ preview -->
+    <section class="ib-section preview" id="preview">
+      <div class="ib-container">
+        <div class="preview__head">
+          <div>
+            <h2 class="ib-h2">One quiet queue for <span class="ib-mark">all of it.</span></h2>
+            <p class="ib-lead preview__lead">A live, simulated Blister window. Press the keys to copy a link and watch it get caught.</p>
+          </div>
+                    <button class="catch" id="catch" type="button" aria-label="Copy a link: see Blister catch it in the preview below">
             <span class="ib-keys" id="keys" aria-hidden="true">
               <span class="ib-keycap">Ctrl</span><span class="ib-plus">+</span><span class="ib-keycap ib-keycap--accent">C</span>
             </span>
             <span class="catch__label ib-mono" id="catch-label">copy a link anywhere, Blister catches it</span>
           </button>
         </div>
-
         <!-- the app, as a window slab -->
-        <figure class="ib-slab app rise" style="--d:10" aria-label="A simulated preview of the Blister window">
+        <figure class="ib-slab app" aria-label="A simulated preview of the Blister window">
           <div class="ib-slab__bar">
             <span class="ib-slab__dot" style="background:var(--ib-hot)"></span>
             <span class="ib-slab__dot" style="background:var(--ib-accent)"></span>
@@ -182,16 +221,6 @@
         </figure>
       </div>
     </section>
-
-    <!-- ============================================================ marquee -->
-    <div class="marquee-wrap" aria-hidden="true">
-      <div class="ib-marquee">
-        <div class="ib-marquee__track">
-          <span class="ib-marquee__item">16 connections a file <i class="ib-marquee__star"></i> Magnets <i class="ib-marquee__star"></i> Video sites <i class="ib-marquee__star"></i> Resume anything <i class="ib-marquee__star"></i> No accounts <i class="ib-marquee__star"></i> No ads <i class="ib-marquee__star"></i> No telemetry <i class="ib-marquee__star"></i></span>
-          <span class="ib-marquee__item">16 connections a file <i class="ib-marquee__star"></i> Magnets <i class="ib-marquee__star"></i> Video sites <i class="ib-marquee__star"></i> Resume anything <i class="ib-marquee__star"></i> No accounts <i class="ib-marquee__star"></i> No ads <i class="ib-marquee__star"></i> No telemetry <i class="ib-marquee__star"></i></span>
-        </div>
-      </div>
-    </div>
 
     <!-- ============================================================ features: chunks -->
     <section class="ib-section" id="features">
