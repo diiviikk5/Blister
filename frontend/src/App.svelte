@@ -9,6 +9,7 @@
   import Settings from "./components/Settings.svelte";
   import RiceStudio from "./components/RiceStudio.svelte";
   import Palette from "./components/Palette.svelte";
+  import MiniBar from "./components/MiniBar.svelte";
   import Toasts from "./components/Toasts.svelte";
   import Modal from "./components/Modal.svelte";
   import { api, onFileDrop, readClipboard } from "./lib/api";
@@ -87,7 +88,12 @@
       store.paletteOpen = !store.paletteOpen;
       return;
     }
-    if (store.addOpen || removing || renaming || store.relink || store.paletteOpen) return;
+    if (mod && e.key.toLowerCase() === "m") {
+      e.preventDefault();
+      store.setMini(!store.mini);
+      return;
+    }
+    if (store.addOpen || removing || renaming || store.relink || store.paletteOpen || store.mini) return;
     if (mod && e.key.toLowerCase() === "r" && e.shiftKey) {
       e.preventDefault();
       store.view = store.view === "rice" ? "list" : "rice";
@@ -178,6 +184,9 @@
   ondragleave={(e) => e.relatedTarget === null && (dragging = false)}
   ondrop={drop}
 >
+  {#if store.mini && ready}
+    <MiniBar />
+  {:else}
   <TitleBar bind:search />
   {#if failed}
     <div class="boot-err">
@@ -210,6 +219,7 @@
       {/if}
     </div>
     <StatusBar />
+  {/if}
   {/if}
 
   {#if dragging}

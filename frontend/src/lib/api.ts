@@ -76,6 +76,7 @@ export const api = {
   pickTorrents: () => call<string[] | null>("PickTorrents"),
   pickImage: () => call<string>("PickImage"),
   relaunch: () => call<void>("Relaunch"),
+  setMini: (on: boolean) => call<void>("SetMini", on),
 };
 
 export const win = {

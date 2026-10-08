@@ -300,6 +300,7 @@ export function createMock() {
     PickTorrents: () => [],
     PickImage: () => "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=70",
     Relaunch: () => location.reload(),
+    SetMini: () => {},
   };
 
   return {

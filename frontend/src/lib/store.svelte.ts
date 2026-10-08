@@ -51,6 +51,7 @@ class Store {
   rice = $state<Rice>(structuredClone(defaultRice));
   library = $state<Rice[]>([]);
   paletteOpen = $state(false);
+  mini = $state(false);
   addOpen = $state(false);
   addSeed = $state<External | null>(null);
   toasts = $state<Toast[]>([]);
@@ -198,6 +199,12 @@ class Store {
     if (!this.settings) return;
     const s = { ...this.settings, rice: JSON.stringify($state.snapshot(this.rice)), riceLibrary: JSON.stringify($state.snapshot(this.library)) };
     this.saveSettings(s);
+  }
+
+  setMini(on: boolean) {
+    this.mini = on;
+    this.paletteOpen = false;
+    this.run(api.setMini(on));
   }
 
   toast(text: string, tone: Toast["tone"] = "info", action?: Toast["action"]) {
