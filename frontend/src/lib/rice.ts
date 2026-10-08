@@ -257,9 +257,13 @@ let styleEl: HTMLStyleElement | null = null;
 export function applyRice(r: Rice, el: HTMLElement = document.body) {
   const c = r.colors;
   const set = (k: string, v: string) => el.style.setProperty(k, v);
-  set("--ib-paper", c.paper);
-  set("--ib-paper-2", c.paper2);
-  set("--ib-card", c.card);
+  // Surfaces thin out over a wallpaper or a Mica/Acrylic window.
+  const op = r.fx.opacity;
+  const see = (col: string, o: number) => (o >= 1 ? col : `color-mix(in srgb, ${col} ${Math.round(Math.min(1, o) * 100)}%, transparent)`);
+  set("--ib-paper", see(c.paper, op));
+  set("--ib-paper-2", see(c.paper2, op + 0.1));
+  set("--ib-card", see(c.card, op + 0.2));
+  set("--paper-solid", c.paper);
   set("--ib-night", c.paper2);
   set("--ib-text", c.text);
   set("--ib-muted", c.muted);

@@ -14,6 +14,24 @@
   --ok: #2fd27a;
   --bad: #ff4d6d;
 
+  /* rice tokens (rice.ts overwrites these live) */
+  --bw: 2.5px;
+  --bw-lg: 3px;
+  --r: 11px;
+  --r-sm: 8px;
+  --r-xs: 5px;
+  --r-lg: 16px;
+  --ib-ex3: var(--ib-ex2), 3px 3px 0 var(--ib-ex);
+  --press: 3px;
+  --zoom: 1;
+  --h-weight: 900;
+  --h-track: -0.05em;
+  --bar-h: 14px;
+  --ib-bw: var(--bw);
+  --ib-r: var(--r);
+  --ib-r-sm: var(--r-sm);
+  --ib-r-lg: var(--r-lg);
+
   --row-h: 76px;
   --side-w: 232px;
   --detail-w: 380px;
@@ -36,7 +54,10 @@
 }
 
 .ib[data-density="compact"] {
-  --row-h: 58px;
+  --row-h: 56px;
+}
+.ib[data-density="cozy"] {
+  --row-h: 92px;
 }
 
 html,
@@ -54,6 +75,59 @@ body {
 }
 #app {
   height: 100%;
+  zoom: var(--zoom);
+}
+
+/* ------------------------------------------------------------ rice effects */
+html {
+  background: var(--paper-solid, #0d0913);
+}
+body.ib {
+  background: transparent;
+}
+.wall {
+  position: fixed;
+  inset: calc(var(--wall-blur, 0px) * -2);
+  z-index: -2;
+  background: var(--wall) center / cover no-repeat;
+  filter: blur(var(--wall-blur, 0px));
+}
+.wall::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: var(--wall-dim, 0.5);
+}
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+.fx::before {
+  /* film grain */
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--grain, 0);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+.fx::after {
+  /* CRT scanlines + vignette */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, calc(var(--scan, 0) * 0.55)) 2px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, calc(var(--vignette, 0) * 0.85)) 100%);
+}
+.ib[data-motion="0"] *,
+.ib[data-motion="0"] *::before,
+.ib[data-motion="0"] *::after {
+  animation: none !important;
+  transition: none !important;
 }
 input,
 textarea,
@@ -87,7 +161,7 @@ button {
   border: 3px solid var(--ib-paper);
   outline: 2px solid var(--ib-faint);
   outline-offset: -5px;
-  border-radius: 10px;
+  border-radius: var(--r);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ib-accent);
@@ -103,8 +177,8 @@ button {
   gap: 8px;
   height: 36px;
   padding: 0 13px;
-  border: 2.5px solid var(--ib-line);
-  border-radius: 10px;
+  border: var(--bw) solid var(--ib-line);
+  border-radius: var(--r);
   background: var(--face);
   color: var(--fg);
   font-weight: 800;
@@ -120,7 +194,7 @@ button {
   box-shadow: var(--ib-ex4), 5px 5px 0 var(--ib-ex);
 }
 .btn:active:not(:disabled) {
-  transform: translate(3px, 3px);
+  transform: translate(var(--press), var(--press));
   box-shadow: 1px 1px 0 var(--ib-ex);
 }
 .btn:disabled {
@@ -157,19 +231,19 @@ button {
   height: 46px;
   padding: 0 20px;
   font-size: 15px;
-  border-width: 3px;
-  border-radius: 12px;
+  border-width: var(--bw-lg);
+  border-radius: var(--r);
   box-shadow: var(--ib-ex6);
 }
 .btn--lg:active:not(:disabled) {
-  transform: translate(5px, 5px);
+  transform: translate(var(--press), var(--press));
 }
 .btn--sm {
   height: 28px;
   padding: 0 9px;
   font-size: 12px;
   border-width: 2px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   box-shadow: var(--ib-ex2);
 }
 .btn--sm.btn--icon {
@@ -181,8 +255,8 @@ button {
   width: 100%;
   height: 38px;
   padding: 0 12px;
-  border: 2.5px solid var(--ib-line);
-  border-radius: 10px;
+  border: var(--bw) solid var(--ib-line);
+  border-radius: var(--r);
   background: var(--ib-paper-2);
   color: var(--ib-text);
   font: inherit;
@@ -248,8 +322,8 @@ select.field {
   gap: 5px;
   height: 20px;
   padding: 0 7px;
-  border: 2px solid var(--ib-line);
-  border-radius: 6px;
+  border: calc(var(--bw) * 0.8) solid var(--ib-line);
+  border-radius: var(--r-sm);
   font-size: 10.5px;
   font-weight: 900;
   letter-spacing: 0.06em;
