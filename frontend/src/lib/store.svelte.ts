@@ -12,7 +12,7 @@ export type Filter =
   | "failed"
   | `cat:${string}`;
 
-export type SortKey = "added" | "name" | "size" | "progress" | "speed";
+export type SortKey = "smart" | "added" | "name" | "size" | "progress" | "speed";
 
 export interface Toast {
   id: number;
@@ -41,7 +41,7 @@ class Store {
 
   filter = $state<Filter>("all");
   query = $state("");
-  sort = $state<SortKey>("added");
+  sort = $state<SortKey>("smart");
   selected = $state<string[]>([]);
   focus = $state<string | null>(null);
 
@@ -71,7 +71,13 @@ class Store {
     let list = this.all.filter((t) => matches(t, this.filter));
     if (q) list = list.filter((t) => t.name.toLowerCase().includes(q) || t.url.toLowerCase().includes(q));
     const by = this.sort;
-    if (by !== "added") {
+    if (by === "smart") {
+      // Working downloads first, then waiting, stopped, failed, finished;
+      // newest first inside each group.
+      const rank = { active: 0, queued: 1, paused: 2, failed: 3, completed: 4 };
+      const idx = new Map(this.order.map((id, i) => [id, i]));
+      list = [...list].sort((a, b) => rank[bucket(a)] - rank[bucket(b)] || idx.get(b.id)! - idx.get(a.id)!);
+    } else if (by !== "added") {
       list = [...list].sort((a, b) => {
         switch (by) {
           case "name":

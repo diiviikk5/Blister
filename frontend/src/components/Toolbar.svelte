@@ -48,7 +48,7 @@
   <div class="spacer"></div>
 
   <select class="field sort" bind:value={store.sort} aria-label="Sort by">
-    {#each [["added", "Newest"], ["name", "Name"], ["size", "Size"], ["progress", "Progress"], ["speed", "Speed"]] as [k, l] (k)}
+    {#each [["smart", "Smart"], ["added", "Newest"], ["name", "Name"], ["size", "Size"], ["progress", "Progress"], ["speed", "Speed"]] as [k, l] (k)}
       <option value={k as SortKey}>{l}</option>
     {/each}
   </select>
