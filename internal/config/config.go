@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/diiviikk5/Blister/internal/rules"
 )
 
 // Settings are every user-tunable option. JSON names are shared with the UI.
@@ -66,6 +68,11 @@ type Settings struct {
 	// user's saved themes. Go only stores them.
 	Rice        string `json:"rice"`
 	RiceLibrary string `json:"riceLibrary"`
+	// Automation rules, applied to every new download in order.
+	Rules []rules.Rule `json:"rules"`
+	// Command run after every finished download ({path} {name} {dir} {url} {size}).
+	OnComplete string `json:"onComplete"`
+
 	// Native window backdrop: "none", "mica", "acrylic" or "tabbed".
 	// Applied at startup.
 	WindowEffect string `json:"windowEffect"`
