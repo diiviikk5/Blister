@@ -23,3 +23,9 @@ func revealPath(p string) error {
 }
 
 func setStartOnBoot(bool) error { return nil }
+
+func runShell(cmdline, dir string) error {
+	cmd := exec.Command("sh", "-c", cmdline)
+	cmd.Dir = dir
+	return cmd.Start()
+}

@@ -24,6 +24,14 @@ func revealPath(p string) error {
 	return cmd.Start()
 }
 
+// runShell runs a user hook through cmd without flashing a console.
+func runShell(cmdline, dir string) error {
+	cmd := exec.Command("cmd")
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CmdLine: `cmd /S /C "` + cmdline + `"`}
+	cmd.Dir = dir
+	return cmd.Start()
+}
+
 const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
 
 func setStartOnBoot(on bool) error {

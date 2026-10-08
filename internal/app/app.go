@@ -27,6 +27,7 @@ import (
 	"github.com/diiviikk5/Blister/internal/httpdl"
 	"github.com/diiviikk5/Blister/internal/linkgrab"
 	"github.com/diiviikk5/Blister/internal/media"
+	"github.com/diiviikk5/Blister/internal/rules"
 )
 
 // Version is set at build time with -ldflags "-X .../app.Version=...".
@@ -153,6 +154,9 @@ func (a *App) emit(ev string, data any) {
 
 func (a *App) emitEngine(ev string, data any) {
 	a.emit(ev, data)
+	if t, ok := data.(engine.Task); ok && ev == engine.EvCompleted {
+		go a.runHooks(t)
+	}
 	if !a.notify || !a.store.Get().Notifications {
 		return
 	}
@@ -367,11 +371,76 @@ func (a *App) Probe(url string, req httpdl.Request) ProbeResult {
 	}
 }
 
+// applyRules lets the user's automation shape a new download. Explicit
+// choices from the add dialog win over rules, except connections, which the
+// dialog always fills with the global default.
+func (a *App) applyRules(r *engine.AddRequest) {
+	s := a.store.Get()
+	if len(s.Rules) == 0 {
+		return
+	}
+	kind := r.Kind
+	if kind == "" {
+		kind = engine.DetectKind(r.URL)
+	}
+	name := r.Name
+	if name == "" {
+		name = engine.GuessName(r.URL, kind)
+	}
+	e := rules.Evaluate(s.Rules, rules.Item{URL: r.URL, Name: name, Kind: string(kind), Size: r.Size})
+	if len(e.Matched) == 0 {
+		return
+	}
+	if r.Dir == "" && e.Dir != "" {
+		r.Dir = e.Dir
+	}
+	if e.Connections > 0 && (r.Connections == 0 || r.Connections == s.Connections) {
+		r.Connections = e.Connections
+	}
+	if r.SpeedLimit == 0 && e.SpeedLimit > 0 {
+		r.SpeedLimit = e.SpeedLimit
+	}
+	r.Paused = r.Paused || e.Paused
+	r.Tags = append(r.Tags, e.Tags...)
+	for _, id := range e.Matched {
+		r.Tags = append(r.Tags, "rule:"+id)
+	}
+}
+
+// runHooks starts the global and per-rule completion commands for t.
+func (a *App) runHooks(t engine.Task) {
+	s := a.store.Get()
+	var cmds []string
+	if strings.TrimSpace(s.OnComplete) != "" {
+		cmds = append(cmds, s.OnComplete)
+	}
+	for _, tag := range t.Tags {
+		id, ok := strings.CutPrefix(tag, "rule:")
+		if !ok {
+			continue
+		}
+		for _, r := range s.Rules {
+			if r.ID == id && strings.TrimSpace(r.Run) != "" {
+				cmds = append(cmds, r.Run)
+			}
+		}
+	}
+	vars := map[string]string{
+		"path": t.Path(), "name": t.Name, "dir": t.Dir, "url": t.URL, "size": fmt.Sprint(t.Size),
+	}
+	for _, c := range cmds {
+		if err := runShell(rules.Expand(c, vars), t.Dir); err != nil && a.ctx != nil {
+			runtime.LogWarningf(a.ctx, "hook failed: %v", err)
+		}
+	}
+}
+
 // Add queues downloads.
 func (a *App) Add(reqs []engine.AddRequest) ([]engine.Task, error) {
 	var out []engine.Task
 	var errs []error
 	for _, r := range reqs {
+		a.applyRules(&r)
 		t, err := a.m.Add(r)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s: %w", r.URL, err))
