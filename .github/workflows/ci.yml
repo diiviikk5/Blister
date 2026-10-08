@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npx svelte-check --tsconfig ./tsconfig.json
+          npm run build
+      - name: Go tests
+        run: go test ./...
+
+  build:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.16.0
+      - name: Build
+        run: wails build -skipbindings -ldflags "-X github.com/diiviikk5/Blister/internal/app.Version=0.1.0-${{ github.sha }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Blister-windows
+          path: build/bin/Blister.exe
