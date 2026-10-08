@@ -9,37 +9,40 @@
  */
 
 /* ------------------------------------------------------------------ brand tokens */
+/* "Thermal": a sunflower block fill, a magenta signal and violet for
+   illustration, on cool lilac paper / plum-black night. Deliberately far
+   from Saber's cream + ember orange. */
 .ib {
-    --ib-paper: #f5eee3;
-    --ib-paper-2: #ebe1d1;
-    --ib-card: #fffaf2;
-    --ib-night: #150f0c;
-    --ib-text: #1a110d;
-    --ib-muted: #50443d;
-    --ib-faint: #74675d;
-    --ib-line: #1a110d;
-    --ib-ex: #1a110d;
-    --ib-grid: rgba(26, 17, 13, 0.07);
-    --ib-accent: #ff5c39;
-    --ib-accent-ink: #1a110d;
-    --ib-hot: #ffd23f;
-    --ib-hot-ink: #1a110d;
-    --ib-alt: #3d7bff;
-    --app-ink: #f7eee4;
-    --app-dim: #a3958b;
+    --ib-paper: #f0edf6;
+    --ib-paper-2: #e4dfee;
+    --ib-card: #fbfaff;
+    --ib-night: #110b19;
+    --ib-text: #140d1f;
+    --ib-muted: #4a4158;
+    --ib-faint: #6b6279;
+    --ib-line: #140d1f;
+    --ib-ex: #140d1f;
+    --ib-grid: rgba(20, 13, 31, 0.07);
+    --ib-accent: #ffd60a;
+    --ib-accent-ink: #140d1f;
+    --ib-hot: #ff2e88;
+    --ib-hot-ink: #ffffff;
+    --ib-alt: #6c4dff;
+    --app-ink: #f1ecf9;
+    --app-dim: #9b91ab;
     --app-line: rgba(255, 255, 255, .09);
 }
 
 [data-theme="dark"] .ib {
-    --ib-paper: #0f0b09;
-    --ib-paper-2: #18120f;
-    --ib-card: #1f1814;
-    --ib-text: #f7eee4;
-    --ib-muted: #bdb0a6;
-    --ib-faint: #8d8077;
-    --ib-line: #f7eee4;
-    --ib-ex: #f7eee4;
-    --ib-grid: rgba(247, 238, 228, 0.06);
+    --ib-paper: #0d0913;
+    --ib-paper-2: #150f1e;
+    --ib-card: #1c1527;
+    --ib-text: #f3eefb;
+    --ib-muted: #b9afc8;
+    --ib-faint: #8b819b;
+    --ib-line: #f3eefb;
+    --ib-ex: #f3eefb;
+    --ib-grid: rgba(243, 238, 251, 0.06);
 }
 
 /* ------------------------------------------------------------------ base */
@@ -121,7 +124,7 @@ body.ib { margin: 0; overflow-x: clip; }
 .dl__icon::after { content: attr(data-label); }
 .dl__icon[data-kind="zip"] { background: var(--ib-accent); color: #1a110d; }
 .dl__icon[data-kind="magnet"] { background: var(--ib-hot); color: #1a110d; }
-.dl__icon[data-kind="video"] { background: #3d7bff; }
+.dl__icon[data-kind="video"] { background: #6c4dff; color: #fff; }
 .dl__icon[data-kind="clip"] { background: #f7eee4; color: #1a110d; }
 .dl__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .dl__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 800; letter-spacing: -.01em; }
@@ -389,11 +392,11 @@ body.ib { margin: 0; overflow-x: clip; }
 
 /* ------------------------------------------------------------------ make it yours */
 /* accents mirror the app's picker; the signal colour is re-paired so it never clashes */
-[data-accent="lime"] .ib { --ib-accent: #c6f432; --ib-hot: #ff6fae; }
-[data-accent="cyan"] .ib { --ib-accent: #35d0ff; --ib-hot: #ffd23f; }
-[data-accent="violet"] .ib { --ib-accent: #b18cff; --ib-hot: #ffd23f; }
-[data-accent="rose"] .ib { --ib-accent: #ff6fae; --ib-hot: #35d0ff; }
-[data-accent="amber"] .ib { --ib-accent: #ffc23d; --ib-hot: #ff5c39; }
+[data-accent="lime"] .ib { --ib-accent: #c6f432; --ib-hot: #6c4dff; }
+[data-accent="cyan"] .ib { --ib-accent: #35d0ff; --ib-hot: #ff2e88; }
+[data-accent="violet"] .ib { --ib-accent: #b8a2ff; --ib-hot: #ff2e88; }
+[data-accent="rose"] .ib { --ib-accent: #ff8fc4; --ib-hot: #6c4dff; }
+[data-accent="ember"] .ib { --ib-accent: #ff7a45; --ib-hot: #6c4dff; }
 
 .yours__grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
 .yours .ib-h2 { margin-top: 20px; }
