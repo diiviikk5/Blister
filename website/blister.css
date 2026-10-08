@@ -430,6 +430,16 @@ body.ib { margin: 0; overflow-x: clip; }
 .dens[data-density="compact"] .dens__list .ib-bar { height: 9px; border-width: 2px; }
 .dens__note { margin: 16px 0 0; }
 
+/* ------------------------------------------------------------------ spec + faq */
+.spec__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+.spec__title { margin: 20px 0 32px; }
+.spec .ib-table th { width: 36%; border-bottom: 2px solid var(--ib-card); font-family: var(--ib-mono); font-weight: 700; }
+.spec .ib-table tr:last-child th { border-bottom: 0; }
+.spec .ib-table .ib-badge + .ib-badge { margin-left: 6px; }
+.faqs { display: grid; gap: 16px; padding-top: 6px; }
+.ib-faq summary { gap: 16px; }
+.ib-faq summary::after { flex: none; }
+
 /* ------------------------------------------------------------------ footer */
 .footer__inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
 .footer__links { display: flex; gap: 4px; }

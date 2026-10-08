@@ -479,6 +479,62 @@
         </div>
       </div>
     </section>
+
+    <!-- ============================================================ spec sheet + faq -->
+    <section class="ib-section spec" id="faq">
+      <div class="ib-container spec__grid">
+        <div>
+          <span class="ib-kicker">Spec sheet</span>
+          <h2 class="ib-h2 spec__title">The numbers, without the fluff.</h2>
+          <div class="ib-table-wrap">
+            <table class="ib-table">
+              <caption class="visually-hidden">Blister at a glance</caption>
+              <tbody>
+                <tr><th scope="row">Connections</th><td>16 per file by default, up to 64</td></tr>
+                <tr><th scope="row">Protocols</th><td>HTTP, HTTPS, BitTorrent, HLS</td></tr>
+                <tr><th scope="row">Video sites</th><td>Through yt-dlp and ffmpeg</td></tr>
+                <tr><th scope="row">Checksums</th><td>MD5, SHA-1, SHA-256, SHA-512</td></tr>
+                <tr><th scope="row">Built with</th><td>Go and Wails</td></tr>
+                <tr><th scope="row">Platforms</th><td>Windows now, macOS and Linux later</td></tr>
+                <tr><th scope="row">Accounts</th><td>None, ever</td></tr>
+                <tr><th scope="row">Price</th><td><span class="ib-badge ib-badge--accent">Free</span> <span class="ib-badge">Open source</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="faqs">
+          <h2 class="visually-hidden">Questions</h2>
+          <details class="ib-faq" open>
+            <summary>Will it make every download faster?</summary>
+            <div>Not every one. Blister helps most when a server limits each connection, which many do. If a server is already fast on a single connection, or your line is already full, there's less to gain. It will never be faster than your own connection.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>Is it really free?</summary>
+            <div>Yes. No trial, no pro tier, no ads and no account. The full source is on GitHub, so you can read exactly what it does.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>Does it collect anything about me?</summary>
+            <div>No. There's no telemetry and no sign-in. Your list of downloads lives on your own disk.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>How is it different from IDM or qBittorrent?</summary>
+            <div>Those are good at one job each. Blister does fast multi-connection links, torrents and video sites in one window, with one queue, one set of speed limits and one schedule. And it's free and open.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>How does it pick up downloads from my browser?</summary>
+            <div>The browser extension sends links to Blister over a local port, 7323, using a private token, so other programs can't slip things into your queue. You can also just copy a link and Blister will offer to grab it.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>What if my PC restarts halfway through?</summary>
+            <div>Open Blister again and the download carries on from where it stopped. Progress is saved as each range moves, not only at the end.</div>
+          </details>
+          <details class="ib-faq">
+            <summary>When is macOS and Linux support coming?</summary>
+            <div>After the Windows version settles. Watch the repository on GitHub to hear about it first.</div>
+          </details>
+        </div>
+      </div>
+    </section>
 <!--SECTIONS-->
   </main>
 
