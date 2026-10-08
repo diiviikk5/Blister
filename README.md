@@ -22,6 +22,28 @@ Files, torrents and videos from 1,800+ sites, split across up to 64 connections,
 - **Tidy by default.** Files land in Videos, Music, Archives, Programs… inside your download folder.
 - **No accounts, ads or telemetry.**
 
+## Rice it
+
+Blister is built to be riced. Open **Rice Studio** (`Ctrl Shift R`) and everything is live:
+
+- **13 themes** to start from: Thermal, Lilac Paper, Phosphor (green CRT terminal), Catppuccin Mocha, Gruvbox, Nord, Tokyo Night, Rosé Pine, Dracula, Everforest, Neon '84, Mono and Solar Paper. Or hit **Shuffle** for a fresh readable palette.
+- **Colours**: all 15 tokens, with a live contrast checker.
+- **Shape**: outline width, corner radius, depth, and shadow style (3D extrusion, hard, soft, glow or flat).
+- **Type**: any installed font (Nerd Fonts welcome), monospace-everything, scale, heading weight and tracking.
+- **Layout**: list, dense table or card grid; line or card rows; three densities; sidebar left, right or hidden; details right, bottom or off.
+- **Progress bars**: lanes (live connection map), solid, line, `▰▰▱` blocks, `[##=->..]` ASCII, braille or dots.
+- **Effects**: wallpaper with dim and blur, see-through surfaces, film grain, CRT scanlines, vignette, motion off/normal/springy, and Windows 11 **Mica / Acrylic** window backdrops.
+- **Custom CSS** applied as you type, with snippets.
+- **Share**: every look is a single `blister-rice:` code. Copy yours, paste someone else's, or save variations to your library.
+
+Plus:
+
+- **`Ctrl K` command palette**: every action, theme, layout, filter and download.
+- **Mini bar** (`Ctrl M`): the whole app as a slim always-on-top strip with live speed and progress.
+- **3D lanes**: the selected download as 16 isometric blocks filling from the live coverage map.
+- **Rules**: "when the host, extension, kind or size looks like this, use this folder, connection count, speed cap, tags or start paused". They apply to links from anywhere.
+- **Hooks**: run any command when a download finishes, globally or per rule, with `{path}` `{name}` `{dir}` `{url}` `{size}`. For example, unzip archives automatically.
+
 ## Install
 
 Grab `Blister.exe` from [Releases](https://github.com/diiviikk5/Blister/releases/latest) and run it. Windows 10/11 with the WebView2 runtime, which ships with Windows 11 and current Windows 10.
@@ -48,6 +70,9 @@ From then on downloads go to Blister (small files under 1 MB stay in the browser
 | `Ctrl F` | Search |
 | `Ctrl A` | Select all |
 | `Ctrl ,` | Settings |
+| `Ctrl K` | Command palette |
+| `Ctrl Shift R` | Rice Studio |
+| `Ctrl M` | Mini bar |
 
 ## Build from source
 
@@ -87,6 +112,7 @@ internal/media       yt-dlp driver for video sites and HLS
 internal/bridge      127.0.0.1-only API for the browser extension
 internal/ratelimit   Stackable token-bucket limiters (global → per download)
 internal/linkgrab    Link extraction and [01-12] batch expansion
+internal/rules       Automation rules and hook templates
 internal/category    File-type sorting
 frontend/            Svelte 5 UI in the isometric-brutalism design kit
 extension/           Manifest V3 browser extension
