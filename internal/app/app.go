@@ -5,10 +5,13 @@ package app
 import (
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -519,6 +522,47 @@ func (a *App) PickFolder(current string) (string, error) {
 	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
 		Title: "Choose a folder", DefaultDirectory: current, CanCreateDirectories: true,
 	})
+}
+
+// PickImage lets the user choose a wallpaper and returns it as a data URL,
+// so themes stay self-contained and shareable.
+func (a *App) PickImage() (string, error) {
+	p, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title:   "Choose a wallpaper",
+		Filters: []runtime.FileFilter{{DisplayName: "Images", Pattern: "*.png;*.jpg;*.jpeg;*.webp;*.gif"}},
+	})
+	if err != nil || p == "" {
+		return "", err
+	}
+	st, err := os.Stat(p)
+	if err != nil {
+		return "", err
+	}
+	if st.Size() > 8<<20 {
+		return "", errors.New("pick an image under 8 MB")
+	}
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return "", err
+	}
+	mime := http.DetectContentType(b)
+	if !strings.HasPrefix(mime, "image/") {
+		return "", errors.New("that file isn't an image")
+	}
+	return "data:" + mime + ";base64," + base64.StdEncoding.EncodeToString(b), nil
+}
+
+// Relaunch restarts Blister (window effects only apply at startup).
+func (a *App) Relaunch() error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	if err := exec.Command(exe).Start(); err != nil {
+		return err
+	}
+	runtime.Quit(a.ctx)
+	return nil
 }
 
 // PickTorrents shows a .torrent file picker.
