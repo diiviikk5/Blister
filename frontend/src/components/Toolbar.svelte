@@ -109,8 +109,7 @@
     }
   }
   @container (max-width: 560px) {
-    .sort,
-    .label-txt {
+    .sort {
       display: none;
     }
   }
