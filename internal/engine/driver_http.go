@@ -19,7 +19,11 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 	t := j.Task()
 	s := j.Settings()
 
-	probe, err := httpdl.ProbeURL(ctx, j.Client(), t.Request)
+	// Always resolve from the original link: the redirect target saved last
+	// time is often a short-lived signed URL.
+	req := t.Request
+	req.URL = t.URL
+	probe, err := httpdl.ProbeURL(ctx, j.Client(), req)
 	if err != nil {
 		return err
 	}
@@ -52,6 +56,7 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 				tt.Category = c
 			}
 		}
+		tt.Request.URL = tt.URL
 		if probe.FinalURL != "" {
 			// Keep the original link for display/retry, but download from
 			// where it redirected to so each connection skips the hop.
