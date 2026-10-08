@@ -14,7 +14,7 @@
   const sel = $derived(store.selected.includes(task.id));
   const running = $derived(task.status === "downloading" || task.status === "starting");
   const stoppable = $derived(running || task.status === "queued" || task.status === "seeding");
-  const map = $derived(task.kind === "torrent" ? (task.torrent?.pieceMap ?? "") : (live?.map ?? ""));
+  const map = $derived(live?.map || task.torrent?.pieceMap || "");
   const progress = $derived(task.size > 0 || task.status === "completed" ? prog(task) : running ? -1 : 0);
 
   function click(e: MouseEvent) {

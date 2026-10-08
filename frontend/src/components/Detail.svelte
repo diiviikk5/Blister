@@ -12,7 +12,7 @@
   const look = $derived(iconFor(task));
   const live = $derived(store.live[task.id]);
   const running = $derived(task.status === "downloading" || task.status === "starting");
-  const map = $derived(task.kind === "torrent" ? (task.torrent?.pieceMap ?? "") : (live?.map ?? ""));
+  const map = $derived(live?.map || task.torrent?.pieceMap || "");
   const sep = $derived(task.dir.includes("\\") ? "\\" : "/");
 
   // Local edits for tuning; resynced when another task is focused.
