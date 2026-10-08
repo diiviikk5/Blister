@@ -52,6 +52,8 @@ type App struct {
 
 	mu      sync.Mutex
 	ready   bool
+	// Window geometry to restore after mini bar mode.
+	restore *[4]int
 	pending []External
 	notify  bool
 }
@@ -658,6 +660,48 @@ func (a *App) Close() {
 		return
 	}
 	runtime.Quit(a.ctx)
+}
+
+// SetMini turns the window into a slim always-on-top bar (or back).
+func (a *App) SetMini(on bool) {
+	ctx := a.ctx
+	if ctx == nil {
+		return
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if on {
+		if a.restore == nil {
+			w, h := runtime.WindowGetSize(ctx)
+			x, y := runtime.WindowGetPosition(ctx)
+			a.restore = &[4]int{w, h, x, y}
+		}
+		if runtime.WindowIsMaximised(ctx) {
+			runtime.WindowUnmaximise(ctx)
+		}
+		const mw, mh = 820, 52
+		runtime.WindowSetMinSize(ctx, 420, mh)
+		runtime.WindowSetSize(ctx, mw, mh)
+		if screens, err := runtime.ScreenGetAll(ctx); err == nil {
+			for _, sc := range screens {
+				if sc.IsCurrent {
+					runtime.WindowSetPosition(ctx, (sc.Size.Width-mw)/2, 14)
+				}
+			}
+		}
+		runtime.WindowSetAlwaysOnTop(ctx, true)
+		return
+	}
+	runtime.WindowSetAlwaysOnTop(ctx, false)
+	runtime.WindowSetMinSize(ctx, 880, 560)
+	if r := a.restore; r != nil {
+		runtime.WindowSetSize(ctx, max(r[0], 880), max(r[1], 560))
+		runtime.WindowSetPosition(ctx, r[2], r[3])
+	} else {
+		runtime.WindowSetSize(ctx, 1240, 780)
+		runtime.WindowCenter(ctx)
+	}
+	a.restore = nil
 }
 
 // Quit closes Blister.
