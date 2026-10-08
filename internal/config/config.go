@@ -60,6 +60,15 @@ type Settings struct {
 	// Scheduler: only download inside this window (HH:MM, empty = always).
 	ScheduleStart string `json:"scheduleStart"`
 	ScheduleEnd   string `json:"scheduleEnd"`
+
+	// Rice: the UI's whole look as an opaque JSON document owned by the
+	// frontend (colours, shape, type, layout, effects, custom CSS), plus the
+	// user's saved themes. Go only stores them.
+	Rice        string `json:"rice"`
+	RiceLibrary string `json:"riceLibrary"`
+	// Native window backdrop: "none", "mica", "acrylic" or "tabbed".
+	// Applied at startup.
+	WindowEffect string `json:"windowEffect"`
 }
 
 // Defaults are sensible out-of-the-box settings.
@@ -92,6 +101,11 @@ func Defaults() Settings {
 // Normalize clamps values into safe ranges.
 func (s *Settings) Normalize() {
 	d := Defaults()
+	switch s.WindowEffect {
+	case "none", "mica", "acrylic", "tabbed":
+	default:
+		s.WindowEffect = "none"
+	}
 	if s.DownloadDir == "" {
 		s.DownloadDir = d.DownloadDir
 	}
