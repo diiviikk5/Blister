@@ -7,6 +7,8 @@
   import StatusBar from "./components/StatusBar.svelte";
   import AddDialog from "./components/AddDialog.svelte";
   import Settings from "./components/Settings.svelte";
+  import RiceStudio from "./components/RiceStudio.svelte";
+  import Palette from "./components/Palette.svelte";
   import Toasts from "./components/Toasts.svelte";
   import Modal from "./components/Modal.svelte";
   import { api, onFileDrop, readClipboard } from "./lib/api";
@@ -79,8 +81,18 @@
   }
 
   async function keys(e: KeyboardEvent) {
-    if (store.addOpen || removing || renaming || store.relink) return;
     const mod = e.ctrlKey || e.metaKey;
+    if (mod && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      store.paletteOpen = !store.paletteOpen;
+      return;
+    }
+    if (store.addOpen || removing || renaming || store.relink || store.paletteOpen) return;
+    if (mod && e.key.toLowerCase() === "r" && e.shiftKey) {
+      e.preventDefault();
+      store.view = store.view === "rice" ? "list" : "rice";
+      return;
+    }
     if (mod && e.key.toLowerCase() === "f") {
       e.preventDefault();
       store.view = "list";
@@ -153,6 +165,9 @@
 
 <svelte:window onkeydown={keys} />
 
+{#if store.rice.fx.wallpaper}<div class="wall" aria-hidden="true"></div>{/if}
+<div class="fx" aria-hidden="true"></div>
+
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="app"
@@ -170,17 +185,25 @@
       <p class="mono">{failed}</p>
     </div>
   {:else if ready}
-    <div class="body">
-      <Sidebar />
+    {@const L = store.rice.layout}
+    <div class="body" data-side={L.sidebar}>
+      {#if L.sidebar !== "hidden"}<Sidebar />{/if}
       <main class="main">
         {#if store.view === "settings"}
           <Settings />
+        {:else if store.view === "rice"}
+          <RiceStudio />
         {:else}
           <Toolbar onremove={() => askRemove(store.targets())} />
           <TaskList onremove={askRemove} onrename={askRename} />
+          {#if L.detail === "bottom" && store.focused}
+            {#key store.focused.id}
+              <Detail task={store.focused} dock="bottom" />
+            {/key}
+          {/if}
         {/if}
       </main>
-      {#if store.view === "list" && store.focused}
+      {#if store.view === "list" && L.detail === "right" && store.focused}
         {#key store.focused.id}
           <Detail task={store.focused} />
         {/key}
@@ -197,6 +220,7 @@
 </div>
 
 {#if store.addOpen}<AddDialog />{/if}
+{#if store.paletteOpen}<Palette />{/if}
 
 {#if removing}
   <Modal title={removing.length === 1 ? "Remove this download?" : `Remove ${removing.length} downloads?`} onclose={() => (removing = null)}>
@@ -250,11 +274,17 @@
     display: flex;
     flex-direction: column;
     background: var(--ib-paper);
+    color: var(--ib-text);
   }
   .body {
     flex: 1;
     display: flex;
     min-height: 0;
+  }
+  .body[data-side="right"] :global(.side) {
+    order: 3;
+    border-right: 0;
+    border-left: var(--bw-lg) solid var(--ib-line);
   }
   .main {
     flex: 1;

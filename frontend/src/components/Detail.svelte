@@ -7,7 +7,7 @@
   import { iconFor, statusLabel, kindLabel } from "../lib/kinds";
   import type { Task } from "../lib/types";
 
-  let { task }: { task: Task } = $props();
+  let { task, dock = "right" }: { task: Task; dock?: "right" | "bottom" } = $props();
 
   const look = $derived(iconFor(task));
   const live = $derived(store.live[task.id]);
@@ -41,7 +41,7 @@
   }
 </script>
 
-<aside class="detail" aria-label="Download details">
+<aside class="detail" class:bottom={dock === "bottom"} aria-label="Download details">
   <div class="head">
     <div class="tile" style:--c={look.color}><Icon name={look.icon} size={22} stroke={2.6} /></div>
     <div class="title">
@@ -198,6 +198,36 @@
     border-left: var(--bw-lg) solid var(--ib-line);
     background: var(--ib-paper);
     min-height: 0;
+  }
+  /* docked under the list: wide and short, sections side by side */
+  .bottom {
+    width: auto;
+    height: 300px;
+    flex: none;
+    border-left: 0;
+    border-top: var(--bw-lg) solid var(--ib-line);
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .bottom .head {
+    grid-column: 1;
+    grid-row: 1;
+    border-bottom: 0;
+  }
+  .bottom .foot {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    border-top: 0;
+  }
+  .bottom .body {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-content: start;
+    border-left: calc(var(--bw) * 0.8) solid var(--ib-paper-2);
   }
   .head {
     display: flex;
