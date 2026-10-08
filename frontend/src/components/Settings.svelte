@@ -1,14 +1,16 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
+  import Rules from "./Rules.svelte";
   import { api, copyText, errText } from "../lib/api";
   import { store } from "../lib/store.svelte";
   import { bytes, parseRate } from "../lib/format";
   import type { Settings } from "../lib/types";
 
-  type Tab = "general" | "speed" | "torrents" | "video" | "browser" | "look";
+  type Tab = "general" | "speed" | "auto" | "torrents" | "video" | "browser" | "look";
   const tabs: { id: Tab; label: string }[] = [
     { id: "general", label: "General" },
     { id: "speed", label: "Speed" },
+    { id: "auto", label: "Automation" },
     { id: "torrents", label: "Torrents" },
     { id: "video", label: "Video sites" },
     { id: "browser", label: "Browser" },
@@ -68,8 +70,10 @@
   </div>
 
   <div class="scroll">
-    <div class="card">
-      {#if tab === "general"}
+    <div class="card" class:plain={tab === "auto"}>
+      {#if tab === "auto"}
+        <Rules {s} save={(p) => (Object.assign(s, p), save())} />
+      {:else if tab === "general"}
         <div class="row">
           <div class="txt"><b>Download folder</b><span>Where finished files go.</span></div>
           <div class="ctl folder">
@@ -265,6 +269,12 @@
     border-radius: var(--r-lg);
     background: var(--ib-card);
     box-shadow: var(--ib-ex6);
+  }
+  .card.plain {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    max-width: none;
   }
   .row {
     display: flex;

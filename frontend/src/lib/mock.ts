@@ -38,6 +38,8 @@ const defaults: Settings = {
   scheduleEnd: "",
   rice: "",
   riceLibrary: "",
+  rules: [],
+  onComplete: "",
   windowEffect: "none",
 };
 

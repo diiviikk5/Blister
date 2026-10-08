@@ -148,7 +148,26 @@ export interface Settings {
   scheduleEnd: string;
   rice: string;
   riceLibrary: string;
+  rules: Rule[] | null;
+  onComplete: string;
   windowEffect: "none" | "mica" | "acrylic" | "tabbed";
+}
+
+export interface Rule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  hosts: string;
+  exts: string;
+  kinds: string[] | null;
+  minSize: number;
+  maxSize: number;
+  dir: string;
+  connections: number;
+  speedLimit: number;
+  paused: boolean;
+  tags: string[] | null;
+  run: string;
 }
 
 export interface ToolStatus {
