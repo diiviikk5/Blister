@@ -2,10 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'codex/**']
   pull_request:
+  workflow_dispatch:
 
-# Many small commits land in a row; only the newest needs checking.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -13,6 +16,10 @@ concurrency:
 jobs:
   test:
     runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      # The torrent library supports a pure-Go transport on Windows.
+      CGO_ENABLED: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -20,21 +27,32 @@ jobs:
           go-version-file: go.mod
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Frontend
+      - name: Install frontend dependencies
+        run: npm ci
         working-directory: frontend
-        run: |
-          npm ci
-          npx svelte-check --tsconfig ./tsconfig.json
-          npm run build
-      - name: Go tests
+      - name: Check UI types and accessibility diagnostics
+        run: npm run check
+        working-directory: frontend
+      - name: Test theme sharing, import bounds, and readable contrast
+        run: npm test
+        working-directory: frontend
+      - name: Build UI assets
+        run: npm run build
+        working-directory: frontend
+      - name: Test all Go packages and local torrent transfers
         run: go test ./...
+      - name: Check Go diagnostics
+        run: go vet ./...
 
   build:
     needs: test
     runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      CGO_ENABLED: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -42,12 +60,29 @@ jobs:
           go-version-file: go.mod
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.16.0
-      - name: Build
-        run: wails build -skipbindings -ldflags "-X github.com/diiviikk5/Blister/internal/app.Version=0.1.0-${{ github.sha }}"
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install and build UI assets
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+      - name: Build packaged Windows application
+        run: go run github.com/wailsapp/wails/v2/cmd/wails@v2.16.0 build -s -skipbindings -m -nosyncgomod -ldflags "-X github.com/diiviikk5/Blister/internal/app.Version=0.1.0-${{ github.sha }}"
       - uses: actions/upload-artifact@v4
         with:
           name: Blister-windows
           path: build/bin/Blister.exe
+          if-no-files-found: error
+
+  engine-race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Detect races in transfer workers, tuning, and queue persistence
+        run: go test -race ./internal/httpdl ./internal/engine
