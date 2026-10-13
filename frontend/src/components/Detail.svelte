@@ -127,7 +127,7 @@
         {/if}
         <div class="tune">
           <span class="tl">Speed cap</span>
-          <input class="field" placeholder="Unlimited, or e.g. 2 MB" bind:value={limit} onchange={tune} onkeydown={(e) => e.key === "Enter" && tune()} />
+          <input aria-label="Download speed cap" class="field" placeholder="Unlimited, or e.g. 2 MB" bind:value={limit} onchange={tune} onkeydown={(e) => e.key === "Enter" && tune()} />
         </div>
       </section>
     {/if}

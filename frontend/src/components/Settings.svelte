@@ -57,19 +57,28 @@
     store.toast("New pairing code. Paste it into the extension.", "info");
   }
 
+  function tabKeys(e: KeyboardEvent) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const index = tabs.findIndex((t) => t.id === tab);
+    const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (index + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tab = tabs[next].id;
+    document.getElementById(`settings-tab-${tab}`)?.focus();
+  }
+
 </script>
 
 <div class="settings">
   <div class="top">
     <h1>Settings</h1>
-    <div class="ib-tabs" role="tablist">
+    <div class="ib-tabs" role="tablist" aria-label="Settings sections">
       {#each tabs as t (t.id)}
-        <button class="ib-tab" role="tab" aria-selected={tab === t.id} onclick={() => (tab = t.id)}>{t.label}</button>
+        <button id={`settings-tab-${t.id}`} class="ib-tab" role="tab" aria-selected={tab === t.id} aria-controls="settings-content" tabindex={tab === t.id ? 0 : -1} onkeydown={tabKeys} onclick={() => (tab = t.id)}>{t.label}</button>
       {/each}
     </div>
   </div>
 
-  <div class="scroll">
+  <div id="settings-content" class="scroll" role="tabpanel" aria-labelledby={`settings-tab-${tab}`}>
     <div class="card" class:plain={tab === "auto"}>
       {#if tab === "auto"}
         <Rules {s} save={(p) => (Object.assign(s, p), save())} />
@@ -77,40 +86,40 @@
         <div class="row">
           <div class="txt"><b>Download folder</b><span>Where finished files go.</span></div>
           <div class="ctl folder">
-            <input class="field" value={s.downloadDir} onchange={(e) => set("downloadDir", e.currentTarget.value)} />
+            <input aria-label="Download folder" class="field" value={s.downloadDir} onchange={(e) => set("downloadDir", e.currentTarget.value)} />
             <button class="btn btn--icon" onclick={browse} aria-label="Choose folder"><Icon name="folder" size={16} /></button>
           </div>
         </div>
         <div class="row">
           <div class="txt"><b>Sort into folders</b><span>Videos, Music, Archives, Programs and so on, inside the download folder.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.categorizeFolders} onchange={(e) => set("categorizeFolders", e.currentTarget.checked)} />
+          <input aria-label="Sort into folders" type="checkbox" class="ib-switch" checked={s.categorizeFolders} onchange={(e) => set("categorizeFolders", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Catch copied links</b><span>When you copy a link anywhere, offer to download it.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.clipboardWatch} onchange={(e) => set("clipboardWatch", e.currentTarget.checked)} />
+          <input aria-label="Watch copied links" type="checkbox" class="ib-switch" checked={s.clipboardWatch} onchange={(e) => set("clipboardWatch", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Notifications</b><span>A Windows notification when a download finishes or fails.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.notifications} onchange={(e) => set("notifications", e.currentTarget.checked)} />
+          <input aria-label="Desktop notifications" type="checkbox" class="ib-switch" checked={s.notifications} onchange={(e) => set("notifications", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Sound on finish</b><span>A short two-note chime.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.sounds} onchange={(e) => set("sounds", e.currentTarget.checked)} />
+          <input aria-label="Completion sounds" type="checkbox" class="ib-switch" checked={s.sounds} onchange={(e) => set("sounds", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Ask before removing</b><span>Confirm before removing downloads from the list.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.confirmDelete} onchange={(e) => set("confirmDelete", e.currentTarget.checked)} />
+          <input aria-label="Confirm removal" type="checkbox" class="ib-switch" checked={s.confirmDelete} onchange={(e) => set("confirmDelete", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Start with Windows</b><span>Launch minimised when you sign in, so queued downloads carry on.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.startOnBoot} onchange={(e) => set("startOnBoot", e.currentTarget.checked)} />
+          <input aria-label="Start with Windows" type="checkbox" class="ib-switch" checked={s.startOnBoot} onchange={(e) => set("startOnBoot", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Download window</b><span>Only download between these times, e.g. overnight. Leave empty to always download.</span></div>
           <div class="ctl times">
-            <input class="field" type="time" value={s.scheduleStart} onchange={(e) => set("scheduleStart", e.currentTarget.value)} />
+            <input aria-label="Schedule start" class="field" type="time" value={s.scheduleStart} onchange={(e) => set("scheduleStart", e.currentTarget.value)} />
             <span class="faint">to</span>
-            <input class="field" type="time" value={s.scheduleEnd} onchange={(e) => set("scheduleEnd", e.currentTarget.value)} />
+            <input aria-label="Schedule end" class="field" type="time" value={s.scheduleEnd} onchange={(e) => set("scheduleEnd", e.currentTarget.value)} />
           </div>
         </div>
       {:else if tab === "speed"}
@@ -125,58 +134,58 @@
         <div class="row">
           <div class="txt"><b>Connections per download</b><span>More connections beat per-connection throttling. 16 suits most servers; some cap it lower.</span></div>
           <div class="ctl slider">
-            <input type="range" min="1" max="64" value={s.connections} oninput={(e) => set("connections", +e.currentTarget.value)} />
+            <input aria-label="Connections per download" type="range" min="1" max="64" value={s.connections} oninput={(e) => set("connections", +e.currentTarget.value)} />
             <span class="num big">{s.connections}</span>
           </div>
         </div>
         <div class="row">
           <div class="txt"><b>Download speed cap</b><span>For everything combined. Empty means unlimited. Try “5 MB”.</span></div>
-          <input class="field ctl" placeholder="Unlimited" bind:value={down} onchange={() => set("speedLimit", parseRate(down))} />
+          <input aria-label="Download speed cap" class="field ctl" placeholder="Unlimited" bind:value={down} onchange={() => set("speedLimit", parseRate(down))} />
         </div>
         <div class="row">
           <div class="txt"><b>Retries</b><span>How often a dropped connection is retried before the download fails.</span></div>
-          <input class="field ctl short" type="number" min="1" max="100" value={s.maxRetries} onchange={(e) => set("maxRetries", +e.currentTarget.value)} />
+          <input aria-label="Retries" class="field ctl short" type="number" min="1" max="100" value={s.maxRetries} onchange={(e) => set("maxRetries", +e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>Proxy</b><span>http://, https:// or socks5:// — empty uses the system proxy.</span></div>
-          <input class="field ctl mono" placeholder="socks5://127.0.0.1:1080" value={s.proxy} onchange={(e) => set("proxy", e.currentTarget.value)} />
+          <input aria-label="Proxy" class="field ctl mono" placeholder="socks5://127.0.0.1:1080" value={s.proxy} onchange={(e) => set("proxy", e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>User agent</b><span>Leave empty to look like Chrome, which most servers prefer.</span></div>
-          <input class="field ctl mono" placeholder="Browser default" value={s.userAgent} onchange={(e) => set("userAgent", e.currentTarget.value)} />
+          <input aria-label="User agent" class="field ctl mono" placeholder="Browser default" value={s.userAgent} onchange={(e) => set("userAgent", e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>Allow untrusted certificates</b><span>Only for mirrors with self-signed HTTPS. Leave off otherwise.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.insecureTls} onchange={(e) => set("insecureTls", e.currentTarget.checked)} />
+          <input aria-label="Allow untrusted certificates" type="checkbox" class="ib-switch" checked={s.insecureTls} onchange={(e) => set("insecureTls", e.currentTarget.checked)} />
         </div>
       {:else if tab === "torrents"}
         <div class="row">
           <div class="txt"><b>Seed after downloading</b><span>Give back to the swarm until the ratio below is reached.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.seedAfter} onchange={(e) => set("seedAfter", e.currentTarget.checked)} />
+          <input aria-label="Seed after downloading" type="checkbox" class="ib-switch" checked={s.seedAfter} onchange={(e) => set("seedAfter", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Seed ratio</b><span>Upload this many times the download size, then stop.</span></div>
-          <input class="field ctl short" type="number" step="0.1" min="0" value={s.seedRatio} onchange={(e) => set("seedRatio", +e.currentTarget.value)} />
+          <input aria-label="Seed ratio" class="field ctl short" type="number" step="0.1" min="0" value={s.seedRatio} onchange={(e) => set("seedRatio", +e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>Upload speed cap</b><span>Empty means unlimited.</span></div>
-          <input class="field ctl" placeholder="Unlimited" bind:value={up} onchange={() => set("uploadLimit", parseRate(up))} />
+          <input aria-label="Upload speed cap" class="field ctl" placeholder="Unlimited" bind:value={up} onchange={() => set("uploadLimit", parseRate(up))} />
         </div>
         <div class="row">
           <div class="txt"><b>Listening port</b><span>Takes effect after restarting Blister.</span></div>
-          <input class="field ctl short" type="number" value={s.torrentPort} onchange={(e) => set("torrentPort", +e.currentTarget.value)} />
+          <input aria-label="Torrent listening port" class="field ctl short" type="number" value={s.torrentPort} onchange={(e) => set("torrentPort", +e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>DHT</b><span>Find peers without trackers. Needed for most magnet links.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.enableDht} onchange={(e) => set("enableDht", e.currentTarget.checked)} />
+          <input aria-label="DHT" type="checkbox" class="ib-switch" checked={s.enableDht} onchange={(e) => set("enableDht", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Open port on router (UPnP)</b><span>Lets more peers connect to you.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.enableUpnp} onchange={(e) => set("enableUpnp", e.currentTarget.checked)} />
+          <input aria-label="Open port on router" type="checkbox" class="ib-switch" checked={s.enableUpnp} onchange={(e) => set("enableUpnp", e.currentTarget.checked)} />
         </div>
         <div class="row">
           <div class="txt"><b>Prefer encrypted peers</b><span>Helps on networks that throttle BitTorrent.</span></div>
-          <input type="checkbox" class="ib-switch" checked={s.encryptPeers} onchange={(e) => set("encryptPeers", e.currentTarget.checked)} />
+          <input aria-label="Prefer encrypted peers" type="checkbox" class="ib-switch" checked={s.encryptPeers} onchange={(e) => set("encryptPeers", e.currentTarget.checked)} />
         </div>
       {:else if tab === "video"}
         <div class="row">
@@ -207,11 +216,11 @@
         </div>
         <div class="row">
           <div class="txt"><b>Custom yt-dlp path</b><span>Use your own copy instead.</span></div>
-          <input class="field ctl mono" placeholder="Automatic" value={s.ytDlpPath} onchange={(e) => set("ytDlpPath", e.currentTarget.value)} />
+          <input aria-label="Custom yt-dlp path" class="field ctl mono" placeholder="Automatic" value={s.ytDlpPath} onchange={(e) => set("ytDlpPath", e.currentTarget.value)} />
         </div>
         <div class="row">
           <div class="txt"><b>Custom ffmpeg path</b><span>Point at ffmpeg.exe if it isn't on PATH.</span></div>
-          <input class="field ctl mono" placeholder="Automatic" value={s.ffmpegPath} onchange={(e) => set("ffmpegPath", e.currentTarget.value)} />
+          <input aria-label="Custom ffmpeg path" class="field ctl mono" placeholder="Automatic" value={s.ffmpegPath} onchange={(e) => set("ffmpegPath", e.currentTarget.value)} />
         </div>
       {:else if tab === "browser"}
         <div class="row">
@@ -224,7 +233,7 @@
         </div>
         <div class="row">
           <div class="txt"><b>Local port</b><span>The extension talks to Blister on 127.0.0.1 at this port. Nothing is reachable from other machines.</span></div>
-          <input class="field ctl short" type="number" value={s.browserPort} onchange={(e) => set("browserPort", +e.currentTarget.value)} />
+          <input aria-label="Browser bridge port" class="field ctl short" type="number" value={s.browserPort} onchange={(e) => set("browserPort", +e.currentTarget.value)} />
         </div>
       {:else}
         <div class="row">
@@ -364,5 +373,11 @@
     font-size: 12px;
     font-weight: 700;
     margin: 16px 4px 0;
+  }
+  @container (max-width: 680px) {
+    .top { gap: 12px; flex-wrap: wrap; }
+    .scroll { padding: 14px; }
+    .row { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px; }
+    .ctl, .ctl.short { width: 100%; }
   }
 </style>

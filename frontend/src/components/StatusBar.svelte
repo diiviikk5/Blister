@@ -60,6 +60,7 @@
 
 <style>
   .status {
+    flex: none;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -104,5 +105,10 @@
   }
   .ver {
     font-size: 11px;
+  }
+  @container (max-width: 680px) {
+    .status { gap: 0; padding-inline: 4px; }
+    .cell { padding-inline: 5px; font-size: 11px; }
+    .status > .faint, .status > .cell:nth-child(2) { display: none; }
   }
 </style>

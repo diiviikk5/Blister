@@ -290,4 +290,9 @@
   .row.sel .acts {
     opacity: 1;
   }
+  @container (max-width: 560px) {
+    .row { grid-template-columns: 32px minmax(0, 1fr) 68px; gap: 10px; padding-inline: 10px; }
+    .nums { display: none; }
+    .tile { width: 30px; height: 30px; }
+  }
 </style>

@@ -264,7 +264,7 @@
 {#if renaming}
   <Modal title="Rename" onclose={() => (renaming = null)}>
     <!-- svelte-ignore a11y_autofocus -->
-    <input class="field" bind:value={newName} autofocus onkeydown={(e) => e.key === "Enter" && doRename()} />
+    <input aria-label="File name" class="field" bind:value={newName} autofocus onkeydown={(e) => e.key === "Enter" && doRename()} />
     {#snippet actions()}
       <button class="btn" onclick={() => (renaming = null)}>Cancel</button>
       <button class="btn btn--accent" onclick={doRename}>Rename</button>
@@ -279,7 +279,7 @@
       (signed or session URLs) are the usual reason to do this.
     </p>
     <!-- svelte-ignore a11y_autofocus -->
-    <input class="field mono" bind:value={relinkURL} placeholder="https://…" autofocus onkeydown={(e) => e.key === "Enter" && relinkURL.trim() && doRelink()} />
+    <input aria-label="Replacement download link" type="url" class="field mono" bind:value={relinkURL} placeholder="https://…" autofocus onkeydown={(e) => e.key === "Enter" && relinkURL.trim() && doRelink()} />
     {#snippet actions()}
       <button class="btn" onclick={() => (store.relink = null)}>Cancel</button>
       <button class="btn btn--accent" disabled={!relinkURL.trim()} onclick={doRelink}>Replace and resume</button>
@@ -291,6 +291,7 @@
 
 <style>
   .app {
+    container-type: inline-size;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -298,6 +299,7 @@
     color: var(--ib-text);
   }
   .body {
+    position: relative;
     flex: 1;
     display: flex;
     min-height: 0;
@@ -357,5 +359,22 @@
     height: 20px;
     border-width: var(--bw);
     border-radius: var(--r-sm);
+  }
+  @container (max-width: 1000px) {
+    .body :global(.detail:not(.bottom)) {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: min(380px, 100%);
+      z-index: 25;
+      background: var(--paper-solid);
+    }
+  }
+  @container (max-width: 680px) {
+    .body :global(.side) { display: none; }
+    .body :global(.detail.bottom) { display: flex; flex-direction: column; height: min(300px, 45%); }
+    .body :global(.detail.bottom .body) { display: block; border-left: 0; }
+    .body :global(.detail.bottom .foot) { flex: none; }
   }
 </style>

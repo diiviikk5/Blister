@@ -17,6 +17,8 @@
   <label class="search" style="--wails-draggable: no-drag">
     <Icon name="search" size={16} />
     <input
+      type="search"
+      aria-label="Search downloads"
       bind:this={search}
       bind:value={store.query}
       placeholder="Search downloads"
@@ -32,6 +34,11 @@
 
   <div class="spacer"></div>
 
+  <div class="quick" style="--wails-draggable: no-drag">
+    <button class="btn btn--icon" onclick={() => store.openAdd()} aria-label="Add download" title="Add download"><Icon name="plus" size={17} /></button>
+    <button class="btn btn--icon" onclick={() => (store.paletteOpen = true)} aria-label="Commands and navigation" title="Commands and navigation (Ctrl K)"><Icon name="list" size={17} /></button>
+  </div>
+
   <button class="minibtn" style="--wails-draggable: no-drag" onclick={() => store.setMini(true)} title="Mini bar (Ctrl M)" aria-label="Mini bar mode">
     <Icon name="min" size={14} stroke={3} /><span>Mini</span>
   </button>
@@ -46,6 +53,7 @@
 
 <style>
   .bar {
+    flex: none;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -63,6 +71,7 @@
     font-size: 19px;
     letter-spacing: -0.045em;
   }
+  .quick { display: none; }
   .search {
     display: flex;
     align-items: center;
@@ -154,5 +163,14 @@
   .win .close:hover {
     background: var(--bad);
     color: #1a0a0d;
+  }
+  @container (max-width: 680px) {
+    .bar { gap: 8px; padding-left: 10px; }
+    .brand { width: auto; }
+    .brand span { display: none; }
+    .quick { display: flex; gap: 6px; }
+    .search { flex: 1; width: auto; min-width: 0; }
+    .spacer, .minibtn { display: none; }
+    kbd { display: none; }
   }
 </style>

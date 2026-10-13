@@ -113,4 +113,8 @@
       display: none;
     }
   }
+  @container (max-width: 460px) {
+    h1 { font-size: 19px; flex: 1 1 100%; }
+    .tools { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  }
 </style>
