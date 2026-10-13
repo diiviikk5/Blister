@@ -2,7 +2,7 @@
 // the list view derives filtered/sorted arrays from it.
 import { api, on, errText } from "./api";
 import type { External, Settings, Task, Tick, TickItem, ToolStatus } from "./types";
-import { applyRice, defaultRice, normalize, type Rice } from "./rice";
+import { applyRice, defaultRice, normalize, restoreRice, type Rice } from "./rice";
 
 export type Filter =
   | "all"
@@ -173,7 +173,7 @@ class Store {
   loadRice(s: Settings) {
     let r: Rice;
     try {
-      r = s.rice ? normalize(JSON.parse(s.rice)) : structuredClone(defaultRice);
+      r = restoreRice(s.rice);
     } catch {
       r = structuredClone(defaultRice);
     }
@@ -229,7 +229,7 @@ class Store {
 
   resetRice() {
     this.setRice(structuredClone(defaultRice));
-    this.toast("Restored the default look. Your saved themes are kept.", "ok");
+    this.toast("Restored Graphite. Your saved themes are kept.", "ok");
   }
 
   persistRice() {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { normalize, decodeRice, encodeRice, presets, contrast } from "../src/lib/rice.ts";
+import { normalize, decodeRice, encodeRice, presets, contrast, restoreRice, defaultRice } from "../src/lib/rice.ts";
 
 test("imported themes keep numeric settings, fonts and colors usable", () => {
   const bad = normalize({ colors: { text: "broken" }, type: { scale: 0, ui: 42 }, layout: { view: "oops" }, fx: { opacity: -8, wallpaper: 42 }, shape: { depth: Infinity } });
@@ -29,4 +29,32 @@ test("Readable uses AA text contrast on every surface and disables motion", () =
   assert.ok(contrast(p.colors.accentInk, p.colors.accent) >= 4.5);
   assert.ok(contrast(p.colors.hotInk, p.colors.hot) >= 4.5);
   assert.equal(p.fx.motion, 0);
+});
+
+test("desktop upgrade replaces bundled legacy rice and preserves personal changes", () => {
+  const legacy = structuredClone(presets.find((p) => p.name === "Solar Paper"));
+  delete legacy.chrome;
+  delete legacy.layout.gap;
+  delete legacy.layout.sidebarWidth;
+  delete legacy.layout.detailWidth;
+  delete legacy.bar.animation;
+  assert.deepEqual(restoreRice(JSON.stringify(legacy)), defaultRice);
+  legacy.colors.accent = "#123456";
+  assert.equal(restoreRice(JSON.stringify(legacy)).colors.accent, "#123456");
+});
+
+test("desktop layout imports respect useful panel sizes and animation choices", () => {
+  const r = normalize({ layout: { gap: -20, sidebarWidth: 999, detailWidth: 2 }, bar: { animation: "invalid" } });
+  assert.equal(r.layout.gap, 0);
+  assert.equal(r.layout.sidebarWidth, 320);
+  assert.equal(r.layout.detailWidth, 280);
+  assert.equal(r.bar.animation, "flow");
+});
+
+test("new desktop presets provide AA body and secondary text contrast", () => {
+  for (const p of presets.slice(0, 3)) {
+    for (const bg of [p.colors.paper, p.colors.paper2, p.colors.card]) {
+      for (const fg of [p.colors.text, p.colors.muted]) assert.ok(contrast(fg, bg) >= 4.5, `${p.name}: ${fg} on ${bg}`);
+    }
+  }
 });

@@ -26,6 +26,7 @@ export interface Colors {
 
 export interface Rice {
   v: 1;
+  chrome: "linux";
   name: string;
   author?: string;
   colors: Colors;
@@ -37,8 +38,11 @@ export interface Rice {
     sidebar: "left" | "right" | "hidden";
     detail: "right" | "bottom" | "off";
     rows: "lines" | "cards";
+    gap: number;
+    sidebarWidth: number;
+    detailWidth: number;
   };
-  bar: { style: BarStyle; height: number; heads: boolean; stripes: boolean };
+  bar: { style: BarStyle; height: number; heads: boolean; stripes: boolean; animation: "flow" | "pulse" | "off" };
   fx: {
     motion: number; // 0 off, 1 normal, 2 springy
     grain: number; // 0..1
@@ -54,10 +58,11 @@ export interface Rice {
 
 const base: Omit<Rice, "name" | "colors"> = {
   v: 1,
+  chrome: "linux",
   shape: { border: 2.5, radius: 11, depth: 6, shadow: "extrude" },
   type: { ui: "Geist Variable", mono: "Geist Mono Variable", scale: 1, weight: 900, tracking: -0.05, monoUI: false },
-  layout: { view: "list", density: "comfortable", sidebar: "left", detail: "right", rows: "lines" },
-  bar: { style: "lanes", height: 14, heads: true, stripes: true },
+  layout: { view: "list", density: "comfortable", sidebar: "left", detail: "right", rows: "lines", gap: 10, sidebarWidth: 208, detailWidth: 360 },
+  bar: { style: "lanes", height: 14, heads: true, stripes: true, animation: "flow" },
   fx: { motion: 1, grain: 0, scanlines: 0, vignette: 0, wallpaper: "", dim: 0.35, blur: 0, opacity: 1 },
   css: "",
 };
@@ -86,6 +91,42 @@ function make(p: Patch): Rice {
 }
 
 export const presets: Rice[] = [
+  make({
+    name: "Graphite",
+    colors: {
+      paper: "#101116", paper2: "#17191f", card: "#1c1f27", text: "#e8eaf0", muted: "#b0b7c8", faint: "#929aaf",
+      line: "#303542", ex: "#08090c", accent: "#b4befe", accentInk: "#111320", hot: "#f5a9cb", hotInk: "#111320",
+      alt: "#94e2d5", ok: "#a6e3a1", bad: "#f38ba8",
+    },
+    shape: { border: 1, radius: 12, depth: 0, shadow: "none" },
+    type: { weight: 650, tracking: -0.025 },
+    layout: { rows: "cards", gap: 10, sidebarWidth: 208 },
+    bar: { style: "solid", height: 7, stripes: false, animation: "flow" },
+  }),
+  make({
+    name: "Moss",
+    colors: {
+      paper: "#121713", paper2: "#19201b", card: "#212a23", text: "#e1e9df", muted: "#b2c1b1", faint: "#92a58f",
+      line: "#354438", ex: "#080e0a", accent: "#b9d58c", accentInk: "#172012", hot: "#e8b899", hotInk: "#20160e",
+      alt: "#97c9c0", ok: "#b9d58c", bad: "#ec9f9f",
+    },
+    shape: { border: 1, radius: 8, depth: 0, shadow: "none" },
+    type: { ui: "Geist Mono Variable", monoUI: true, weight: 600, tracking: -0.02 },
+    layout: { rows: "cards", density: "compact" },
+    bar: { style: "line", height: 12, stripes: false, animation: "pulse" },
+  }),
+  make({
+    name: "Paper WM",
+    colors: {
+      paper: "#f3f4f0", paper2: "#e8ebe4", card: "#ffffff", text: "#222921", muted: "#4d584c", faint: "#667164",
+      line: "#cdd5c8", ex: "#ced3c9", accent: "#456441", accentInk: "#ffffff", hot: "#835c70", hotInk: "#ffffff",
+      alt: "#477470", ok: "#3b7046", bad: "#a23c4b",
+    },
+    shape: { border: 1, radius: 10, depth: 0, shadow: "none" },
+    type: { weight: 650, tracking: -0.02 },
+    layout: { rows: "cards" },
+    bar: { style: "solid", height: 6, stripes: false, animation: "flow" },
+  }),
   make({
     name: "Thermal",
     colors: {
@@ -268,6 +309,7 @@ let styleEl: HTMLStyleElement | null = null;
 
 /** Paints a rice onto the document. Cheap enough to call on every slider tick. */
 export function applyRice(r: Rice, el: HTMLElement = document.body) {
+  el.dataset.chrome = "linux";
   const c = r.colors;
   const set = (k: string, v: string) => el.style.setProperty(k, v);
   // Surfaces thin out over a wallpaper or a Mica/Acrylic window.
@@ -310,6 +352,9 @@ export function applyRice(r: Rice, el: HTMLElement = document.body) {
   set("--h-track", `${t.tracking}em`);
 
   const L = r.layout;
+  set("--row-gap", `${L.gap}px`);
+  set("--side-w", `${L.sidebarWidth}px`);
+  set("--detail-w", `${L.detailWidth}px`);
   el.dataset.view = L.view;
   el.dataset.density = L.density;
   el.dataset.sidebar = L.sidebar;
@@ -320,6 +365,7 @@ export function applyRice(r: Rice, el: HTMLElement = document.body) {
   set("--bar-h", `${r.bar.height}px`);
   el.dataset.heads = String(r.bar.heads);
   el.dataset.stripes = String(r.bar.stripes);
+  el.dataset.transferAnimation = r.bar.animation;
 
   const f = r.fx;
   el.dataset.motion = String(f.motion);
@@ -368,6 +414,7 @@ export function normalize(x: Partial<Rice> | null | undefined): Rice {
   if (!x || typeof x !== "object") return d;
   const r: Rice = {
     v: 1,
+    chrome: "linux",
     name: String(x.name ?? "Untitled"),
     author: x.author,
     colors: { ...d.colors, ...x.colors },
@@ -402,16 +449,29 @@ export function normalize(x: Partial<Rice> | null | undefined): Rice {
   r.layout.sidebar = choice(r.layout.sidebar, ["left", "right", "hidden"], d.layout.sidebar);
   r.layout.detail = choice(r.layout.detail, ["right", "bottom", "off"], d.layout.detail);
   r.layout.rows = choice(r.layout.rows, ["lines", "cards"], d.layout.rows);
+  r.layout.gap = clamp(r.layout.gap, d.layout.gap, 0, 24);
+  r.layout.sidebarWidth = clamp(r.layout.sidebarWidth, d.layout.sidebarWidth, 176, 320);
+  r.layout.detailWidth = clamp(r.layout.detailWidth, d.layout.detailWidth, 280, 480);
   r.bar.style = choice(r.bar.style, ["lanes", "solid", "blocks", "ascii", "braille", "line", "dots"], d.bar.style);
   r.bar.height = clamp(r.bar.height, d.bar.height, 3, 32);
   r.bar.heads = typeof r.bar.heads === "boolean" ? r.bar.heads : d.bar.heads;
   r.bar.stripes = typeof r.bar.stripes === "boolean" ? r.bar.stripes : d.bar.stripes;
+  r.bar.animation = choice(r.bar.animation, ["flow", "pulse", "off"], d.bar.animation);
   r.fx.motion = clamp(r.fx.motion, d.fx.motion, 0, 2);
   for (const key of ["grain", "scanlines", "vignette", "dim"] as const) r.fx[key] = clamp(r.fx[key], d.fx[key], 0, 1);
   r.fx.blur = clamp(r.fx.blur, d.fx.blur, 0, 40);
   r.fx.opacity = clamp(r.fx.opacity, d.fx.opacity, 0.35, 1);
   r.fx.wallpaper = typeof r.fx.wallpaper === "string" && /^(https?:\/\/|data:image\/(png|jpeg|webp|gif);base64,)/i.test(r.fx.wallpaper) ? r.fx.wallpaper : "";
   return r;
+}
+
+/** Replace untouched bundled looks on upgrade while preserving personal rice. */
+export function restoreRice(saved: string): Rice {
+  if (!saved) return structuredClone(defaultRice);
+  const raw = JSON.parse(saved) as Partial<Rice>;
+  const restored = normalize(raw);
+  if (!raw?.chrome && presets.some((p) => JSON.stringify(normalize(p)) === JSON.stringify(restored))) return structuredClone(defaultRice);
+  return restored;
 }
 
 // --------------------------------------------------------------- colour helpers

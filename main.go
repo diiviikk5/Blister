@@ -106,5 +106,5 @@ func bg(translucent bool) *options.RGBA {
 	if translucent {
 		return &options.RGBA{R: 0, G: 0, B: 0, A: 0}
 	}
-	return &options.RGBA{R: 13, G: 9, B: 19, A: 255}
+	return &options.RGBA{R: 16, G: 17, B: 22, A: 255}
 }

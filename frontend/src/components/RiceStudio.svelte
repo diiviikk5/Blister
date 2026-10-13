@@ -79,6 +79,7 @@
   ];
   const checks = $derived([
     { label: "Text on background", v: contrast(r.colors.text, r.colors.paper) },
+    { label: "Text on cards", v: contrast(r.colors.text, r.colors.card) },
     { label: "Muted on background", v: contrast(r.colors.muted, r.colors.paper) },
     { label: "Ink on accent", v: contrast(r.colors.accentInk, r.colors.accent) },
     { label: "Ink on signal", v: contrast(r.colors.hotInk, r.colors.hot) },
@@ -171,7 +172,7 @@
     <div class="acts">
       <button class="btn" disabled={!store.canUndoRice} onclick={() => store.undoRice()} title="Undo the last theme change">Undo</button>
       <button class="btn" disabled={!store.canRedoRice} onclick={() => store.redoRice()} title="Redo the last theme change">Redo</button>
-      <button class="btn" onclick={() => store.resetRice()} title="Restore Thermal; saved themes stay in your library">Reset look</button>
+      <button class="btn" onclick={() => store.resetRice()} title="Restore Graphite; saved themes stay in your library">Reset look</button>
       <button class="btn" onclick={() => store.setRice(shuffle($state.snapshot(store.rice) as Rice))} title="Random palette and shape"><Icon name="bolt" size={15} /> Shuffle</button>
       <button class="btn" onclick={saveToLibrary}><Icon name="heart" size={15} /> Save</button>
       <button class="btn" onclick={() => copyCode(false)}><Icon name="copy" size={15} /> Share code</button>
@@ -356,6 +357,21 @@
               {/each}
             </div>
           </div>
+          <label class="ctl">
+            <span>Card spacing</span>
+            <input type="range" min="0" max="24" value={r.layout.gap} oninput={(e) => edit((x) => (x.layout.gap = num(e)))} />
+            <b class="num">{r.layout.gap}px</b>
+          </label>
+          <label class="ctl">
+            <span>Sidebar width</span>
+            <input type="range" min="176" max="320" step="8" value={r.layout.sidebarWidth} oninput={(e) => edit((x) => (x.layout.sidebarWidth = num(e)))} />
+            <b class="num">{r.layout.sidebarWidth}px</b>
+          </label>
+          <label class="ctl">
+            <span>Details width</span>
+            <input type="range" min="280" max="480" step="8" value={r.layout.detailWidth} oninput={(e) => edit((x) => (x.layout.detailWidth = num(e)))} />
+            <b class="num">{r.layout.detailWidth}px</b>
+          </label>
         </div>
         <p class="note">With the sidebar hidden, <kbd>Ctrl K</kbd> still reaches every filter and action.</p>
       {:else if tab === "bars"}
@@ -370,6 +386,14 @@
           {/each}
         </div>
         <div class="rows">
+          <div class="ctl">
+            <span>Transfer animation</span>
+            <div class="seg-pick">
+              {#each [["flow", "Flow"], ["pulse", "Pulse"], ["off", "Off"]] as [v, label] (v)}
+                <button class:on={r.bar.animation === v} aria-pressed={r.bar.animation === v} onclick={() => edit((x) => (x.bar.animation = v as Rice["bar"]["animation"]))}>{label}</button>
+              {/each}
+            </div>
+          </div>
           <div class="ctl">
             <span>Bar height</span>
             <input type="range" min="4" max="28" value={r.bar.height} oninput={(e) => edit((x) => (x.bar.height = num(e)))} />
@@ -473,7 +497,7 @@
         <span class="pill">Torrent</span>
         <span class="pill pill--hot">New</span>
       </div>
-      <button class="reset" onclick={() => store.setRice(structuredClone(defaultRice))}>Reset to Thermal</button>
+      <button class="reset" onclick={() => store.setRice(structuredClone(defaultRice))}>Reset to Graphite</button>
     </aside>
   </div>
 </div>
