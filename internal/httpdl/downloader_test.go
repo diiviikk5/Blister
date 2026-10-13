@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -81,12 +82,22 @@ func TestMultiConnectionDownload(t *testing.T) {
 
 func TestResumeFromSnapshot(t *testing.T) {
 	data := payload(16 << 20)
-	var served atomic.Int64
+	var saved atomic.Value
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Canceled first-run handlers can still flush socket buffers after
-		// Run returns. Only count requests belonging to the resumed run.
 		if r.Header.Get("X-Blister-Test-Phase") == "resume" {
-			w = &countingWriter{ResponseWriter: w, n: &served}
+			// Check the requested offsets, not socket byte counts: work stealing
+			// can discard buffered data within a range that was missing on disk.
+			var start, last int64
+			if n, err := fmt.Sscanf(r.Header.Get("Range"), "bytes=%d-%d", &start, &last); err != nil || n != 2 || last < start {
+				t.Errorf("resume requested invalid range %q", r.Header.Get("Range"))
+				http.Error(w, "invalid range", http.StatusBadRequest)
+				return
+			}
+			for _, s := range saved.Load().([]Segment) {
+				if s.Pos > s.Start && start < s.Pos && last >= s.Start {
+					t.Errorf("resume range [%d,%d] overlaps saved bytes [%d,%d)", start, last, s.Start, s.Pos)
+				}
+			}
 		}
 		http.ServeContent(w, r, "x", time.Time{}, bytes.NewReader(data))
 	}))
@@ -112,6 +123,7 @@ func TestResumeFromSnapshot(t *testing.T) {
 	had := d.Written()
 
 	opts.Segments = snap
+	saved.Store(snap)
 	opts.Request.Headers = map[string]string{"X-Blister-Test-Phase": "resume"}
 	d2 := New(opts)
 	if d2.Written() != had {
@@ -121,22 +133,6 @@ func TestResumeFromSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkFile(t, out, data)
-	// The second run must not re-download what was already on disk
-	// (allow slack for in-flight buffers discarded at cancel).
-	if got, max := served.Load(), int64(len(data))-had+int64(opts.Connections)*bufSize*2; got > max {
-		t.Fatalf("resume re-fetched too much: %d > %d", got, max)
-	}
-}
-
-type countingWriter struct {
-	http.ResponseWriter
-	n *atomic.Int64
-}
-
-func (c *countingWriter) Write(p []byte) (int, error) {
-	n, err := c.ResponseWriter.Write(p)
-	c.n.Add(int64(n))
-	return n, err
 }
 
 func TestNoRangeServer(t *testing.T) {
