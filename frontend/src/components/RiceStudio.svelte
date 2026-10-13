@@ -230,9 +230,9 @@
         <div class="colors">
           {#each colorKeys as [k, label] (k)}
             <label class="color">
-              <input type="color" value={r.colors[k]} oninput={(e) => edit((x) => (x.colors[k] = str(e)))} />
+              <input aria-label={label} type="color" value={r.colors[k]} oninput={(e) => edit((x) => (x.colors[k] = str(e)))} />
               <span class="cl">{label}</span>
-              <input class="hex mono" value={r.colors[k]} onchange={(e) => /^#[0-9a-f]{6}$/i.test(str(e)) && edit((x) => (x.colors[k] = str(e)))} spellcheck="false" />
+              <input aria-label={`${label} hex color`} class="hex mono" value={r.colors[k]} onchange={(e) => /^#[0-9a-f]{6}$/i.test(str(e)) && edit((x) => (x.colors[k] = str(e)))} spellcheck="false" />
             </label>
           {/each}
         </div>
@@ -413,7 +413,7 @@
             <span>Wallpaper</span>
             <div class="wallrow">
               <button class="btn btn--sm" onclick={pickWall}><Icon name="image" size={13} /> Choose image</button>
-              <input class="field" placeholder="…or an https:// image URL" value={r.fx.wallpaper.startsWith("data:") ? "" : r.fx.wallpaper} onchange={(e) => edit((x) => ((x.fx.wallpaper = str(e).trim()), str(e).trim() && (x.fx.opacity = Math.min(x.fx.opacity, 0.68))))} />
+              <input aria-label="Wallpaper image URL" type="url" class="field" placeholder="…or an https:// image URL" value={r.fx.wallpaper.startsWith("data:") ? "" : r.fx.wallpaper} onchange={(e) => edit((x) => ((x.fx.wallpaper = str(e).trim()), str(e).trim() && (x.fx.opacity = Math.min(x.fx.opacity, 0.68))))} />
               {#if r.fx.wallpaper}<button class="btn btn--sm btn--icon" onclick={() => edit((x) => ((x.fx.wallpaper = ""), (x.fx.opacity = 1)))} aria-label="Remove wallpaper"><Icon name="x" size={13} /></button>{/if}
             </div>
           </div>
@@ -449,7 +449,7 @@
         <p class="note">Mica and Acrylic let your desktop show through the window on Windows 11. Lower the surface opacity to taste.</p>
       {:else}
         <div class="css">
-          <textarea class="field mono" rows="14" spellcheck="false" value={r.css} oninput={(e) => edit((x) => (x.css = (e.currentTarget as HTMLTextAreaElement).value))} placeholder={"/* Your CSS, applied live. Tokens: --ib-accent, --ib-paper, --bw, --r, --bar-h… */\n.row .name { letter-spacing: .02em; }"}></textarea>
+          <textarea aria-label="Custom theme CSS" class="field mono" rows="14" spellcheck="false" value={r.css} oninput={(e) => edit((x) => (x.css = (e.currentTarget as HTMLTextAreaElement).value))} placeholder={"/* Your CSS, applied live. Tokens: --ib-accent, --ib-paper, --bw, --r, --bar-h… */\n.row .name { letter-spacing: .02em; }"}></textarea>
           <div class="snips">
             {#each snippets as [l, css] (l)}
               <button class="btn btn--sm" onclick={() => addSnippet(css)}><Icon name="plus" size={12} /> {l}</button>

@@ -16,6 +16,7 @@
 - Retain user-chosen file names and support Windows local torrent path names.
 - Carry browser authentication to video and torrent downloads; strip credentials on cross-host HTTP redirects.
 - Add public tracker fallbacks only after metadata confirms a torrent is public.
+- Decode local torrent file URLs, including spaces and Windows drive letters; retry TCP/UDP port collisions when choosing a listening port.
 
 ### Accessibility and customization
 
@@ -27,6 +28,7 @@
 - Add 20-step theme undo/redo, grouped slider edits, validated imports, and a default-look recovery shortcut.
 - Adapt narrow windows with compact navigation, responsive dialogs and settings, and usable detail panels.
 - Clearly label simulated browser previews and snapshot reactive settings before saving.
+- Label theme editors for screen readers and show available audio formats when ffmpeg is missing.
 
 ### Validation
 

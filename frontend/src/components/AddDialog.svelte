@@ -248,8 +248,9 @@
               <option value="1080">1080p</option>
               <option value="720">720p</option>
               <option value="480">480p</option>
-              <option value="audio">Audio only (MP3)</option>
+              <option value="audio">{store.tools.ffmpeg ? "Audio only (MP3)" : "Audio only (best available)"}</option>
             </select>
+            {#if !store.tools.ffmpeg}<span class="hint">Install ffmpeg for MP3 conversion and separate video/audio streams.</span>{/if}
           </div>
         {/if}
         <div class="opt">
