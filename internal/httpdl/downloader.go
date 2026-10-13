@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -95,6 +96,8 @@ var ErrInvalidRange = errors.New("server returned an invalid byte range")
 
 var ErrRemoteChanged = errors.New("file changed on the server; retry to download the current version")
 
+var ErrEncodedBody = errors.New("server sent compressed transfer data despite an identity request")
+
 // New prepares a downloader. Call Run to start it.
 func New(o Options) *Downloader {
 	if o.MinSegment <= 0 {
@@ -121,10 +124,9 @@ func (d *Downloader) initSegments() {
 	o := d.o
 	if !o.Resumable || o.Size <= 0 {
 		// Can't seek: always restart from zero.
-		d.segs = []*segment{{Segment: Segment{Start: 0, End: o.Size, Pos: 0}}}
-		if o.Size <= 0 {
-			d.segs[0].End = -1
-		}
+		// A full-body response must reach EOF, even with a known size. The
+		// server may change its length between the probe and the transfer.
+		d.segs = []*segment{{Segment: Segment{Start: 0, End: -1, Pos: 0}}}
 		return
 	}
 	if len(o.Segments) > 0 && validSegments(o.Segments, o.Size) {
@@ -287,6 +289,9 @@ func (d *Downloader) Run(ctx context.Context) error {
 	if !d.done() {
 		return errors.New("download ended with missing data")
 	}
+	if d.o.Size >= 0 && d.written.Load() != d.o.Size {
+		return ErrRemoteChanged
+	}
 	return f.Sync()
 }
 
@@ -428,7 +433,7 @@ func (d *Downloader) fetchWithRetry(seg *segment) error {
 		if d.ctx.Err() != nil {
 			return context.Canceled
 		}
-		if errors.Is(err, ErrRangeIgnored) || errors.Is(err, ErrInvalidRange) || errors.Is(err, ErrRemoteChanged) {
+		if errors.Is(err, ErrRangeIgnored) || errors.Is(err, ErrInvalidRange) || errors.Is(err, ErrRemoteChanged) || errors.Is(err, ErrEncodedBody) {
 			return err
 		}
 		var he *HTTPError
@@ -499,6 +504,21 @@ func (d *Downloader) fetch(seg *segment) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return &HTTPError{Status: resp.StatusCode, URL: d.o.Request.URL}
+	}
+	if encoding := resp.Header.Get("Content-Encoding"); encoding != "" && !strings.EqualFold(encoding, "identity") {
+		return ErrEncodedBody
+	}
+	if d.o.Validator != "" {
+		key := "Last-Modified"
+		if strings.HasPrefix(d.o.Validator, `"`) {
+			key = "ETag"
+		}
+		if current := resp.Header.Get(key); current != "" && current != d.o.Validator {
+			return ErrRemoteChanged
+		}
+	}
+	if !ranged && d.o.Size >= 0 && resp.ContentLength >= 0 && resp.ContentLength != d.o.Size {
+		return ErrRemoteChanged
 	}
 	if ranged && resp.StatusCode != http.StatusPartialContent {
 		if d.o.Validator != "" {

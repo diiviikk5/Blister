@@ -28,6 +28,39 @@ func TestSanitizeReservedAndUnicodeNames(t *testing.T) {
 	}
 }
 
+func TestSingleStreamRejectsChangedLength(t *testing.T) {
+	for _, chunked := range []bool{false, true} {
+		t.Run(fmt.Sprintf("chunked=%v", chunked), func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if chunked {
+					w.(http.Flusher).Flush()
+				}
+				fmt.Fprint(w, "more than four bytes")
+			}))
+			defer srv.Close()
+			d := New(Options{Client: client(t), Request: Request{URL: srv.URL}, Path: filepath.Join(t.TempDir(), "f.part"), Size: 4})
+			if err := d.Run(context.Background()); !errors.Is(err, ErrRemoteChanged) {
+				t.Fatalf("error = %v", err)
+			}
+		})
+	}
+}
+
+func TestRejectsUnexpectedTransferEncoding(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Encoding", "gzip")
+		fmt.Fprint(w, "gzip")
+	}))
+	defer srv.Close()
+	d := New(Options{Client: client(t), Request: Request{URL: srv.URL}, Path: filepath.Join(t.TempDir(), "f.part"), Size: 4})
+	if err := d.Run(context.Background()); !errors.Is(err, ErrEncodedBody) {
+		t.Fatalf("error = %v", err)
+	}
+	if d.Written() != 0 {
+		t.Fatal("encoded response was written as file bytes")
+	}
+}
+
 func TestProbeDoesNotTrustAcceptRanges(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Accept-Ranges", "bytes")

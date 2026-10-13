@@ -5,6 +5,7 @@
 ### Downloads
 
 - Validate ranged response offsets, lengths and totals before writing file data.
+- Verify full-stream lengths through EOF and reject unexpected transfer compression or changed response validators.
 - Trust demonstrated range support, rather than an `Accept-Ranges` claim; support empty files.
 - Strip captured range, compression and cache headers that interfere with full downloads.
 - Restart missing or truncated partial files and compare ETag / Last-Modified on resume.
