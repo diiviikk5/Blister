@@ -161,12 +161,23 @@ func (m *Manager) Add(r AddRequest) (*Task, error) {
 	if r.Kind == "" {
 		r.Kind = DetectKind(r.URL)
 	}
+	if r.Kind != KindHTTP && r.Kind != KindTorrent && r.Kind != KindHLS && r.Kind != KindMedia {
+		return nil, fmt.Errorf("unsupported download type %q", r.Kind)
+	}
+	if r.Checksum != "" {
+		if _, _, err := ParseChecksum(r.Checksum); err != nil {
+			return nil, err
+		}
+	}
 	s := m.o.Settings()
 	name := r.Name
 	if name == "" {
 		name = GuessName(r.URL, r.Kind)
 	}
 	name = httpdl.Sanitize(name)
+	if name == "" {
+		return nil, errors.New("choose a file name with at least one letter or number")
+	}
 	cat := category.Detect(name, "")
 	if r.Kind == KindMedia || r.Kind == KindHLS {
 		cat = category.Video
@@ -351,6 +362,7 @@ func (m *Manager) SetURL(id, raw string) error {
 	t.URL = raw
 	t.Request.URL = raw
 	t.ETag = "" // another mirror has its own ETag; size still guards us
+	t.LastModified = ""
 	if t.Status != StatusCompleted {
 		t.Status = StatusQueued
 		t.Error = ""
@@ -585,18 +597,27 @@ func (m *Manager) Rename(id, name string) error {
 		m.mu.Unlock()
 		return errors.New("pause the download before renaming it")
 	}
-	oldPart, oldPath := t.PartPath(), t.Path()
-	t.Name = name
-	newPart, newPath := t.PartPath(), t.Path()
-	cp := *t
-	m.mu.Unlock()
-	if exists(oldPart) {
-		_ = os.Rename(oldPart, newPart)
-	} else if cp.Status == StatusCompleted && exists(oldPath) {
-		if err := os.Rename(oldPath, newPath); err != nil {
-			return err
+	if name != t.Name {
+		if exists(joinPath(t.Dir, name)) || exists(joinPath(t.Dir, name)+".part") || m.nameTakenLocked(t.Dir, id)(name) {
+			m.mu.Unlock()
+			return errors.New("that file name is already in use; choose another name")
+		}
+		if exists(t.PartPath()) {
+			if err := moveFile(t.PartPath(), joinPath(t.Dir, name)+".part"); err != nil {
+				m.mu.Unlock()
+				return fmt.Errorf("rename partial file: %w", err)
+			}
+		} else if t.Status == StatusCompleted && exists(t.Path()) {
+			if err := moveFile(t.Path(), joinPath(t.Dir, name)); err != nil {
+				m.mu.Unlock()
+				return fmt.Errorf("rename file: %w", err)
+			}
 		}
 	}
+	t.Name, t.NameFixed = name, true
+	cp := *t
+	// Emit outside the manager lock; listeners may read the task list.
+	m.mu.Unlock()
 	m.o.Emit(EvUpdated, cp)
 	m.save()
 	return nil

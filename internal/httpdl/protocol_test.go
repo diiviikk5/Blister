@@ -8,11 +8,25 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/diiviikk5/Blister/internal/ratelimit"
 )
+
+func TestSanitizeReservedAndUnicodeNames(t *testing.T) {
+	for _, name := range []string{"COM9.zip", "LPT8.txt", "CON.tar.gz", "aux .txt"} {
+		if !strings.HasPrefix(Sanitize(name), "_") {
+			t.Errorf("reserved name survived: %q", name)
+		}
+	}
+	name := Sanitize(strings.Repeat("界", 100) + ".zip")
+	if !utf8.ValidString(name) || len(name) > 200 || !strings.HasSuffix(name, ".zip") {
+		t.Fatalf("invalid shortened name: %q", name)
+	}
+}
 
 func TestProbeDoesNotTrustAcceptRanges(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

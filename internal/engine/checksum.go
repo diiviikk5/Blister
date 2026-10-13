@@ -35,8 +35,12 @@ func ParseChecksum(s string) (algo, digest string, err error) {
 		}
 	}
 	algo = strings.ReplaceAll(algo, "-", "")
-	if _, err := newHash(algo); err != nil {
+	h, err := newHash(algo)
+	if err != nil {
 		return "", "", err
+	}
+	if len(digest) != h.Size()*2 {
+		return "", "", fmt.Errorf("%s checksum must have %d hex characters", algo, h.Size()*2)
 	}
 	if _, err := hex.DecodeString(digest); err != nil {
 		return "", "", fmt.Errorf("checksum isn't hex: %w", err)

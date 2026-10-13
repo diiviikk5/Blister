@@ -3,7 +3,6 @@ package engine
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -47,38 +46,35 @@ func exists(p string) bool {
 	return err == nil
 }
 
-// moveFile renames src to dst, falling back to copy across volumes.
+// moveFile moves src without ever overwriting an existing destination.
 func moveFile(src, dst string) error {
-	if err := os.Rename(src, dst); err == nil {
-		return nil
-	} else if !errors.Is(err, os.ErrExist) && !isCrossDevice(err) {
-		return err
+	// Linking is atomic, cheap for large downloads, and fails if dst exists.
+	if err := os.Link(src, dst); err == nil {
+		return os.Remove(src)
 	}
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer in.Close()
-	out, err := os.Create(dst)
+	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return err
 	}
 	if _, err := out.ReadFrom(in); err != nil {
 		out.Close()
+		os.Remove(dst)
+		return err
+	}
+	if err := out.Sync(); err != nil {
+		out.Close()
+		os.Remove(dst)
 		return err
 	}
 	if err := out.Close(); err != nil {
+		os.Remove(dst)
 		return err
 	}
 	in.Close()
 	return os.Remove(src)
-}
-
-func isCrossDevice(err error) bool {
-	var le *os.LinkError
-	if errors.As(err, &le) {
-		s := le.Err.Error()
-		return strings.Contains(s, "cross-device") || strings.Contains(s, "different disk drive")
-	}
-	return false
 }

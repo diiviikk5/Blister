@@ -9,6 +9,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // Request describes what to fetch and how to look while fetching it.
@@ -198,11 +199,16 @@ func Sanitize(name string) string {
 		if len(ext) > 20 {
 			ext = ""
 		}
-		name = name[:200-len(ext)] + ext
+		base := name[:200-len(ext)]
+		for !utf8.ValidString(base) {
+			base = base[:len(base)-1]
+		}
+		name = base + ext
 	}
-	upper := strings.ToUpper(strings.TrimSuffix(name, path.Ext(name)))
+	stem, _, _ := strings.Cut(name, ".")
+	upper := strings.ToUpper(strings.TrimSpace(stem))
 	switch upper {
-	case "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "LPT1", "LPT2", "LPT3":
+	case "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9":
 		name = "_" + name
 	}
 	return name
