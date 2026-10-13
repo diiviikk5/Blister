@@ -67,9 +67,10 @@ type Task struct {
 	// Lower runs first.
 	Priority int `json:"priority"`
 
-	Request  httpdl.Request   `json:"request"`
-	Segments []httpdl.Segment `json:"segments,omitempty"`
-	ETag     string           `json:"etag,omitempty"`
+	Request      httpdl.Request   `json:"request"`
+	Segments     []httpdl.Segment `json:"segments,omitempty"`
+	ETag         string           `json:"etag,omitempty"`
+	LastModified string           `json:"lastModified,omitempty"`
 	// Checksum to verify on completion, "sha256:abcd..." (md5/sha1 too).
 	Checksum string `json:"checksum,omitempty"`
 	Verified *bool  `json:"verified,omitempty"`

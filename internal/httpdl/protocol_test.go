@@ -6,8 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"github.com/diiviikk5/Blister/internal/ratelimit"
 )
 
 func TestProbeDoesNotTrustAcceptRanges(t *testing.T) {
@@ -19,6 +23,61 @@ func TestProbeDoesNotTrustAcceptRanges(t *testing.T) {
 	p, err := ProbeURL(context.Background(), client(t), Request{URL: srv.URL})
 	if err != nil || p.Resumable || p.Size != 10 {
 		t.Fatalf("probe = %+v, error = %v", p, err)
+	}
+}
+
+func TestMissingOrTruncatedPartialRestarts(t *testing.T) {
+	data := payload(256 << 10)
+	srv := rangeServer(data)
+	defer srv.Close()
+	for _, mode := range []string{"missing", "truncated"} {
+		t.Run(mode, func(t *testing.T) {
+			out := filepath.Join(t.TempDir(), "f.part")
+			if mode == "truncated" {
+				if err := os.WriteFile(out, data[:10], 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			d := New(Options{Client: client(t), Request: Request{URL: srv.URL}, Path: out, Size: int64(len(data)), Resumable: true,
+				Segments: []Segment{{Start: 0, End: int64(len(data)), Pos: int64(len(data))}}})
+			if err := d.Run(context.Background()); err != nil {
+				t.Fatal(err)
+			}
+			checkFile(t, out, data)
+		})
+	}
+}
+
+func TestThrottlingIsNotAStall(t *testing.T) {
+	data := payload(192 << 10)
+	srv := rangeServer(data)
+	defer srv.Close()
+	out := filepath.Join(t.TempDir(), "f.part")
+	d := New(Options{Client: client(t), Request: Request{URL: srv.URL}, Path: out, Size: int64(len(data)), Resumable: true,
+		Connections: 1, StallTimeout: 150 * time.Millisecond, Limiters: []*ratelimit.Limiter{ratelimit.New(64 << 10)}})
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	if err := d.Run(ctx); err != nil {
+		t.Fatal(err)
+	}
+	checkFile(t, out, data)
+}
+
+func TestChangedIfRangeResponse(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("If-Range") != `"version1"` {
+			t.Error("missing file validator")
+		}
+		fmt.Fprint(w, "new!")
+	}))
+	defer srv.Close()
+	d := New(Options{Client: client(t), Request: Request{URL: srv.URL}, Path: filepath.Join(t.TempDir(), "f.part"), Size: 4,
+		Resumable: true, Validator: `"version1"`, Connections: 1})
+	if err := d.Run(context.Background()); !errors.Is(err, ErrRemoteChanged) {
+		t.Fatalf("error = %v", err)
+	}
+	if d.Written() != 0 {
+		t.Fatal("changed file was written")
 	}
 }
 

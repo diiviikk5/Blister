@@ -42,6 +42,8 @@ type Options struct {
 	Size int64
 	// Resumable means the server honours byte ranges.
 	Resumable bool
+	// Validator is a strong ETag or Last-Modified date for If-Range.
+	Validator string
 	// Connections is the target number of parallel connections.
 	Connections int
 	// MinSegment is the smallest range worth splitting off for a new
@@ -74,14 +76,13 @@ type Downloader struct {
 	target int
 	active int
 
-	written  atomic.Int64
-	conns    atomic.Int32
-	wg       sync.WaitGroup
-	file     *os.File
-	ctx      context.Context
-	fail     context.CancelCauseFunc
-	spawnCh  chan struct{}
-	finished chan struct{}
+	written atomic.Int64
+	conns   atomic.Int32
+	wg      sync.WaitGroup
+	file    *os.File
+	ctx     context.Context
+	fail    context.CancelCauseFunc
+	spawnCh chan struct{}
 }
 
 const bufSize = 128 << 10
@@ -91,6 +92,8 @@ var ErrRangeIgnored = errors.New("server ignored byte range request")
 
 // ErrInvalidRange prevents writing a response at an unverified byte offset.
 var ErrInvalidRange = errors.New("server returned an invalid byte range")
+
+var ErrRemoteChanged = errors.New("file changed on the server; retry to download the current version")
 
 // New prepares a downloader. Call Run to start it.
 func New(o Options) *Downloader {
@@ -109,7 +112,7 @@ func New(o Options) *Downloader {
 	if !o.Resumable || o.Size <= 0 {
 		o.Connections = 1
 	}
-	d := &Downloader{o: o, target: o.Connections, spawnCh: make(chan struct{}, 1), finished: make(chan struct{})}
+	d := &Downloader{o: o, target: o.Connections, spawnCh: make(chan struct{}, 1)}
 	d.initSegments()
 	return d
 }
@@ -230,6 +233,19 @@ func (d *Downloader) Run(ctx context.Context) error {
 	}
 	d.file = f
 	defer f.Close()
+	// Saved offsets only mean anything while the preallocated partial file
+	// is intact. Never recreate a missing file and skip its saved bytes.
+	st, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if len(d.o.Segments) > 0 && st.Size() != d.o.Size {
+		d.mu.Lock()
+		d.o.Segments, d.segs = nil, nil
+		d.written.Store(0)
+		d.initSegments()
+		d.mu.Unlock()
+	}
 	if d.o.Size > 0 {
 		if st, err := f.Stat(); err == nil && st.Size() != d.o.Size {
 			// Pre-size the (sparse) file so every connection can WriteAt
@@ -245,21 +261,22 @@ func (d *Downloader) Run(ctx context.Context) error {
 	defer fail(nil)
 	d.ctx, d.fail = runCtx, fail
 
-	d.spawn()
-	go func() {
-		for {
-			select {
-			case <-d.spawnCh:
-				d.spawn()
-			case <-d.finished:
-				return
-			case <-runCtx.Done():
-				return
-			}
+	// Only this goroutine spawns workers. WaitGroup.Add can never race with
+	// Wait when the last worker finishes during live connection tuning.
+	for runCtx.Err() == nil {
+		d.spawn()
+		d.mu.Lock()
+		active := d.active
+		d.mu.Unlock()
+		if active == 0 {
+			break
 		}
-	}()
+		select {
+		case <-d.spawnCh:
+		case <-runCtx.Done():
+		}
+	}
 	d.wg.Wait()
-	close(d.finished)
 
 	if err := context.Cause(runCtx); err != nil && !errors.Is(err, context.Canceled) {
 		return err
@@ -270,7 +287,7 @@ func (d *Downloader) Run(ctx context.Context) error {
 	if !d.done() {
 		return errors.New("download ended with missing data")
 	}
-	return nil
+	return f.Sync()
 }
 
 func (d *Downloader) done() bool {
@@ -288,7 +305,7 @@ func (d *Downloader) done() bool {
 func (d *Downloader) spawn() {
 	for {
 		d.mu.Lock()
-		if d.active >= d.target {
+		if d.ctx.Err() != nil || d.active >= d.target {
 			d.mu.Unlock()
 			return
 		}
@@ -345,6 +362,12 @@ func (d *Downloader) acquireLocked() *segment {
 
 func (d *Downloader) worker(seg *segment) {
 	defer d.wg.Done()
+	defer func() {
+		select {
+		case d.spawnCh <- struct{}{}:
+		default:
+		}
+	}()
 	for seg != nil {
 		err := d.fetchWithRetry(seg)
 		d.mu.Lock()
@@ -395,7 +418,9 @@ var errScaledDown = errors.New("connection count reduced")
 func (d *Downloader) fetchWithRetry(seg *segment) error {
 	failures := 0
 	for {
-		before := d.written.Load()
+		d.mu.Lock()
+		before := seg.Pos
+		d.mu.Unlock()
 		err := d.fetch(seg)
 		if err == nil || errors.Is(err, errScaledDown) {
 			return err
@@ -403,14 +428,17 @@ func (d *Downloader) fetchWithRetry(seg *segment) error {
 		if d.ctx.Err() != nil {
 			return context.Canceled
 		}
-		if errors.Is(err, ErrRangeIgnored) || errors.Is(err, ErrInvalidRange) {
+		if errors.Is(err, ErrRangeIgnored) || errors.Is(err, ErrInvalidRange) || errors.Is(err, ErrRemoteChanged) {
 			return err
 		}
 		var he *HTTPError
 		if errors.As(err, &he) && !he.Temporary() {
 			return err
 		}
-		if d.written.Load() > before {
+		d.mu.Lock()
+		progress := seg.Pos > before
+		d.mu.Unlock()
+		if progress {
 			failures = 0 // made progress; this is a fresh streak
 		}
 		failures++
@@ -450,6 +478,9 @@ func (d *Downloader) fetch(seg *segment) error {
 		// Ask for everything to the original end; we stop early if the
 		// segment gets split while we read.
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", pos, end-1))
+		if d.o.Validator != "" {
+			req.Header.Set("If-Range", d.o.Validator)
+		}
 	} else if pos > 0 {
 		pos = 0
 		d.mu.Lock()
@@ -470,6 +501,9 @@ func (d *Downloader) fetch(seg *segment) error {
 		return &HTTPError{Status: resp.StatusCode, URL: d.o.Request.URL}
 	}
 	if ranged && resp.StatusCode != http.StatusPartialContent {
+		if d.o.Validator != "" {
+			return ErrRemoteChanged
+		}
 		return ErrRangeIgnored
 	}
 	if ranged {
@@ -481,16 +515,17 @@ func (d *Downloader) fetch(seg *segment) error {
 		return ErrInvalidRange
 	}
 
-	// Stall watchdog: cancel the request if no bytes arrive for a while.
-	stall := time.AfterFunc(d.o.StallTimeout, cancel)
-	defer stall.Stop()
-
-	body := ratelimit.Reader(reqCtx, resp.Body, d.o.Limiters...)
 	buf := make([]byte, bufSize)
 	for {
-		n, rerr := io.ReadFull(body, buf)
+		// Watch network reads only. Deliberate speed limiting and disk I/O
+		// must not look like a stalled server, even with a very low cap.
+		stall := time.AfterFunc(d.o.StallTimeout, cancel)
+		n, rerr := resp.Body.Read(buf)
+		stall.Stop()
 		if n > 0 {
-			stall.Reset(d.o.StallTimeout)
+			if err := (ratelimit.Chain(d.o.Limiters)).WaitN(reqCtx, n); err != nil {
+				return err
+			}
 			d.mu.Lock()
 			at := seg.Pos
 			limit := int64(n)

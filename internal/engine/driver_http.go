@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/diiviikk5/Blister/internal/category"
@@ -40,11 +41,23 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 		t.Segments = nil
 		_ = os.Remove(t.PartPath())
 	}
+	if !fresh && t.LastModified != "" && probe.LastModified != "" && t.LastModified != probe.LastModified {
+		fresh = true
+	}
+	if !fresh {
+		st, statErr := os.Stat(t.PartPath())
+		if errors.Is(statErr, os.ErrNotExist) || (statErr == nil && st.Size() != probe.Size) {
+			fresh = true
+		} else if statErr != nil {
+			return statErr
+		}
+	}
 
 	j.Update(func(tt *Task) {
 		tt.Size = probe.Size
 		tt.Resumable = probe.Resumable
 		tt.ETag = probe.ETag
+		tt.LastModified = probe.LastModified
 		tt.Status = StatusDownloading
 		if fresh {
 			tt.Segments = nil
@@ -76,12 +89,17 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 	}
 
 	for attempt := 0; ; attempt++ {
+		validator := t.LastModified
+		if t.ETag != "" && !strings.HasPrefix(t.ETag, "W/") {
+			validator = t.ETag
+		}
 		d := httpdl.New(httpdl.Options{
 			Client:      j.Client(),
 			Request:     t.Request,
 			Path:        t.PartPath(),
 			Size:        t.Size,
 			Resumable:   t.Resumable,
+			Validator:   validator,
 			Connections: conns,
 			Segments:    t.Segments,
 			Limiters:    j.Limiters(),
@@ -92,7 +110,9 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 		j.SetDone(d.Written())
 
 		stop := make(chan struct{})
+		sampled := make(chan struct{})
 		go func() {
+			defer close(sampled)
 			tk := time.NewTicker(200 * time.Millisecond)
 			defer tk.Stop()
 			for {
@@ -107,6 +127,7 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 		}()
 		err := d.Run(ctx)
 		close(stop)
+		<-sampled
 		j.SetDone(d.Written())
 		j.SetConns(0)
 		j.OnTune(nil)
