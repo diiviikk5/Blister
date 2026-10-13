@@ -12,7 +12,7 @@ Files, torrents and videos from 1,800+ sites, split across up to 64 connections,
 ## What it does
 
 - **Multi-connection downloads.** Every file is split into segments that download in parallel (16 by default, up to 64). When a connection finishes early it takes over half of the slowest one's remaining range, so the tail of a download never crawls on a single connection.
-- **Resume anything.** Pause, quit, reboot: progress is saved per segment and picks up where it left off, as long as the server supports ranges.
+- **Safe pause and resume.** Progress is saved per segment. Blister validates byte ranges and server validators before continuing, restarts missing or truncated partial files, and falls back to a single stream when ranges are ignored. Failed checksum retries fetch the file again.
 - **Torrents built in.** Magnet links and `.torrent` files with DHT, UPnP, peer encryption, per-file selection, a live piece map and seed-to-ratio.
 - **Video sites.** YouTube, X, Instagram, TikTok, Reddit, Vimeo, Twitch and many more through yt-dlp, which Blister installs and keeps updated for you. Pick 4K, 1080p, 720p or audio-only MP3.
 - **Catches links.** Copy a link anywhere and Blister offers to grab it. The browser extension sends downloads over with their cookies and referer, so logged-in downloads work.
@@ -26,7 +26,7 @@ Files, torrents and videos from 1,800+ sites, split across up to 64 connections,
 
 Blister is built to be riced. Open **Rice Studio** (`Ctrl Shift R`) and everything is live:
 
-- **13 themes** to start from: Thermal, Lilac Paper, Phosphor (green CRT terminal), Catppuccin Mocha, Gruvbox, Nord, Tokyo Night, Rosé Pine, Dracula, Everforest, Neon '84, Mono and Solar Paper. Or hit **Shuffle** for a fresh readable palette.
+- **14 themes** to start from: Thermal, Lilac Paper, Phosphor (green CRT terminal), Catppuccin Mocha, Gruvbox, Nord, Tokyo Night, Rosé Pine, Dracula, Everforest, Neon '84, Mono, Solar Paper and **Readable** (larger text, high contrast, no motion). Or hit **Shuffle** for a fresh palette.
 - **Colours**: all 15 tokens, with a live contrast checker.
 - **Shape**: outline width, corner radius, depth, and shadow style (3D extrusion, hard, soft, glow or flat).
 - **Type**: any installed font (Nerd Fonts welcome), monospace-everything, scale, heading weight and tracking.
@@ -35,6 +35,10 @@ Blister is built to be riced. Open **Rice Studio** (`Ctrl Shift R`) and everythi
 - **Effects**: wallpaper with dim and blur, see-through surfaces, film grain, CRT scanlines, vignette, motion off/normal/springy, and Windows 11 **Mica / Acrylic** window backdrops.
 - **Custom CSS** applied as you type, with snippets.
 - **Share**: every look is a single `blister-rice:` code. Copy yours, paste someone else's, or save variations to your library.
+- **Undo / Redo**: back out up to 20 theme changes; continuous slider movement counts as one change. Imported values are bounded so a broken theme cannot set the UI scale to zero.
+- **Recover**: **Reset look**, or `Ctrl Shift Backspace` from anywhere, restores Thermal and clears custom CSS while keeping your theme library.
+
+Dialogs keep keyboard focus inside and return it when closed. Tab reaches the download list; arrow keys move between downloads and settings tabs. Narrow windows use compact navigation and responsive controls; the title bar's command button opens filters, settings and Rice Studio.
 
 Plus:
 
@@ -72,6 +76,7 @@ From then on downloads go to Blister (small files under 1 MB stay in the browser
 | `Ctrl ,` | Settings |
 | `Ctrl K` | Command palette |
 | `Ctrl Shift R` | Rice Studio |
+| `Ctrl Shift Backspace` | Restore the default look and clear custom CSS |
 | `Ctrl M` | Mini bar |
 
 ## Build from source
@@ -94,11 +99,32 @@ The UI also runs on its own against a simulated engine, which is handy for desig
 cd frontend && npm install && npm run dev
 ```
 
+The browser preview labels its downloads as simulated. Use the desktop executable for actual file transfers.
+
 Tests:
 
 ```bash
 go test ./...
 ```
+
+On Windows with a 32-bit C compiler on PATH, use the torrent library's supported pure-Go transport:
+
+```powershell
+$env:CGO_ENABLED = '0'
+go test ./...
+```
+
+Frontend checks and theme tests:
+
+```bash
+cd frontend
+npm ci
+npm run check
+npm test
+npm run build
+```
+
+CI runs the full suite on Windows, checks the HTTP downloader and queue with Go's race detector on Linux, and uploads a packaged `Blister-windows` executable after tests pass. Transfer tests use local HTTP servers and torrent peers, including corrupt resume state, ignored ranges, empty files, authentication and private trackers.
 
 ## How it's put together
 
