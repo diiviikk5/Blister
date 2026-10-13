@@ -129,7 +129,6 @@ func (c *Client) Add(ctx context.Context, source, dir string, httpc *http.Client
 	if err != nil {
 		return nil, err
 	}
-	spec.Trackers = append(spec.Trackers, extraTrackers)
 	spec.Storage = c.storageFor(dir)
 	t, _, err := c.cl.AddTorrentSpec(spec)
 	return t, err

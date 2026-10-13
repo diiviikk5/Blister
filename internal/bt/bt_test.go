@@ -46,6 +46,56 @@ func TestAuthenticatedTorrentFile(t *testing.T) {
 	}
 }
 
+func TestPrivateTorrentKeepsOnlySuppliedTrackers(t *testing.T) {
+	private := true
+	info := metainfo.Info{Name: "private.bin", Length: 1, PieceLength: 16384, Pieces: make([]byte, 20), Private: &private}
+	ib, err := bencode.Marshal(info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mi := &metainfo.MetaInfo{InfoBytes: ib, Announce: "http://127.0.0.1:1/private"}
+	path := filepath.Join(t.TempDir(), "private.torrent")
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := mi.Write(f); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	m, _, driver := setup(t, false)
+	task, err := m.Add(engine.AddRequest{URL: path})
+	if err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		tk, _ := m.Get(task.ID)
+		if tk.Status == engine.StatusError {
+			t.Fatal(tk.Error)
+		}
+		if tk.Status == engine.StatusDownloading {
+			// The driver has processed metadata by this point.
+			client, err := driver.Client()
+			if err != nil {
+				t.Fatal(err)
+			}
+			active := client.cl.Torrents()
+			if len(active) != 1 {
+				t.Fatalf("active torrents = %d", len(active))
+			}
+			trackers := active[0].Metainfo().AnnounceList.DistinctValues()
+			if len(trackers) != 1 || trackers[0] != mi.Announce {
+				t.Fatalf("private torrent leaked to extra trackers: %v", trackers)
+			}
+			m.Pause(task.ID)
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("private torrent did not load")
+}
+
 // seed creates a two-file torrent and starts a local seeder for it.
 func seed(t *testing.T) (magnet string, files map[string][]byte, torrentPath string) {
 	t.Helper()

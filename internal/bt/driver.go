@@ -64,6 +64,11 @@ func (d *Driver) Run(ctx context.Context, j *engine.Job) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+	// A private torrent must use only the trackers its author supplied.
+	// Wait for metadata before deciding; magnets don't expose private status.
+	if info := t.Info(); info.Private == nil || !*info.Private {
+		t.AddTrackers([][]string{extraTrackers})
+	}
 
 	files := t.Files()
 	prev := j.Task()
