@@ -89,6 +89,9 @@ const bufSize = 128 << 10
 // ErrRangeIgnored means a server answered a ranged request with the full body.
 var ErrRangeIgnored = errors.New("server ignored byte range request")
 
+// ErrInvalidRange prevents writing a response at an unverified byte offset.
+var ErrInvalidRange = errors.New("server returned an invalid byte range")
+
 // New prepares a downloader. Call Run to start it.
 func New(o Options) *Downloader {
 	if o.MinSegment <= 0 {
@@ -400,7 +403,7 @@ func (d *Downloader) fetchWithRetry(seg *segment) error {
 		if d.ctx.Err() != nil {
 			return context.Canceled
 		}
-		if errors.Is(err, ErrRangeIgnored) {
+		if errors.Is(err, ErrRangeIgnored) || errors.Is(err, ErrInvalidRange) {
 			return err
 		}
 		var he *HTTPError
@@ -463,13 +466,19 @@ func (d *Downloader) fetch(seg *segment) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return &HTTPError{Status: resp.StatusCode, URL: d.o.Request.URL}
 	}
 	if ranged && resp.StatusCode != http.StatusPartialContent {
-		if pos != 0 {
-			return ErrRangeIgnored
+		return ErrRangeIgnored
+	}
+	if ranged {
+		start, last, total, err := parseContentRange(resp.Header.Get("Content-Range"))
+		if err != nil || start != pos || last != end-1 || total != d.o.Size || (resp.ContentLength >= 0 && resp.ContentLength != end-pos) {
+			return ErrInvalidRange
 		}
+	} else if resp.StatusCode == http.StatusPartialContent {
+		return ErrInvalidRange
 	}
 
 	// Stall watchdog: cancel the request if no bytes arrive for a while.

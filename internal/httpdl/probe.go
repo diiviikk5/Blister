@@ -3,7 +3,6 @@ package httpdl
 import (
 	"context"
 	"fmt"
-	"io"
 	"mime"
 	"net/http"
 	"net/url"
@@ -76,6 +75,11 @@ func (r Request) build(ctx context.Context, method, rawURL string) (*http.Reques
 	for k, v := range r.Headers {
 		req.Header.Set(k, v)
 	}
+	// These are controlled by the engine, never by a captured browser request.
+	for _, k := range []string{"Range", "If-Range", "If-None-Match", "If-Modified-Since"} {
+		req.Header.Del(k)
+	}
+	req.Header.Set("Accept-Encoding", "identity")
 	return req, nil
 }
 
@@ -92,10 +96,9 @@ func ProbeURL(ctx context.Context, c *http.Client, r Request) (*Probe, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	// Drain at most a little so the connection can be reused.
-	_, _ = io.CopyN(io.Discard, resp.Body, 4096)
-
-	if resp.StatusCode >= 400 {
+	// Empty files commonly answer bytes=0-0 with 416 and bytes */0.
+	empty := resp.StatusCode == http.StatusRequestedRangeNotSatisfiable && strings.TrimSpace(resp.Header.Get("Content-Range")) == "bytes */0"
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent && !empty {
 		return nil, &HTTPError{Status: resp.StatusCode, URL: r.URL}
 	}
 
@@ -108,33 +111,41 @@ func ProbeURL(ctx context.Context, c *http.Client, r Request) (*Probe, error) {
 	}
 	switch resp.StatusCode {
 	case http.StatusPartialContent:
-		if total := parseContentRangeTotal(resp.Header.Get("Content-Range")); total >= 0 {
-			p.Size = total
-			p.Resumable = true
+		start, end, total, err := parseContentRange(resp.Header.Get("Content-Range"))
+		if err != nil || start != 0 || end != 0 {
+			return nil, ErrInvalidRange
 		}
+		p.Size, p.Resumable = total, true
 	case http.StatusOK:
 		if resp.ContentLength >= 0 {
 			p.Size = resp.ContentLength
 		}
-		// 200 to a range request means the server ignores ranges, unless it
-		// advertises them anyway (rare but harmless to trust).
-		p.Resumable = strings.EqualFold(resp.Header.Get("Accept-Ranges"), "bytes") && p.Size > 0
+		// Accept-Ranges is only a claim; the response must prove support.
+	case http.StatusRequestedRangeNotSatisfiable:
+		p.Size = 0
 	}
 	p.FileName = FileName(resp.Header.Get("Content-Disposition"), resp.Request.URL, p.ContentType)
 	return p, nil
 }
 
-// parseContentRangeTotal returns the total from "bytes 0-0/12345", or -1.
-func parseContentRangeTotal(v string) int64 {
-	i := strings.LastIndexByte(v, '/')
-	if i < 0 {
-		return -1
+// parseContentRange validates an inclusive range with a known total size.
+func parseContentRange(v string) (start, end, total int64, err error) {
+	fields := strings.Fields(v)
+	if len(fields) != 2 || fields[0] != "bytes" {
+		return 0, 0, 0, ErrInvalidRange
 	}
-	n, err := strconv.ParseInt(strings.TrimSpace(v[i+1:]), 10, 64)
-	if err != nil {
-		return -1
+	span, length, ok := strings.Cut(fields[1], "/")
+	first, last, rangeOK := strings.Cut(span, "-")
+	if !ok || !rangeOK {
+		return 0, 0, 0, ErrInvalidRange
 	}
-	return n
+	start, e1 := strconv.ParseInt(first, 10, 64)
+	end, e2 := strconv.ParseInt(last, 10, 64)
+	total, e3 := strconv.ParseInt(length, 10, 64)
+	if e1 != nil || e2 != nil || e3 != nil || start < 0 || end < start || total <= end {
+		return 0, 0, 0, ErrInvalidRange
+	}
+	return start, end, total, nil
 }
 
 // FileName picks the best local name from Content-Disposition, the URL path,
