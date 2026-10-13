@@ -29,7 +29,7 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 		return err
 	}
 
-	fresh := t.Done == 0 && len(t.Segments) == 0
+	fresh := (t.Done == 0 && len(t.Segments) == 0) || (t.Verified != nil && !*t.Verified)
 	// A changed file on the server makes our partial data garbage.
 	if !fresh && t.ETag != "" && probe.ETag != "" && t.ETag != probe.ETag {
 		fresh = true
@@ -62,6 +62,7 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 		if fresh {
 			tt.Segments = nil
 			tt.Done = 0
+			tt.Verified = nil
 			if !tt.NameFixed && probe.FileName != "" && probe.FileName != tt.Name {
 				tt.Name = uniqueName(tt.Dir, probe.FileName, j.m.nameTakenLocked(tt.Dir, tt.ID))
 			}

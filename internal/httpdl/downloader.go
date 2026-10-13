@@ -532,19 +532,17 @@ func (d *Downloader) fetch(seg *segment) error {
 			if seg.End >= 0 && at+limit > seg.End {
 				limit = seg.End - at
 			}
-			seg.Pos += limit // reserve before writing; see acquireLocked
-			d.mu.Unlock()
 			if limit > 0 {
 				if _, werr := d.file.WriteAt(buf[:limit], at); werr != nil {
-					d.mu.Lock()
-					seg.Pos = at
 					d.mu.Unlock()
 					d.fail(fmt.Errorf("write: %w", werr))
 					return context.Canceled
 				}
+				// Publish offsets only after the bytes are on disk. A snapshot
+				// taken during WriteAt must never skip unwritten data on resume.
+				seg.Pos += limit
 				d.written.Add(limit)
 			}
-			d.mu.Lock()
 			finished := seg.End >= 0 && seg.Pos >= seg.End
 			scaled := !finished && d.active > d.target
 			if scaled {

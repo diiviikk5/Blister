@@ -64,6 +64,17 @@ func IsLocalPath(s string) bool {
 
 // GuessName derives a provisional display name from a link.
 func GuessName(raw string, k Kind) string {
+	if IsLocalPath(raw) {
+		// url.Parse treats a Windows drive letter as a URL scheme and puts
+		// the rest in Opaque, leaving Path empty.
+		local := raw
+		if strings.HasPrefix(raw, "file://") {
+			if u, err := url.Parse(raw); err == nil {
+				local = u.Path
+			}
+		}
+		return path.Base(strings.ReplaceAll(local, `\`, "/"))
+	}
 	if k == KindTorrent && linkgrab.IsMagnet(raw) {
 		if u, err := url.Parse(raw); err == nil {
 			if dn := u.Query().Get("dn"); dn != "" {

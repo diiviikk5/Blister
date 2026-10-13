@@ -2,15 +2,48 @@ package engine
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/diiviikk5/Blister/internal/httpdl"
 )
+
+func TestRetryChecksumFailureFetchesAgain(t *testing.T) {
+	want := blob(256 << 10)
+	var repaired atomic.Bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data := make([]byte, len(want))
+		if repaired.Load() {
+			data = want
+		}
+		http.ServeContent(w, r, "file.bin", time.Time{}, bytes.NewReader(data))
+	}))
+	defer srv.Close()
+	m, _ := newManager(t, t.TempDir(), t.TempDir())
+	defer m.Close()
+	sum := sha256.Sum256(want)
+	task, err := m.Add(AddRequest{URL: srv.URL + "/file.bin", Checksum: "sha256:" + hex.EncodeToString(sum[:])})
+	if err != nil {
+		t.Fatal(err)
+	}
+	waitStatus(t, m, task.ID, StatusError, 5*time.Second)
+	repaired.Store(true)
+	if err := m.Resume(task.ID); err != nil {
+		t.Fatal(err)
+	}
+	done := waitStatus(t, m, task.ID, StatusCompleted, 5*time.Second)
+	got, err := os.ReadFile(done.Path())
+	if err != nil || !bytes.Equal(got, want) || done.Verified == nil || !*done.Verified {
+		t.Fatalf("retry failed: %+v, %v", done, err)
+	}
+}
 
 func TestHTTPRangeFallback(t *testing.T) {
 	data := blob(4 << 20)

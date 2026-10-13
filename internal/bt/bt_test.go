@@ -165,7 +165,10 @@ func TestMagnetDownload(t *testing.T) {
 func TestTorrentFileAndSeeding(t *testing.T) {
 	_, _, tp := seed(t)
 	m, _, _ := setup(t, true)
-	task, _ := m.Add(engine.AddRequest{URL: tp})
+	task, err := m.Add(engine.AddRequest{URL: tp})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if task.Kind != engine.KindTorrent {
 		t.Fatalf("kind %s for %s", task.Kind, tp)
 	}

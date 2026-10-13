@@ -68,3 +68,11 @@ func TestRejectMalformedChecksumsBeforeDownloading(t *testing.T) {
 		t.Fatal("invalid downloads queued")
 	}
 }
+
+func TestGuessLocalTorrentName(t *testing.T) {
+	for _, raw := range []string{`C:\Downloads\pack.torrent`, "file:///C:/Downloads/pack.torrent", "/tmp/pack.torrent"} {
+		if got := GuessName(raw, KindTorrent); got != "pack.torrent" {
+			t.Errorf("GuessName(%q) = %q", raw, got)
+		}
+	}
+}

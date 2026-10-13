@@ -434,6 +434,10 @@ func (m *Manager) stopAndWait(id string) error {
 	j := m.jobs[id]
 	if j != nil {
 		j.pausing = true
+	} else if t := m.tasks[id]; t != nil && t.Status == StatusQueued {
+		// Prevent the scheduler starting work while Remove/Restart/SetURL
+		// is about to change its files or request.
+		t.Status = StatusPaused
 	}
 	m.mu.Unlock()
 	if j != nil {
