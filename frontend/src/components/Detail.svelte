@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
   import SegBar from "./SegBar.svelte";
-  import IsoLanes from "./IsoLanes.svelte";
+  import TransferMap from "./TransferMap.svelte";
   import { api, copyText } from "../lib/api";
   import { store, prog } from "../lib/store.svelte";
   import { bytes, speed, eta, percent, ago, parseRate } from "../lib/format";
@@ -16,8 +16,8 @@
   const map = $derived(live?.map || task.torrent?.pieceMap || "");
   const sep = $derived(task.dir.includes("\\") ? "\\" : "/");
 
-  // 3D lanes or just the flat bar; remembered for the session.
-  let viz = $state<"iso" | "flat">((sessionStorage.getItem("blister-viz") as "iso" | "flat") || "iso");
+  // Real coverage as a flat piece matrix or a compact progress bar.
+  let viz = $state<"map" | "flat">(sessionStorage.getItem("blister-viz") === "flat" ? "flat" : "map");
   $effect(() => sessionStorage.setItem("blister-viz", viz));
 
   // Local edits for tuning; resynced when another task is focused.
@@ -64,13 +64,13 @@
 
   <div class="body">
     <div class="barwrap">
-      {#if viz === "iso" && dock === "right"}
-        <IsoLanes {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} progress={prog(task)} status={task.status} />
+      {#if viz === "map" && dock === "right"}
+        <TransferMap {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} progress={prog(task)} status={task.status} torrent={task.kind === "torrent"} />
       {/if}
-      <SegBar progress={task.size > 0 || task.status === "completed" ? prog(task) : running ? -1 : 0} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} height={30} />
+      <SegBar progress={task.size > 0 || task.status === "completed" ? prog(task) : running ? -1 : 0} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} height={viz === "map" ? 8 : 18} />
       <div class="legend num">
         {#if dock === "right"}
-          <button class="viz" onclick={() => (viz = viz === "iso" ? "flat" : "iso")}>{viz === "iso" ? "Flat" : "3D"}</button>
+          <button class="viz" aria-pressed={viz === "map"} onclick={() => (viz = viz === "map" ? "flat" : "map")}>{viz === "map" ? "Hide map" : "Show map"}</button>
         {/if}
         <span>{percent(task.done, task.size) || (task.status === "completed" ? "100%" : "–")}</span>
         {#if task.kind === "http" && running && live?.heads?.length}

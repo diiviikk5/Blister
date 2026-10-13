@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
   import SegBar from "./SegBar.svelte";
+  import TransferMap from "./TransferMap.svelte";
   import { api } from "../lib/api";
   import { store, prog } from "../lib/store.svelte";
   import { bytes, speed, eta, percent, host, ago } from "../lib/format";
@@ -59,7 +60,11 @@
   <div class="main">
     <div class="name ell" title={task.name}>{task.name}</div>
     <div class="bar">
-      <SegBar {progress} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} />
+      {#if task.kind === "torrent" && store.rice.layout.view === "grid"}
+        <TransferMap {progress} {map} status={task.status} compact torrent />
+      {:else}
+        <SegBar {progress} {map} heads={task.kind === "http" ? (live?.heads ?? []) : []} status={task.status} />
+      {/if}
     </div>
     <div class="meta">
       <span class="state" data-s={task.status}>{task.media?.stage && running ? task.media.stage : statusLabel[task.status]}</span>

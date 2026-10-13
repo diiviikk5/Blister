@@ -94,8 +94,13 @@
   class:error={status === "error"}
   class:done
   class:seeding={status === "seeding"}
+  class:flow={live && store.rice.bar.animation === "flow" && !isText}
+  class:pulse={live && store.rice.bar.animation === "pulse" && !isText}
+  class:still={store.rice.bar.animation === "off"}
+  style:--progress="{pct}%"
   style:--h="{style === 'line' ? Math.max(3, Math.round(h / 3)) : h}px"
   role="progressbar"
+  aria-label="Download progress"
   aria-valuemin={0}
   aria-valuemax={100}
   aria-valuenow={progress >= 0 ? Math.round(pct) : undefined}
@@ -130,6 +135,27 @@
     overflow: hidden;
     box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.2);
   }
+  .flow::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--progress);
+    border-radius: inherit;
+    background: linear-gradient(100deg, transparent 15%, #ffffff90 48%, transparent 82%);
+    transform: translateX(-100%);
+    opacity: 0.4;
+    animation: stream 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    pointer-events: none;
+  }
+  .pulse .fill, .pulse .map { animation: breathe 2s ease-in-out infinite; }
+  .still .sweep, .still .heat { animation: none; }
+  @keyframes stream { to { transform: translateX(100%); } }
+  @keyframes breathe { 50% { opacity: 0.55; } }
+  @media (prefers-reduced-motion: reduce) {
+    .flow::after { display: none; }
+    .pulse .fill, .pulse .map, .sweep { animation: none; }
+  }
+  :global([data-motion="0"]) .flow::after { display: none; }
   .paused {
     --fill: var(--ib-faint);
   }

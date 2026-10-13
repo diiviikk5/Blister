@@ -26,17 +26,17 @@ Files, torrents and videos from 1,800+ sites, split across up to 64 connections,
 
 Blister is built to be riced. Open **Rice Studio** (`Ctrl Shift R`) and everything is live:
 
-- **14 themes** to start from: Thermal, Lilac Paper, Phosphor (green CRT terminal), Catppuccin Mocha, Gruvbox, Nord, Tokyo Night, Rosé Pine, Dracula, Everforest, Neon '84, Mono, Solar Paper and **Readable** (larger text, high contrast, no motion). Or hit **Shuffle** for a fresh palette.
+- **17 themes** to start from: Graphite (the default), Moss, Paper WM, Thermal, Lilac Paper, Phosphor (green CRT terminal), Catppuccin Mocha, Gruvbox, Nord, Tokyo Night, Rosé Pine, Dracula, Everforest, Neon '84, Mono, Solar Paper and **Readable** (larger text, high contrast, no motion). Or hit **Shuffle** for a fresh palette.
 - **Colours**: all 15 tokens, with a live contrast checker.
 - **Shape**: outline width, corner radius, depth, and shadow style (3D extrusion, hard, soft, glow or flat).
 - **Type**: any installed font (Nerd Fonts welcome), monospace-everything, scale, heading weight and tracking.
-- **Layout**: list, dense table or card grid; line or card rows; three densities; sidebar left, right or hidden; details right, bottom or off.
-- **Progress bars**: lanes (live connection map), solid, line, `▰▰▱` blocks, `[##=->..]` ASCII, braille or dots.
+- **Layout**: list, dense table or card grid; line or card rows; card spacing; three densities; adjustable sidebar and detail widths; sidebar left, right or hidden; details right, bottom or off.
+- **Progress bars**: lanes (live connection map), solid, line, `▰▰▱` blocks, `[##=->..]` ASCII, braille or dots; flow, pulse or no animation. System reduced-motion preferences are respected.
 - **Effects**: wallpaper with dim and blur, see-through surfaces, film grain, CRT scanlines, vignette, motion off/normal/springy, and Windows 11 **Mica / Acrylic** window backdrops.
 - **Custom CSS** applied as you type, with snippets.
 - **Share**: every look is a single `blister-rice:` code. Copy yours, paste someone else's, or save variations to your library.
 - **Undo / Redo**: back out up to 20 theme changes; continuous slider movement counts as one change. Imported values are bounded so a broken theme cannot set the UI scale to zero.
-- **Recover**: **Reset look**, or `Ctrl Shift Backspace` from anywhere, restores Thermal and clears custom CSS while keeping your theme library.
+- **Recover**: **Reset look**, or `Ctrl Shift Backspace` from anywhere, restores Graphite and clears custom CSS while keeping your theme library. Upgrading an untouched bundled look selects Graphite; personal changes are preserved.
 
 Dialogs keep keyboard focus inside and return it when closed. Tab reaches the download list; arrow keys move between downloads and settings tabs. Narrow windows use compact navigation and responsive controls; the title bar's command button opens filters, settings and Rice Studio.
 
@@ -44,7 +44,8 @@ Plus:
 
 - **`Ctrl K` command palette**: every action, theme, layout, filter and download.
 - **Mini bar** (`Ctrl M`): the whole app as a slim always-on-top strip with live speed and progress.
-- **3D lanes**: the selected download as 16 isometric blocks filling from the live coverage map.
+- **Transfer map**: animated cells show received bytes or torrent pieces from the live coverage map, with active HTTP writers highlighted. Torrent cards show compact piece coverage in grid view.
+- **Download folder**: Browse opens a native folder picker, even when the configured destination has not been created yet. The add dialog shows the destination, recent folders, and whether automatic category subfolders apply.
 - **Rules**: "when the host, extension, kind or size looks like this, use this folder, connection count, speed cap, tags or start paused". They apply to links from anywhere.
 - **Hooks**: run any command when a download finishes, globally or per rule, with `{path}` `{name}` `{dir}` `{url}` `{size}`. For example, unzip archives automatically.
 
@@ -140,7 +141,7 @@ internal/ratelimit   Stackable token-bucket limiters (global → per download)
 internal/linkgrab    Link extraction and [01-12] batch expansion
 internal/rules       Automation rules and hook templates
 internal/category    File-type sorting
-frontend/            Svelte 5 UI in the isometric-brutalism design kit
+frontend/            Svelte 5 desktop UI with customizable Linux-inspired chrome
 extension/           Manifest V3 browser extension
 website/             blister's landing page
 ```

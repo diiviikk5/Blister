@@ -21,6 +21,11 @@
 
 ### Accessibility and customization
 
+- Introduce Graphite, Moss and Paper WM desktop looks, thin borders and restrained Linux-inspired chrome.
+- Add card-spacing and panel-width controls, preserving personal rice and upgrading untouched bundled looks to Graphite.
+- Add live byte/piece coverage cells and selectable flow/pulse/off animations, respecting reduced motion.
+- Repair native folder selection for destinations that do not exist yet; show the destination and recent folders in the add dialog.
+
 - Keep keyboard focus inside dialogs and restore the opener on close.
 - Add keyboard entry into the download list, focus-aware actions, explicit input names, and arrow-key settings navigation.
 - Give command search combobox semantics and prevent global download shortcuts from intercepting buttons or dialogs.
