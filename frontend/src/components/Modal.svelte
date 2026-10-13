@@ -1,6 +1,7 @@
 <script lang="ts">
   // Small confirm/prompt dialog used for remove and rename.
   import type { Snippet } from "svelte";
+  import { dialogFocus } from "../lib/dialog";
 
   let {
     title,
@@ -14,7 +15,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="scrim" role="presentation" onclick={(e) => e.target === e.currentTarget && onclose()}>
-  <div class="box" role="dialog" aria-modal="true" aria-label={title}>
+  <div class="box" use:dialogFocus={{ close: onclose }} role="dialog" aria-modal="true" aria-label={title}>
     <h3>{title}</h3>
     <div class="content">{@render children()}</div>
     <div class="actions">{@render actions()}</div>

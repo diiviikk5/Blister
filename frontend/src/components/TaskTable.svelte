@@ -61,7 +61,9 @@
         class="tr"
         class:sel={store.selected.includes(t.id)}
         role="row"
-        tabindex="-1"
+        tabindex={store.focus === t.id || (!store.focus && store.visible[0]?.id === t.id) ? 0 : -1}
+        data-task-id={t.id}
+        onfocus={() => (store.focus = t.id)}
         aria-selected={store.selected.includes(t.id)}
         onclick={(e) => click(e, t)}
         ondblclick={() => dbl(t)}

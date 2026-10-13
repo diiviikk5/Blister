@@ -78,11 +78,13 @@
 
   function typing(e: KeyboardEvent) {
     const el = e.target as HTMLElement;
-    return el.closest("input, textarea, select, [contenteditable]") !== null;
+    return el.closest("input, textarea, select, button, a, [contenteditable], [role=menuitem]") !== null;
   }
 
   async function keys(e: KeyboardEvent) {
+    if (e.defaultPrevented) return;
     const mod = e.ctrlKey || e.metaKey;
+    if (store.addOpen || removing || renaming || store.relink) return;
     if (mod && e.key.toLowerCase() === "k") {
       e.preventDefault();
       store.paletteOpen = !store.paletteOpen;
@@ -150,7 +152,9 @@
       const i = list.findIndex((t) => t.id === store.focus);
       const next = list[Math.max(0, Math.min(list.length - 1, i + (e.key === "ArrowDown" ? 1 : -1)))];
       store.select(next.id, e.shiftKey ? "range" : "one");
-      document.querySelector(`[aria-selected="true"]`)?.scrollIntoView({ block: "nearest" });
+      const row = document.querySelector<HTMLElement>(`[data-task-id="${CSS.escape(next.id)}"]`);
+      row?.focus();
+      row?.scrollIntoView({ block: "nearest" });
     }
   }
 

@@ -41,7 +41,9 @@
   class:sel
   role="option"
   aria-selected={sel}
-  tabindex="-1"
+  tabindex={store.focus === task.id || (!store.focus && store.visible[0]?.id === task.id) ? 0 : -1}
+  data-task-id={task.id}
+  onfocus={() => { if (store.tasks[task.id]) store.focus = task.id; }}
   onclick={click}
   ondblclick={dbl}
   oncontextmenu={context}
@@ -97,15 +99,15 @@
 
   <div class="acts">
     {#if task.status === "completed"}
-      <button class="btn btn--sm btn--icon" title="Open" onclick={(e) => (e.stopPropagation(), store.run(api.open(task.id)))}>
+      <button class="btn btn--sm btn--icon" title="Open" aria-label={`Open ${task.name}`} onclick={(e) => (e.stopPropagation(), store.run(api.open(task.id)))}>
         <Icon name="open" size={14} />
       </button>
     {:else}
-      <button class="btn btn--sm btn--icon" title={stoppable ? "Pause" : "Resume"} onclick={toggle}>
+      <button class="btn btn--sm btn--icon" title={stoppable ? "Pause" : "Resume"} aria-label={`${stoppable ? "Pause" : "Resume"} ${task.name}`} onclick={toggle}>
         <Icon name={stoppable ? "pause" : task.status === "error" ? "restart" : "play"} size={14} />
       </button>
     {/if}
-    <button class="btn btn--sm btn--icon" title="Show in folder" onclick={(e) => (e.stopPropagation(), store.run(api.reveal(task.id)))}>
+    <button class="btn btn--sm btn--icon" title="Show in folder" aria-label={`Show ${task.name} in folder`} onclick={(e) => (e.stopPropagation(), store.run(api.reveal(task.id)))}>
       <Icon name="folder" size={14} />
     </button>
   </div>

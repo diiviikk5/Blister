@@ -1,5 +1,7 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
+  import { onMount } from "svelte";
+  import { dialogFocus } from "../lib/dialog";
   import { api, readClipboard, errText } from "../lib/api";
   import { store } from "../lib/store.svelte";
   import { bytes } from "../lib/format";
@@ -13,6 +15,10 @@
   let names = $state<Record<string, string>>({});
   let dropped = $state<Set<string>>(new Set());
   let parseErr = $state("");
+  let submitErr = $state("");
+  let parsing = $state(false);
+  let generation = 0;
+  let alive = true;
 
   let dir = $state("");
   let connections = $state(store.settings?.connections ?? 16);
@@ -34,40 +40,46 @@
   );
 
   // Prefill from the clipboard when opened empty.
-  $effect(() => {
-    if (text) return;
-    readClipboard().then((c) => {
-      if (!text && /(https?:\/\/|magnet:\?)/i.test(c)) text = c.trim();
+  onMount(() => {
+    if (!text) readClipboard().then((c) => {
+      if (alive && !text && /(https?:\/\/|magnet:\?)/i.test(c)) text = c.trim();
     });
-    area?.focus();
+    return () => { alive = false; clearTimeout(timer); };
   });
 
   // Parse as the user types; probe new HTTP links for name and size.
   let timer: ReturnType<typeof setTimeout>;
   $effect(() => {
     const t = text;
+    const version = ++generation;
+    parsing = true;
     clearTimeout(timer);
     timer = setTimeout(async () => {
       try {
-        links = (await api.parse(t)) ?? [];
+        const parsed = (await api.parse(t)) ?? [];
+        if (!alive || version !== generation) return;
+        links = parsed;
         // The extension marks video pages explicitly; trust it over URL rules.
         if (seed?.media) links = links.map((l) => (l.kind === "http" ? { ...l, kind: "media" } : l));
         parseErr = "";
       } catch (e) {
+        if (!alive || version !== generation) return;
         parseErr = errText(e);
         links = [];
       }
+      parsing = false;
       if (seed?.fileName && links.length === 1 && !names[links[0].url]) names[links[0].url] = seed.fileName;
       probeAll();
     }, 180);
+    return () => clearTimeout(timer);
   });
 
   let inflight = 0;
   function probeAll() {
+    if (!alive) return;
     for (const l of links) {
       if (l.kind !== "http" || probes[l.url]) continue;
       if (inflight >= 12) {
-        setTimeout(probeAll, 250);
         return;
       }
       probes[l.url] = "loading";
@@ -76,7 +88,7 @@
         .probe(l.url, seed?.request ?? {})
         .then((p) => (probes[l.url] = p))
         .catch((e) => (probes[l.url] = { name: "", size: -1, resumable: false, category: "other", type: "", error: errText(e) }))
-        .finally(() => inflight--);
+        .finally(() => { inflight--; probeAll(); });
     }
   }
 
@@ -96,8 +108,9 @@
   }
 
   async function submit() {
-    if (!chosen.length || busy) return;
+    if (!chosen.length || busy || parsing) return;
     busy = true;
+    submitErr = "";
     const req = seed?.request;
     const reqs: AddRequest[] = chosen.map((l) => {
       const p = probes[l.url];
@@ -124,6 +137,7 @@
       if (added.length) store.select(added[added.length - 1].id);
       close();
     } catch (e) {
+      submitErr = errText(e);
       store.toast(errText(e), "error");
     } finally {
       busy = false;
@@ -131,6 +145,7 @@
   }
 
   function close() {
+    if (busy) return;
     store.addOpen = false;
     store.addSeed = null;
   }
@@ -145,7 +160,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="scrim" role="presentation" onclick={(e) => e.target === e.currentTarget && close()}>
-  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-title">
+  <div class="dialog" use:dialogFocus={{ close, initial: "textarea" }} role="dialog" aria-modal="true" aria-labelledby="add-title" aria-busy={busy}>
     <header>
       <h2 id="add-title">Add <span class="ib-block">downloads</span></h2>
       {#if seed?.source === "browser"}<span class="pill pill--hot">From your browser</span>{/if}
@@ -153,7 +168,11 @@
     </header>
 
     <div class="body">
+      <label class="label" for="download-links">Links or .torrent paths</label>
       <textarea
+        id="download-links"
+        aria-describedby="link-hint"
+        aria-invalid={!!parseErr}
         bind:this={area}
         class="field links mono"
         rows="4"
@@ -161,7 +180,10 @@
         spellcheck="false"
         placeholder={"Paste links: one per line, or a whole page of text.\nhttps://example.com/file.zip\nmagnet:?xt=urn:btih:…\nhttps://youtu.be/…\nhttps://site.com/part[01-12].rar"}
       ></textarea>
-      {#if parseErr}<div class="perr">{parseErr}</div>{/if}
+      <div id="link-hint" class="hint" role="status">
+        {#if parseErr}{parseErr}{:else if parsing}Finding links…{:else if text.trim() && !links.length}No supported links found. Paste an HTTP link, magnet, or .torrent path.{:else}Paste one link or a batch. File previews are checked automatically.{/if}
+      </div>
+      {#if submitErr}<div class="perr" role="alert">{submitErr}</div>{/if}
 
       {#if links.length}
         <div class="found">
@@ -182,10 +204,10 @@
                 {/if}
                 <span class="size num">
                   {#if p === "loading"}
-                    <span class="spin"></span>
+                    <span class="spin" role="status" aria-label="Checking file"></span>
                   {:else if p?.error}
-                    <span class="bad" title={p.error}>can't reach</span>
-                  {:else if p && p.size > 0}
+                    <span class="bad" title={p.error} aria-label={p.error}>Preview unavailable</span>
+                  {:else if p && p.size >= 0}
                     {bytes(p.size)}
                   {/if}
                 </span>
@@ -210,16 +232,16 @@
 
       <div class="opts">
         <div class="opt grow">
-          <span class="label">Save to</span>
+          <label class="label" for="download-folder">Save to</label>
           <div class="folder">
-            <input class="field" bind:value={dir} placeholder={`${store.settings?.downloadDir ?? "Downloads"}${store.settings?.categorizeFolders ? ", sorted by type" : ""}`} />
+            <input id="download-folder" class="field" bind:value={dir} placeholder={`${store.settings?.downloadDir ?? "Downloads"}${store.settings?.categorizeFolders ? ", sorted by type" : ""}`} />
             <button class="btn btn--icon" onclick={browse} aria-label="Choose folder"><Icon name="folder" size={16} /></button>
           </div>
         </div>
         {#if hasMedia}
           <div class="opt">
-            <span class="label">Video quality</span>
-            <select class="field" bind:value={quality}>
+            <label class="label" for="download-quality">Video quality</label>
+            <select id="download-quality" class="field" bind:value={quality}>
               <option value="best">Best available</option>
               <option value="2160">4K</option>
               <option value="1440">1440p</option>
@@ -231,8 +253,8 @@
           </div>
         {/if}
         <div class="opt">
-          <span class="label">Connections</span>
-          <select class="field" bind:value={connections}>
+          <label class="label" for="download-connections">Connections</label>
+          <select id="download-connections" class="field" bind:value={connections}>
             {#each [1, 2, 4, 8, 16, 24, 32, 48, 64] as n (n)}<option value={n}>{n}</option>{/each}
           </select>
         </div>
@@ -241,8 +263,8 @@
       {#if more}
         <div class="opts">
           <div class="opt grow">
-            <span class="label">Checksum (optional)</span>
-            <input class="field mono" bind:value={checksum} disabled={!single} placeholder={single ? "sha256:… or md5:… — verified when done" : "Only for a single file"} />
+            <label class="label" for="download-checksum">Checksum (optional)</label>
+            <input id="download-checksum" class="field mono" bind:value={checksum} disabled={!single} placeholder={single ? "sha256:… or md5:… — verified when done" : "Only for a single file"} />
           </div>
         </div>
       {/if}
@@ -250,13 +272,13 @@
 
     <footer>
       <label class="ib-check start"><input type="checkbox" bind:checked={paused} /> Add paused</label>
-      <button class="btn btn--ghost" onclick={() => (more = !more)}>{more ? "Fewer options" : "More options"}</button>
+      <button class="btn btn--ghost" aria-expanded={more} onclick={() => (more = !more)}>{more ? "Fewer options" : "More options"}</button>
       <button class="btn btn--ghost" onclick={torrents}><Icon name="magnet" size={15} /> Open .torrent</button>
       <div class="spacer"></div>
       <button class="btn" onclick={close}>Cancel</button>
-      <button class="btn btn--accent btn--lg go" disabled={!chosen.length || busy} onclick={submit}>
+      <button class="btn btn--accent btn--lg go" disabled={!chosen.length || busy || parsing} aria-busy={busy} onclick={submit}>
         <Icon name="down" size={18} stroke={3} />
-        {chosen.length > 1 ? `Download ${chosen.length}` : "Download"}
+        {busy ? "Adding…" : chosen.length > 1 ? `Download ${chosen.length}` : "Download"}
         <kbd>Ctrl ↵</kbd>
       </button>
     </footer>
@@ -399,6 +421,7 @@
   }
   .opts {
     display: flex;
+    flex-wrap: wrap;
     gap: 14px;
   }
   .opt {
@@ -420,6 +443,7 @@
   }
   footer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
     padding: 16px 22px 20px;
@@ -445,5 +469,16 @@
     font-weight: 700;
     opacity: 0.65;
     margin-left: 2px;
+  }
+  .hint { color: var(--ib-muted); font-size: 12px; line-height: 1.5; }
+  @media (max-width: 600px) {
+    .scrim { padding: 12px; }
+    header { flex-wrap: wrap; }
+    h2 { font-size: 24px; }
+    .dialog { max-height: calc(100dvh - 24px); }
+    .opt { min-width: 0; flex: 1 1 140px; }
+    .item { grid-template-columns: minmax(0, 1fr) auto 28px; }
+    .item .pill { display: none; }
+    .go { flex: 1; justify-content: center; }
   }
 </style>

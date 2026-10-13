@@ -1,6 +1,7 @@
 <script lang="ts">
   // Ctrl+K: every action, theme, view and download behind one fuzzy box.
   import Icon from "./Icon.svelte";
+  import { dialogFocus } from "../lib/dialog";
   import { api, readClipboard } from "../lib/api";
   import { store, type Filter } from "../lib/store.svelte";
   import { presets, shuffle, type BarStyle, type Rice } from "../lib/rice";
@@ -128,7 +129,7 @@
     if (e.key === "Escape") return close();
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      active = Math.min(results.length - 1, active + 1);
+      active = Math.max(0, Math.min(results.length - 1, active + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       active = Math.max(0, active - 1);
@@ -147,13 +148,13 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="scrim" role="presentation" onclick={(e) => e.target === e.currentTarget && close()}>
-  <div class="pal" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="pal" use:dialogFocus={{ close }} role="dialog" aria-modal="true" aria-label="Command palette">
     <label class="box">
       <Icon name="search" size={18} />
-      <input bind:this={input} bind:value={q} onkeydown={keys} placeholder="Type a command, theme or download…" spellcheck="false" />
+      <input bind:this={input} bind:value={q} onkeydown={keys} role="combobox" aria-label="Search commands" aria-expanded="true" aria-controls="palette-results" aria-activedescendant={results[active] ? `palette-option-${active}` : undefined} autocomplete="off" placeholder="Type a command, theme or download…" spellcheck="false" />
       <kbd>Esc</kbd>
     </label>
-    <div class="list" bind:this={list} role="listbox">
+    <div id="palette-results" class="list" bind:this={list} role="listbox" aria-label="Commands">
       {#each results as c, i (c.id)}
         {@const prev = results[i - 1]}
         {#if !prev || prev.group !== c.group}<div class="grp">{c.group}</div>{/if}
@@ -161,6 +162,8 @@
           class="item"
           class:on={i === active}
           data-i={i}
+          id={`palette-option-${i}`}
+          tabindex="-1"
           role="option"
           aria-selected={i === active}
           onmouseenter={() => (active = i)}
