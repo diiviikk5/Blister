@@ -10,10 +10,13 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
@@ -79,8 +82,9 @@ func NewClient(dataDir string, s config.Settings, down *ratelimit.Limiter) (*Cli
 	cfg.Slogger = slog.New(slog.NewTextHandler(io.Discard, nil))
 
 	cl, err := torrent.NewClient(cfg)
-	if err != nil && cfg.ListenPort != 0 {
-		// Port taken (another client running?) — fall back to any port.
+	for attempt := 0; err != nil && addressInUse(err) && attempt < 3; attempt++ {
+		// TCP and UDP must share a port. Even a kernel-selected TCP port
+		// can already be occupied for UDP, so resample that case as well.
 		cfg.ListenPort = 0
 		cl, err = torrent.NewClient(cfg)
 	}
@@ -89,6 +93,11 @@ func NewClient(dataDir string, s config.Settings, down *ratelimit.Limiter) (*Cli
 		return nil, fmt.Errorf("start torrent client: %w", err)
 	}
 	return &Client{cl: cl, completion: completion, up: up, storages: map[string]storage.ClientImplCloser{}}, nil
+}
+
+func addressInUse(err error) bool {
+	// WinSock WSAEADDRINUSE differs from Go's portable EADDRINUSE sentinel.
+	return errors.Is(err, syscall.EADDRINUSE) || (runtime.GOOS == "windows" && errors.Is(err, syscall.Errno(10048)))
 }
 
 // SetUploadLimit changes the global upload cap.
@@ -167,7 +176,25 @@ func (c *Client) spec(ctx context.Context, source string, httpc *http.Client, re
 		}
 		return torrent.TorrentSpecFromMetaInfoErr(mi)
 	default:
-		path := strings.TrimPrefix(src, "file://")
+		path := src
+		if strings.HasPrefix(strings.ToLower(src), "file://") {
+			u, err := url.Parse(src)
+			if err != nil {
+				return nil, fmt.Errorf("invalid torrent file URL: %w", err)
+			}
+			path = u.Path
+			if runtime.GOOS == "windows" {
+				if len(path) > 3 && path[0] == '/' && path[2] == ':' {
+					path = path[1:]
+				}
+				if u.Host != "" && !strings.EqualFold(u.Host, "localhost") {
+					path = `\\` + u.Host + path
+				}
+			} else if u.Host != "" && !strings.EqualFold(u.Host, "localhost") {
+				return nil, errors.New("torrent file URL must point to this computer")
+			}
+			path = filepath.FromSlash(path)
+		}
 		mi, err := metainfo.LoadFromFile(path)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {

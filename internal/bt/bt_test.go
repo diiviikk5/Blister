@@ -5,10 +5,13 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -20,7 +23,27 @@ import (
 	"github.com/diiviikk5/Blister/internal/config"
 	"github.com/diiviikk5/Blister/internal/engine"
 	"github.com/diiviikk5/Blister/internal/httpdl"
+	"github.com/diiviikk5/Blister/internal/ratelimit"
 )
+
+func TestClientFallsBackFromOccupiedPort(t *testing.T) {
+	listener, err := net.ListenPacket("udp4", "0.0.0.0:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	settings := config.Defaults()
+	settings.EnableDHT, settings.EnableUPnP = false, false
+	settings.TorrentPort = listener.LocalAddr().(*net.UDPAddr).Port
+	c, err := NewClient(t.TempDir(), settings, ratelimit.New(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	if c.cl.LocalPort() == settings.TorrentPort {
+		t.Fatal("kept occupied port")
+	}
+}
 
 func TestAuthenticatedTorrentFile(t *testing.T) {
 	_, _, path := seed(t)
@@ -43,6 +66,19 @@ func TestAuthenticatedTorrentFile(t *testing.T) {
 	spec, err := c.spec(context.Background(), srv.URL, srv.Client(), httpdl.Request{Cookies: "session=example", Referer: "https://example.com/page", Headers: map[string]string{"Authorization": "Bearer example", "Range": "bytes=10-"}})
 	if err != nil || spec == nil {
 		t.Fatalf("authenticated torrent = %v, %v", spec, err)
+	}
+	// file:// URLs need percent decoding and Windows drive normalization.
+	local := filepath.Join(t.TempDir(), "with spaces.torrent")
+	if err := os.WriteFile(local, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	uriPath := filepath.ToSlash(local)
+	if !strings.HasPrefix(uriPath, "/") {
+		uriPath = "/" + uriPath
+	}
+	uri := (&url.URL{Scheme: "file", Path: uriPath}).String()
+	if spec, err := c.spec(context.Background(), uri, srv.Client()); err != nil || spec == nil {
+		t.Fatalf("local torrent URL = %v, %v", spec, err)
 	}
 }
 
