@@ -2,8 +2,11 @@ package bt
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"math/rand"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,7 +19,32 @@ import (
 
 	"github.com/diiviikk5/Blister/internal/config"
 	"github.com/diiviikk5/Blister/internal/engine"
+	"github.com/diiviikk5/Blister/internal/httpdl"
 )
+
+func TestAuthenticatedTorrentFile(t *testing.T) {
+	_, _, path := seed(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Cookie") != "session=example" || r.Header.Get("Referer") != "https://example.com/page" || r.Header.Get("Authorization") != "Bearer example" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if r.Header.Get("Range") != "" {
+			t.Error("captured Range survived")
+		}
+		w.Write(data)
+	}))
+	defer srv.Close()
+	c := &Client{}
+	spec, err := c.spec(context.Background(), srv.URL, srv.Client(), httpdl.Request{Cookies: "session=example", Referer: "https://example.com/page", Headers: map[string]string{"Authorization": "Bearer example", "Range": "bytes=10-"}})
+	if err != nil || spec == nil {
+		t.Fatalf("authenticated torrent = %v, %v", spec, err)
+	}
+}
 
 // seed creates a two-file torrent and starts a local seeder for it.
 func seed(t *testing.T) (magnet string, files map[string][]byte, torrentPath string) {

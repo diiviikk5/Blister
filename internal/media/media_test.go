@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/diiviikk5/Blister/internal/engine"
+	"github.com/diiviikk5/Blister/internal/httpdl"
 )
 
 func argAfter(args []string, flag string) string {
@@ -14,6 +15,23 @@ func argAfter(args []string, flag string) string {
 		return ""
 	}
 	return args[i+1]
+}
+
+func TestBuildArgsBrowserAuthentication(t *testing.T) {
+	task := engine.Task{URL: "https://example.com/video", Dir: t.TempDir(), Request: httpdl.Request{
+		Cookies: "session=example", Referer: "https://example.com/page", Headers: map[string]string{"Authorization": "Bearer example", "Range": "bytes=10-", "Accept-Encoding": "gzip"},
+	}}
+	args := buildArgs(task, "", 0)
+	for _, header := range []string{"Cookie:session=example", "Referer:https://example.com/page", "Authorization:Bearer example"} {
+		if !slices.Contains(args, header) {
+			t.Errorf("missing %s", header)
+		}
+	}
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "Range:") || strings.HasPrefix(arg, "Accept-Encoding:") {
+			t.Errorf("captured transfer header survived: %s", arg)
+		}
+	}
 }
 
 func TestBuildArgsFormats(t *testing.T) {

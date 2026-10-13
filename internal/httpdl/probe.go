@@ -49,6 +49,12 @@ func (e *HTTPError) Temporary() bool {
 	return e.Status == 408 || e.Status == 425 || e.Status == 429 || e.Status >= 500
 }
 
+// NewRequest carries browser authentication while clearing cache/range headers
+// that could return a partial body or a 304 instead of the requested file.
+func (r Request) NewRequest(ctx context.Context, method string) (*http.Request, error) {
+	return r.build(ctx, method, "")
+}
+
 func (r Request) build(ctx context.Context, method, rawURL string) (*http.Request, error) {
 	if rawURL == "" {
 		rawURL = r.URL

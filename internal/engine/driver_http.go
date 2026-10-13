@@ -71,11 +71,9 @@ func (HTTPDriver) Run(ctx context.Context, j *Job) error {
 			}
 		}
 		tt.Request.URL = tt.URL
-		if probe.FinalURL != "" {
-			// Keep the original link for display/retry, but download from
-			// where it redirected to so each connection skips the hop.
-			tt.Request.URL = probe.FinalURL
-		}
+		// Follow redirects through the client for every request so cookies
+		// and Authorization are stripped when the destination host changes.
+		// Reusing FinalURL with the original credentials bypasses that guard.
 	})
 	t = j.Task()
 	j.SetSize(t.Size)

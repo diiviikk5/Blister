@@ -45,7 +45,7 @@ func (d *Driver) Run(ctx context.Context, j *engine.Job) error {
 		return err
 	}
 	task := j.Task()
-	t, err := c.Add(ctx, task.URL, task.Dir, j.Client())
+	t, err := c.Add(ctx, task.URL, task.Dir, j.Client(), task.Request)
 	if err != nil {
 		return err
 	}

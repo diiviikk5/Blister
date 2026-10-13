@@ -8,12 +8,42 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/diiviikk5/Blister/internal/httpdl"
 )
+
+func TestDownloadDoesNotLeakAuthenticationToRedirectHost(t *testing.T) {
+	data := blob(128 << 10)
+	destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Cookie") != "" || r.Header.Get("Authorization") != "" {
+			t.Error("credentials leaked to redirect host")
+		}
+		http.ServeContent(w, r, "file.bin", time.Time{}, bytes.NewReader(data))
+	}))
+	defer destination.Close()
+	source := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Cookie") != "session=example" {
+			t.Error("original host lost cookies")
+		}
+		http.Redirect(w, r, strings.Replace(destination.URL, "127.0.0.1", "localhost", 1)+"/file.bin", http.StatusFound)
+	}))
+	defer source.Close()
+	m, _ := newManager(t, t.TempDir(), t.TempDir())
+	defer m.Close()
+	task, err := m.Add(AddRequest{URL: source.URL + "/file.bin", Request: httpdl.Request{Cookies: "session=example", Headers: map[string]string{"Authorization": "Bearer example"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := waitStatus(t, m, task.ID, StatusCompleted, 10*time.Second)
+	got, err := os.ReadFile(done.Path())
+	if err != nil || !bytes.Equal(got, data) {
+		t.Fatalf("redirect download failed: %v", err)
+	}
+}
 
 func TestRetryChecksumFailureFetchesAgain(t *testing.T) {
 	want := blob(256 << 10)

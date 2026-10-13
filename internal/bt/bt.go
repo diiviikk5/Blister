@@ -20,6 +20,7 @@ import (
 	"github.com/anacrolix/torrent/storage"
 
 	"github.com/diiviikk5/Blister/internal/config"
+	"github.com/diiviikk5/Blister/internal/httpdl"
 	"github.com/diiviikk5/Blister/internal/ratelimit"
 )
 
@@ -123,8 +124,8 @@ func (completionNoClose) Close() error { return nil }
 
 // Add loads a magnet link, a .torrent URL or a local .torrent file and
 // returns the live torrent, saving data into dir.
-func (c *Client) Add(ctx context.Context, source, dir string, httpc *http.Client) (*torrent.Torrent, error) {
-	spec, err := c.spec(ctx, source, httpc)
+func (c *Client) Add(ctx context.Context, source, dir string, httpc *http.Client, requests ...httpdl.Request) (*torrent.Torrent, error) {
+	spec, err := c.spec(ctx, source, httpc, requests...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,13 +135,18 @@ func (c *Client) Add(ctx context.Context, source, dir string, httpc *http.Client
 	return t, err
 }
 
-func (c *Client) spec(ctx context.Context, source string, httpc *http.Client) (*torrent.TorrentSpec, error) {
+func (c *Client) spec(ctx context.Context, source string, httpc *http.Client, requests ...httpdl.Request) (*torrent.TorrentSpec, error) {
 	src := strings.TrimSpace(source)
 	switch {
 	case strings.HasPrefix(strings.ToLower(src), "magnet:"):
 		return torrent.TorrentSpecFromMagnetUri(src)
 	case strings.HasPrefix(src, "http://"), strings.HasPrefix(src, "https://"):
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, src, nil)
+		request := httpdl.Request{URL: src}
+		if len(requests) > 0 {
+			request = requests[0]
+			request.URL = src
+		}
+		req, err := request.NewRequest(ctx, http.MethodGet)
 		if err != nil {
 			return nil, err
 		}

@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -132,8 +134,26 @@ func buildArgs(t engine.Task, ffmpeg string, rate int64) []string {
 	if ua := t.Request.UserAgent; ua != "" {
 		args = append(args, "--user-agent", ua)
 	}
+	headers := make(http.Header)
+	if t.Request.Cookies != "" {
+		headers.Set("Cookie", t.Request.Cookies)
+	}
+	if t.Request.Referer != "" {
+		headers.Set("Referer", t.Request.Referer)
+	}
 	for k, v := range t.Request.Headers {
-		args = append(args, "--add-header", k+":"+v)
+		headers.Set(k, v)
+	}
+	for _, key := range []string{"Range", "If-Range", "If-None-Match", "If-Modified-Since", "Accept-Encoding"} {
+		headers.Del(key)
+	}
+	keys := make([]string, 0, len(headers))
+	for key := range headers {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		args = append(args, "--add-header", key+":"+headers.Get(key))
 	}
 	if ffmpeg != "" {
 		args = append(args, "--ffmpeg-location", ffmpeg)
