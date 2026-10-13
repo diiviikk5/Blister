@@ -83,8 +83,12 @@ func TestResumeFromSnapshot(t *testing.T) {
 	data := payload(16 << 20)
 	var served atomic.Int64
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cw := &countingWriter{ResponseWriter: w, n: &served}
-		http.ServeContent(cw, r, "x", time.Time{}, bytes.NewReader(data))
+		// Canceled first-run handlers can still flush socket buffers after
+		// Run returns. Only count requests belonging to the resumed run.
+		if r.Header.Get("X-Blister-Test-Phase") == "resume" {
+			w = &countingWriter{ResponseWriter: w, n: &served}
+		}
+		http.ServeContent(w, r, "x", time.Time{}, bytes.NewReader(data))
 	}))
 	defer srv.Close()
 	out := filepath.Join(t.TempDir(), "f.part")
@@ -107,8 +111,8 @@ func TestResumeFromSnapshot(t *testing.T) {
 	snap := d.Snapshot()
 	had := d.Written()
 
-	served.Store(0)
 	opts.Segments = snap
+	opts.Request.Headers = map[string]string{"X-Blister-Test-Phase": "resume"}
 	d2 := New(opts)
 	if d2.Written() != had {
 		t.Fatalf("resume restored %d bytes, had %d", d2.Written(), had)
