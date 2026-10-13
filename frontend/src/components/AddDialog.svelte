@@ -20,7 +20,17 @@
   let generation = 0;
   let alive = true;
 
-  let dir = $state("");
+  let dir = $state(store.settings?.downloadDir ?? "");
+  let useDefaultFolder = $state(true);
+  let folderBusy = $state(false);
+  let folderError = $state("");
+  let recentFolders = $state<string[]>([]);
+  onMount(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem("blister-folders") ?? "[]");
+      if (Array.isArray(saved)) recentFolders = saved.filter((x): x is string => typeof x === "string" && !!x.trim()).slice(0, 6);
+    } catch { /* A corrupt history must not block adding a download. */ }
+  });
   let connections = $state(store.settings?.connections ?? 16);
   let paused = $state(false);
   let quality = $state("best");
@@ -98,8 +108,23 @@
   }
 
   async function browse() {
-    const d = await api.pickFolder(dir || store.settings?.downloadDir || "");
-    if (d) dir = d;
+    if (folderBusy) return;
+    folderBusy = true;
+    folderError = "";
+    try {
+      const d = await api.pickFolder(dir || store.settings?.downloadDir || "");
+      if (d) chooseFolder(d);
+    } catch (e) {
+      folderError = errText(e);
+    } finally { folderBusy = false; }
+  }
+
+  function chooseFolder(folder: string) {
+    dir = folder;
+    useDefaultFolder = false;
+    folderError = "";
+    recentFolders = [folder, ...recentFolders.filter((p) => p !== folder)].slice(0, 6);
+    try { localStorage.setItem("blister-folders", JSON.stringify($state.snapshot(recentFolders))); } catch { /* History is optional. */ }
   }
 
   async function torrents() {
@@ -115,7 +140,7 @@
     const reqs: AddRequest[] = chosen.map((l) => {
       const p = probes[l.url];
       const r: AddRequest = { url: l.url, kind: l.kind, paused };
-      if (dir) r.dir = dir;
+      if (!useDefaultFolder && dir.trim()) r.dir = dir.trim();
       if (names[l.url]) r.name = names[l.url];
       if (l.kind === "http") {
         r.connections = connections;
@@ -135,6 +160,7 @@
       store.filter = "all";
       store.view = "list";
       if (added.length) store.select(added[added.length - 1].id);
+      busy = false;
       close();
     } catch (e) {
       submitErr = errText(e);
@@ -162,7 +188,7 @@
 <div class="scrim" role="presentation" onclick={(e) => e.target === e.currentTarget && close()}>
   <div class="dialog" use:dialogFocus={{ close, initial: "textarea" }} role="dialog" aria-modal="true" aria-labelledby="add-title" aria-busy={busy}>
     <header>
-      <h2 id="add-title">Add <span class="ib-block">downloads</span></h2>
+      <h2 id="add-title">Add downloads</h2>
       {#if seed?.source === "browser"}<span class="pill pill--hot">From your browser</span>{/if}
       <button class="btn btn--ghost btn--icon x" onclick={close} aria-label="Close"><Icon name="x" size={18} /></button>
     </header>
@@ -234,8 +260,14 @@
         <div class="opt grow">
           <label class="label" for="download-folder">Save to</label>
           <div class="folder">
-            <input id="download-folder" class="field" bind:value={dir} placeholder={`${store.settings?.downloadDir ?? "Downloads"}${store.settings?.categorizeFolders ? ", sorted by type" : ""}`} />
-            <button class="btn btn--icon" onclick={browse} aria-label="Choose folder"><Icon name="folder" size={16} /></button>
+            <input id="download-folder" class="field mono" bind:value={dir} oninput={() => { useDefaultFolder = false; folderError = ""; }} aria-describedby="folder-hint" aria-invalid={!!folderError} placeholder="Choose a destination folder" />
+            <button class="btn browse-folder" disabled={folderBusy} aria-busy={folderBusy} onclick={browse}><Icon name="folder" size={16} /> {folderBusy ? "Opening…" : "Browse…"}</button>
+          </div>
+          <span id="folder-hint" class="hint">{useDefaultFolder && store.settings?.categorizeFolders ? "Default location · sorted into subfolders by file type" : "Files will be saved directly in this folder"}</span>
+          {#if folderError}<span class="perr" role="alert">{folderError}</span>{/if}
+          <div class="folder-shortcuts">
+            <button class="folder-choice" class:chosen={useDefaultFolder} onclick={() => { dir = store.settings?.downloadDir ?? ""; useDefaultFolder = true; folderError = ""; }}>Default folder</button>
+            {#each recentFolders as folder (folder)}<button class="folder-choice ell" title={folder} onclick={() => chooseFolder(folder)}>{folder.split(/[\\/]/).filter(Boolean).at(-1) || folder}</button>{/each}
           </div>
         </div>
         {#if hasMedia}
@@ -437,11 +469,10 @@
     display: flex;
     gap: 8px;
   }
-  .folder .btn {
-    height: 38px;
-    width: 38px;
-    flex: none;
-  }
+  .folder .btn { height: 38px; flex: none; }
+  .folder-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .folder-choice { max-width: 160px; padding: 4px 8px; border: 1px solid var(--ib-line); border-radius: var(--r-sm); background: transparent; color: var(--ib-muted); font-size: 11px; cursor: pointer; }
+  .folder-choice:hover, .folder-choice.chosen { color: var(--ib-accent); border-color: var(--ib-accent); }
   footer {
     display: flex;
     flex-wrap: wrap;

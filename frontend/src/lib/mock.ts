@@ -296,7 +296,7 @@ export function createMock() {
     SaveSettings: (s: Settings) => { settings = { ...s }; emit("settings:changed", settings); return settings; },
     ResetToken: () => { settings = { ...settings, browserToken: Math.random().toString(16).slice(2).padEnd(32, "0") }; return settings; },
     SetSpeedLimit: (bps: number) => { settings = { ...settings, speedLimit: bps }; emit("settings:changed", settings); return settings; },
-    PickFolder: (cur: string) => cur,
+    PickFolder: () => { throw new Error("Open Blister desktop to browse folders. The browser preview cannot choose a native destination."); },
     PickTorrents: () => [],
     PickImage: () => "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=70",
     Relaunch: () => location.reload(),

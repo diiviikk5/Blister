@@ -590,8 +590,12 @@ func (a *App) SetSpeedLimit(bps int64) (config.Settings, error) {
 
 // PickFolder shows a folder picker.
 func (a *App) PickFolder(current string) (string, error) {
+	if a.ctx == nil {
+		return "", errors.New("the folder chooser is available in the desktop app")
+	}
+	home, _ := os.UserHomeDir()
 	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
-		Title: "Choose a folder", DefaultDirectory: current, CanCreateDirectories: true,
+		Title: "Save downloads to", DefaultDirectory: existingDirectory(current, a.store.Get().DownloadDir, filepath.Join(home, "Downloads"), home), CanCreateDirectories: true,
 	})
 }
 
