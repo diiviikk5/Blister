@@ -226,6 +226,19 @@ export const presets: Rice[] = [
     shape: { border: 2, radius: 6, depth: 4, shadow: "hard" },
     bar: { style: "solid", stripes: false },
   }),
+  make({
+    name: "Readable",
+    colors: {
+      paper: "#101218", paper2: "#171a22", card: "#202530", text: "#ffffff", muted: "#d5dbea", faint: "#b2bed2",
+      line: "#8f9eb8", ex: "#000000", accent: "#ffe066", accentInk: "#101218", hot: "#ff9ac7", hotInk: "#101218",
+      alt: "#b8c7ff", ok: "#9ee6b0", bad: "#ffacac",
+    },
+    shape: { border: 2, radius: 8, depth: 0, shadow: "none" },
+    type: { scale: 1.1, weight: 700, tracking: -0.02 },
+    layout: { density: "cozy", detail: "bottom" },
+    bar: { style: "solid", height: 12, heads: false, stripes: false },
+    fx: { motion: 0 },
+  }),
 ];
 
 export const defaultRice = presets[0];
@@ -343,13 +356,17 @@ export function encodeRice(r: Rice, withWallpaper = false): string {
 export function decodeRice(text: string): Rice {
   let raw = text.trim();
   if (raw.startsWith(PREFIX)) raw = decodeURIComponent(escape(atob(raw.slice(PREFIX.length))));
-  return normalize(JSON.parse(raw));
+  const value = JSON.parse(raw);
+  if (!value || typeof value !== "object" || Array.isArray(value) || !value.colors || (value.v != null && value.v !== 1)) {
+    throw new Error("This is not a supported Blister theme");
+  }
+  return normalize(value);
 }
 
 export function normalize(x: Partial<Rice> | null | undefined): Rice {
   const d = structuredClone(defaultRice);
   if (!x || typeof x !== "object") return d;
-  return {
+  const r: Rice = {
     v: 1,
     name: String(x.name ?? "Untitled"),
     author: x.author,
@@ -361,6 +378,40 @@ export function normalize(x: Partial<Rice> | null | undefined): Rice {
     fx: { ...d.fx, ...x.fx },
     css: typeof x.css === "string" ? x.css : "",
   };
+  // Imported themes and old saved settings must never make the UI unusable.
+  const clamp = (value: unknown, fallback: number, lo: number, hi: number) => typeof value === "number" && Number.isFinite(value) ? Math.max(lo, Math.min(hi, value)) : fallback;
+  const choice = <T extends string>(value: T, values: readonly T[], fallback: T): T => values.includes(value) ? value : fallback;
+  for (const key of Object.keys(d.colors) as (keyof Colors)[]) {
+    const value = r.colors[key];
+    r.colors[key] = typeof value === "string" && /^#[\da-f]{6}$/i.test(value) ? value : d.colors[key];
+  }
+  r.name = r.name.slice(0, 100);
+  r.author = typeof x.author === "string" ? x.author.slice(0, 100) : undefined;
+  r.shape.border = clamp(r.shape.border, d.shape.border, 0, 6);
+  r.shape.radius = clamp(r.shape.radius, d.shape.radius, 0, 32);
+  r.shape.depth = clamp(r.shape.depth, d.shape.depth, 0, 16);
+  r.shape.shadow = choice(r.shape.shadow, ["extrude", "hard", "soft", "glow", "none"], d.shape.shadow);
+  r.type.ui = typeof r.type.ui === "string" ? r.type.ui.slice(0, 200) : d.type.ui;
+  r.type.mono = typeof r.type.mono === "string" ? r.type.mono.slice(0, 200) : d.type.mono;
+  r.type.scale = clamp(r.type.scale, d.type.scale, 0.8, 1.4);
+  r.type.weight = clamp(r.type.weight, d.type.weight, 400, 950);
+  r.type.tracking = clamp(r.type.tracking, d.type.tracking, -0.08, 0.15);
+  r.type.monoUI = typeof r.type.monoUI === "boolean" ? r.type.monoUI : d.type.monoUI;
+  r.layout.view = choice(r.layout.view, ["list", "table", "grid"], d.layout.view);
+  r.layout.density = choice(r.layout.density, ["compact", "comfortable", "cozy"], d.layout.density);
+  r.layout.sidebar = choice(r.layout.sidebar, ["left", "right", "hidden"], d.layout.sidebar);
+  r.layout.detail = choice(r.layout.detail, ["right", "bottom", "off"], d.layout.detail);
+  r.layout.rows = choice(r.layout.rows, ["lines", "cards"], d.layout.rows);
+  r.bar.style = choice(r.bar.style, ["lanes", "solid", "blocks", "ascii", "braille", "line", "dots"], d.bar.style);
+  r.bar.height = clamp(r.bar.height, d.bar.height, 3, 32);
+  r.bar.heads = typeof r.bar.heads === "boolean" ? r.bar.heads : d.bar.heads;
+  r.bar.stripes = typeof r.bar.stripes === "boolean" ? r.bar.stripes : d.bar.stripes;
+  r.fx.motion = clamp(r.fx.motion, d.fx.motion, 0, 2);
+  for (const key of ["grain", "scanlines", "vignette", "dim"] as const) r.fx[key] = clamp(r.fx[key], d.fx[key], 0, 1);
+  r.fx.blur = clamp(r.fx.blur, d.fx.blur, 0, 40);
+  r.fx.opacity = clamp(r.fx.opacity, d.fx.opacity, 0.35, 1);
+  r.fx.wallpaper = typeof r.fx.wallpaper === "string" && /^(https?:\/\/|data:image\/(png|jpeg|webp|gif);base64,)/i.test(r.fx.wallpaper) ? r.fx.wallpaper : "";
+  return r;
 }
 
 // --------------------------------------------------------------- colour helpers

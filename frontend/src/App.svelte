@@ -12,7 +12,7 @@
   import MiniBar from "./components/MiniBar.svelte";
   import Toasts from "./components/Toasts.svelte";
   import Modal from "./components/Modal.svelte";
-  import { api, onFileDrop, readClipboard } from "./lib/api";
+  import { api, native, onFileDrop, readClipboard } from "./lib/api";
   import { store } from "./lib/store.svelte";
   import type { Task } from "./lib/types";
 
@@ -84,6 +84,12 @@
   async function keys(e: KeyboardEvent) {
     if (e.defaultPrevented) return;
     const mod = e.ctrlKey || e.metaKey;
+    // Recovery remains available even if custom CSS hides every control.
+    if (mod && e.shiftKey && e.key === "Backspace") {
+      e.preventDefault();
+      store.resetRice();
+      return;
+    }
     if (store.addOpen || removing || renaming || store.relink) return;
     if (mod && e.key.toLowerCase() === "k") {
       e.preventDefault();
@@ -192,6 +198,7 @@
     <MiniBar />
   {:else}
   <TitleBar bind:search />
+  {#if !native}<div class="preview-notice" role="status">Preview mode · downloads are simulated. Use the Blister desktop app to download files.</div>{/if}
   {#if failed}
     <div class="boot-err">
       <h2>Blister couldn't start</h2>
@@ -294,6 +301,14 @@
     flex: 1;
     display: flex;
     min-height: 0;
+  }
+  .preview-notice {
+    padding: 8px 16px;
+    background: var(--ib-accent);
+    color: var(--ib-accent-ink);
+    font-size: 12px;
+    text-align: center;
+    flex: none;
   }
   .body[data-side="right"] :global(.side) {
     order: 3;

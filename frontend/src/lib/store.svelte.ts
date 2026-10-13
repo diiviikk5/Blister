@@ -187,12 +187,49 @@ class Store {
   }
 
   #riceTimer: ReturnType<typeof setTimeout> | undefined;
+  #riceUndo = $state<Rice[]>([]);
+  #riceRedo = $state<Rice[]>([]);
+  canUndoRice = $derived(this.#riceUndo.length > 0);
+  canRedoRice = $derived(this.#riceRedo.length > 0);
+  #riceChangeAt = 0;
   /** Applies a look now and persists it (debounced, so sliders stay smooth). */
-  setRice(r: Rice) {
-    this.rice = r;
-    applyRice($state.snapshot(r) as Rice);
+  setRice(r: Rice, remember = true) {
+    if (remember) {
+      // Group continuous slider movement into one undo step.
+      const now = Date.now();
+      if (now - this.#riceChangeAt > 400 || !this.#riceUndo.length) {
+        this.#riceUndo = [...this.#riceUndo.slice(-19), $state.snapshot(this.rice) as Rice];
+      }
+      this.#riceChangeAt = now;
+      this.#riceRedo = [];
+    }
+    this.rice = normalize(r);
+    applyRice($state.snapshot(this.rice) as Rice);
     clearTimeout(this.#riceTimer);
     this.#riceTimer = setTimeout(() => this.persistRice(), 400);
+  }
+
+  undoRice() {
+    const previous = this.#riceUndo.at(-1);
+    if (!previous) return;
+    this.#riceRedo = [...this.#riceRedo, $state.snapshot(this.rice) as Rice];
+    this.#riceUndo = this.#riceUndo.slice(0, -1);
+    this.#riceChangeAt = 0;
+    this.setRice(previous, false);
+  }
+
+  redoRice() {
+    const next = this.#riceRedo.at(-1);
+    if (!next) return;
+    this.#riceUndo = [...this.#riceUndo, $state.snapshot(this.rice) as Rice];
+    this.#riceRedo = this.#riceRedo.slice(0, -1);
+    this.#riceChangeAt = 0;
+    this.setRice(next, false);
+  }
+
+  resetRice() {
+    this.setRice(structuredClone(defaultRice));
+    this.toast("Restored the default look. Your saved themes are kept.", "ok");
   }
 
   persistRice() {
@@ -240,6 +277,7 @@ class Store {
 
   /** Selection, or the focused task when nothing is selected. */
   targets(): string[] {
+    if (this.focus && !this.selected.includes(this.focus)) return [this.focus];
     if (this.selected.length) return this.selected;
     return this.focus ? [this.focus] : [];
   }
@@ -254,7 +292,9 @@ class Store {
 
   async saveSettings(s: Settings) {
     try {
-      this.settings = await api.saveSettings(s);
+      // Svelte state contains proxies; send a plain snapshot through both
+      // the native bridge and preview engine (including nested rules).
+      this.settings = await api.saveSettings($state.snapshot(s));
     } catch (e) {
       this.toast(errText(e), "error");
     }

@@ -41,7 +41,7 @@
   class:sel
   role="option"
   aria-selected={sel}
-  tabindex={store.focus === task.id || (!store.focus && store.visible[0]?.id === task.id) ? 0 : -1}
+  tabindex={store.focus === task.id || (!store.visible.some((t) => t.id === store.focus) && store.visible[0]?.id === task.id) ? 0 : -1}
   data-task-id={task.id}
   onfocus={() => { if (store.tasks[task.id]) store.focus = task.id; }}
   onclick={click}

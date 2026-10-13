@@ -86,8 +86,8 @@
       inflight++;
       api
         .probe(l.url, seed?.request ?? {})
-        .then((p) => (probes[l.url] = p))
-        .catch((e) => (probes[l.url] = { name: "", size: -1, resumable: false, category: "other", type: "", error: errText(e) }))
+        .then((p) => { if (alive) probes[l.url] = p; })
+        .catch((e) => { if (alive) probes[l.url] = { name: "", size: -1, resumable: false, category: "other", type: "", error: errText(e) }; })
         .finally(() => { inflight--; probeAll(); });
     }
   }

@@ -148,6 +148,15 @@
     edit((x) => (x.css = (x.css ? x.css.trimEnd() + "\n\n" : "") + css));
   }
 
+  function tabKeys(e: KeyboardEvent) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const index = tabs.findIndex(([id]) => id === tab);
+    const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (index + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tab = tabs[next][0];
+    document.getElementById(`rice-tab-${tab}`)?.focus();
+  }
+
   const shadowStyles: [ShadowStyle, string][] = [["extrude", "Extrude"], ["hard", "Hard"], ["soft", "Soft"], ["glow", "Glow"], ["none", "Flat"]];
   const barStyles: [BarStyle, string][] = [["lanes", "Lanes"], ["solid", "Solid"], ["line", "Line"], ["blocks", "Blocks"], ["ascii", "ASCII"], ["braille", "Braille"], ["dots", "Dots"]];
   const barDemo = { map: "999999999999877766655544443333222111000000000999999000111222333444555666777888999999999999999999999999998888777766665555444", heads: [0.31, 0.52, 0.66, 0.9] };
@@ -160,6 +169,9 @@
       <input class="name" value={r.name} onchange={(e) => edit((x) => (x.name = str(e)))} aria-label="Theme name" spellcheck="false" />
     </div>
     <div class="acts">
+      <button class="btn" disabled={!store.canUndoRice} onclick={() => store.undoRice()} title="Undo the last theme change">Undo</button>
+      <button class="btn" disabled={!store.canRedoRice} onclick={() => store.redoRice()} title="Redo the last theme change">Redo</button>
+      <button class="btn" onclick={() => store.resetRice()} title="Restore Thermal; saved themes stay in your library">Reset look</button>
       <button class="btn" onclick={() => store.setRice(shuffle($state.snapshot(store.rice) as Rice))} title="Random palette and shape"><Icon name="bolt" size={15} /> Shuffle</button>
       <button class="btn" onclick={saveToLibrary}><Icon name="heart" size={15} /> Save</button>
       <button class="btn" onclick={() => copyCode(false)}><Icon name="copy" size={15} /> Share code</button>
@@ -168,14 +180,14 @@
     </div>
   </div>
 
-  <div class="ib-tabs tabs" role="tablist">
+  <div class="ib-tabs tabs" role="tablist" aria-label="Theme controls">
     {#each tabs as [id, label] (id)}
-      <button class="ib-tab" role="tab" aria-selected={tab === id} onclick={() => (tab = id)}>{label}</button>
+      <button id={`rice-tab-${id}`} class="ib-tab" role="tab" aria-selected={tab === id} aria-controls="rice-controls" tabindex={tab === id ? 0 : -1} onkeydown={tabKeys} onclick={() => (tab = id)}>{label}</button>
     {/each}
   </div>
 
   <div class="split">
-    <div class="controls">
+    <div id="rice-controls" class="controls" role="tabpanel" aria-labelledby={`rice-tab-${tab}`}>
       {#if tab === "themes"}
         <div class="gallery">
           {#each [...presets, ...store.library] as p, i (p.name + i)}
@@ -213,7 +225,7 @@
             </div>
           {/each}
         </div>
-        <p class="note">Click a theme to wear it, then tweak anything in the other tabs. <b>Save</b> keeps your version; <b>Share code</b> copies it as text anyone can paste back.</p>
+        <p class="note">Click a theme, then tweak anything in the other tabs. <b>Readable</b> uses larger text and no motion. Undo backs out changes; Save keeps your version. <b>Ctrl Shift Backspace</b> restores the default look from anywhere.</p>
       {:else if tab === "colors"}
         <div class="colors">
           {#each colorKeys as [k, label] (k)}

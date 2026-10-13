@@ -51,7 +51,7 @@
       </button>
     {/each}
   </div>
-  <div class="tbody">
+  <div class="tbody" role="rowgroup">
     {#each store.visible as t (t.id)}
       {@const look = iconFor(t)}
       {@const live = store.live[t.id]}
@@ -61,7 +61,7 @@
         class="tr"
         class:sel={store.selected.includes(t.id)}
         role="row"
-        tabindex={store.focus === t.id || (!store.focus && store.visible[0]?.id === t.id) ? 0 : -1}
+        tabindex={store.focus === t.id || (!store.visible.some((t) => t.id === store.focus) && store.visible[0]?.id === t.id) ? 0 : -1}
         data-task-id={t.id}
         onfocus={() => (store.focus = t.id)}
         aria-selected={store.selected.includes(t.id)}
